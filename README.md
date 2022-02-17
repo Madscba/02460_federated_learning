@@ -3,7 +3,7 @@
 
     Project Federated Learning
     
-    Description:  what you learned from it.
+    Description: 
     
     Features: 
     
