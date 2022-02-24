@@ -7,7 +7,7 @@
     
     Features: 
     
-    How to use: 
+    How to use: For this project we have used Python 3.7.6. pip install -r requirements.txt to download the libraries used.
     
     Technologies: 
    
