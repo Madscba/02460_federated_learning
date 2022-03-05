@@ -1,0 +1,12 @@
+#1. Create virtual environment
+	* Open terminal (and go to place you want your environment.
+	* module load python3/3.6.2
+	* python3 -m venv <environment_name>
+
+#2. Active venv and install packages
+	* source <environment_name>/bin/activate
+	* change folder to /environment folder
+	* pip install -r requirements.txt
+	
+#3. Test if it succeded
+	* 

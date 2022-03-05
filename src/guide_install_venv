@@ -1,0 +1,19 @@
+1.Create virtual environment
+	#load and create enviroment
+	"module load python3/3.6.2"
+	cd to desktop
+	"python3 -m venv fl_362"
+
+2. Activate and install dependencies
+	#activate environment
+	"source fl_362/bin/activate"
+	cd to /environment folder in our github repo
+	"pip install -r requirements.txt"
+
+3. Test that it works
+	open run.sh file
+	edit path to venv and save
+	cd to /src folder
+	"bsub < run.sh"
+	
+

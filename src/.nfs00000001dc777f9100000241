@@ -1,0 +1,45 @@
+Loaded module: python3/3.6.2
+INFO flower 2022-03-05 18:50:01,134 | app.py:109 | Flower server running (3 rounds)
+SSL is disabled
+INFO flower 2022-03-05 18:50:01,134 | server.py:128 | Initializing global parameters
+INFO flower 2022-03-05 18:50:01,134 | server.py:327 | Requesting initial parameters from one random client
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
+Traceback (most recent call last):
+  File "client.py", line 5, in <module>
+    import torch
+ModuleNotFoundError: No module named 'torch'
