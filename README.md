@@ -14,3 +14,6 @@
    Collaborators: See commits
    
    License: MIT License
+
+## Process data
+    From inside '/dataset/femnist' run ./preprocess.sh

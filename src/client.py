@@ -5,38 +5,17 @@ import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from FedOptLoss import FedOptLoss
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+from model import Net
+from client_dataset import FemnistDataset
+import argparse
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
-# #############################################################################
-# 1. PyTorch pipeline: model/train/test/dataloader
-# #############################################################################
-
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
-class Net(nn.Module):
-    def __init__(self) -> None:
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
 
 
 def train(net, trainloader, epochs):
@@ -71,13 +50,13 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data():
+def load_data(user, root_dir):
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        [transforms.ToTensor()]
     )
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
+    trainset = FemnistDataset(user, root_dir, transform, train=True)
+    testset = FemnistDataset(user, root_dir, transform, train=False)
     trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
     num_examples = {"trainset": len(trainset), "testset": len(testset)}
@@ -89,14 +68,12 @@ def load_data():
 # #############################################################################
 
 
-def main():
-    """Create model, load data, define Flower client, start Flower client."""
-
+def main(args):
     # Load model
     net = Net().to(DEVICE)
 
     # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data()
+    trainloader, testloader, num_examples = load_data(args.user, args.dataset_root)
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
@@ -123,4 +100,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_root',
+                    help='root to data ex. data/femnist')
+    parser.add_argument('--user', 
+                help='user ex f0000_14')
+
+    args = parser.parse_args()
+    main(args)
