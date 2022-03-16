@@ -32,7 +32,7 @@ class FemnistDataset(Dataset):
 
         img_name = os.path.join(self.root_dir,
                                   self.imgs_labs[idx, 0])
-        img = Image.open(img_name,size)
+        img = Image.open(img_name)
         target=relabel_class(self.imgs_labs[idx, 1])
         if self.transform:
             img = self.transform(img)
