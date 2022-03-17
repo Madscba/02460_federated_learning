@@ -22,7 +22,7 @@ def main(args):
     else:
         experiment="experiment-"+wandb.util.generate_id()
     
-    config=os.path.join('src','config',args.configs)
+    config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config,mode=args.wandb_mode)
     wandb.run.name = args.user+wandb.run.id
