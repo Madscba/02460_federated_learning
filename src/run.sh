@@ -16,9 +16,11 @@
 #rm -f *.err
 #rm -f *.out
 
+
 filename='/zhome/87/9/127623/Desktop/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
 n=1
-echo start
+
+echo "starting bash script"
 
 module load python3/3.6.2
 source /zhome/87/9/127623/Desktop/env_fl/bin/activate
@@ -28,9 +30,8 @@ python server.py &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
-
-while read user && (($n<=5)); do
-	echo "user number: $n , name: $user"
+while read user && (($n<=10)); do
+	echo "Starting client: $n , name: $user"
    	python client.py --user=${user} &
 	n=$((n+1))
 done < $filename

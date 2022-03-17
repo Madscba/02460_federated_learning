@@ -4,3 +4,4 @@
 dataset/*/data
 .vscode/
 src/__pycache__
+wandb/

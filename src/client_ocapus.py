@@ -9,50 +9,32 @@ from FedOptLoss import FedOptLoss
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+from opacus import PrivacyEngine
+from model import Net
+from client_dataset import FemnistDataset
+import argparse
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-
-# #############################################################################
-# 1. PyTorch pipeline: model/train/test/dataloader
-# #############################################################################
-
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
-class Net(nn.Module):
-    def __init__(self) -> None:
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-
-def train(net, trainloader, epochs):
+def train(net, trainloader, privacy_engine, epochs, target_delta):
     """Train the network on the training set."""
-    criterion = FedOptLoss(net.parameters(), mu=1)
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    privacy_engine.attach(optimizer)
+
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
-            loss = criterion(net(images), labels, net.parameters())
+            loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
 
+    epsilon, _ = optimizer.privacy_engine.get_privacy_spent(target_delta)
+    return epsilon
 
 def test(net, testloader):
     """Validate the network on the entire test set."""
@@ -72,13 +54,13 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data():
+def load_data(user, root_dir):
     """Load CIFAR-10 (training and test set)."""
     transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        [transforms.ToTensor()]
     )
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
+    trainset = FemnistDataset(user, root_dir, transform, train=True)
+    testset = FemnistDataset(user, root_dir, transform, train=False)
     trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
     testloader = DataLoader(testset, batch_size=32)
     num_examples = {"trainset": len(trainset), "testset": len(testset)}
@@ -90,17 +72,33 @@ def load_data():
 # #############################################################################
 
 
-def main():
-    """Create model, load data, define Flower client, start Flower client."""
-
+def main(args):
     # Load model
     net = Net().to(DEVICE)
 
     # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data()
+    trainloader, testloader, num_examples = load_data(args.user, args.dataset_root)
 
     # Flower client
-    class FemnistClient(fl.client.NumPyClient):
+    class CifarClient(fl.client.NumPyClient):
+        def __init__(self, net, trainloader, testloader, args):
+            self.net = net
+            self.trainloader = trainloader
+            self.testloader = testloader
+            self.dpsgd = args.dpsgd
+            if args.dpsgd:
+                self.noise_multiplier = args.noise_multiplier
+                self.max_grad_norm = args.max_grad_norm
+                self.target_delta = args.target_delta
+                self.sample_rate = args.sample_rate
+                self.privacy_engine = PrivacyEngine(
+                    self.net,
+                    sample_rate=self.sample_rate,
+                    target_delta=self.target_delta,
+                    max_grad_norm=self.max_grad_norm,
+                    noise_multiplier=self.noise_multiplier,
+                )
+
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -111,8 +109,9 @@ def main():
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(net, trainloader, epochs=1)
-            return self.get_parameters(), num_examples["trainset"], {}
+            epsilon = train(self.net, self.trainloader, self.privacy_engine,epochs=1,target_delta=self.target_delta)
+            print(f"epsilon = {epsilon:.2f}")
+            return self.get_parameters(), num_examples["trainset"], {'epsilon': epsilon}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
@@ -120,9 +119,43 @@ def main():
             return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=FemnistClient())
-
+    fl.client.start_numpy_client("[::]:8080", client=CifarClient(net,trainloader,testloader,args))
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_root',
+                    help='root to data ex. data/femnist')
+    parser.add_argument('--user', 
+                help='user ex f0000_14')
+    parser.add_argument(
+        "--noise_multiplier",
+        type=float,
+        default=1.0,
+        metavar="S",
+        help="Noise multiplier",
+    )
+    parser.add_argument(
+        "-c",
+        "--max_grad_norm",
+        type=float,
+        default=1.0,
+        metavar="C",
+        help="Clip per-sample gradients to this norm",
+    )
+    parser.add_argument(
+        "--target_delta",
+        type=float,
+        default=1e-5,
+        metavar="D",
+        help="Target delta",
+    )
+    parser.add_argument(
+        "--sample_rate",
+        type=float,
+        default=0.01,
+        metavar="Q",
+        help="Sample rate",
+    )
+    args = parser.parse_args()
+    main(args)

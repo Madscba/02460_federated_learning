@@ -1,0 +1,11 @@
+epochs:
+  desc: Number of epochs to train over
+  value: 1
+batch_size:
+  desc: Size of each mini-batch
+  value: 8
+train_fn:
+  value: train_fed_prox
+mu: 
+  value: 1
+
