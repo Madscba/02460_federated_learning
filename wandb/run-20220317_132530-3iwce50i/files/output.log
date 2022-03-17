@@ -1,0 +1,7 @@
+[34m[1mwandb[39m[22m: [33mWARNING[39m Calling wandb.run.save without any arguments is deprecated.Changes to attributes are automatically persisted.
+DEBUG flower 2022-03-17 13:25:37,561 | connection.py:36 | ChannelConnectivity.IDLE
+DEBUG flower 2022-03-17 13:25:37,563 | connection.py:36 | ChannelConnectivity.CONNECTING
+INFO flower 2022-03-17 13:25:37,563 | app.py:61 | Opened (insecure) gRPC connection
+DEBUG flower 2022-03-17 13:25:37,564 | connection.py:36 | ChannelConnectivity.READY
+DEBUG flower 2022-03-17 13:25:57,262 | connection.py:68 | Insecure gRPC channel closed
+INFO flower 2022-03-17 13:25:57,262 | app.py:72 | Disconnect and shut down

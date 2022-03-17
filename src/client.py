@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from mimetypes import init
 import warnings
 
 import flwr as fl
@@ -12,6 +13,7 @@ from torchvision.datasets import CIFAR10
 from model import Net
 from client_dataset import FemnistDataset
 import argparse
+import wandb
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -29,8 +31,10 @@ def train(net, trainloader, epochs):
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
+            wandb.log({"train_loss": loss.item()})
             optimizer.step()
 
+        
 
 def test(net, testloader):
     """Validate the network on the entire test set."""
@@ -47,37 +51,47 @@ def test(net, testloader):
             correct += (predicted == labels).sum().item()
     loss /= len(testloader.dataset)
     accuracy = correct / total
+    wandb.log({"test_loss": loss, "test_accuracy": accuracy})
     return loss, accuracy
 
 
-def load_data(user, root_dir):
-    """Load CIFAR-10 (training and test set)."""
+def load_data(user): 
+    """Load Femnist (training and test set)."""
     transform = transforms.Compose(
         [transforms.ToTensor()]
     )
-    trainset = FemnistDataset(user, root_dir, transform, train=True)
-    testset = FemnistDataset(user, root_dir, transform, train=False)
-    trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-    testloader = DataLoader(testset, batch_size=32)
+    trainset = FemnistDataset(user, transform, train=True)
+    testset = FemnistDataset(user, transform, train=False)
+    trainloader = DataLoader(trainset, batch_size=wandb.config.batch_size, shuffle=True)
+    testloader = DataLoader(testset, batch_size=wandb.config.batch_size)
     num_examples = {"trainset": len(trainset), "testset": len(testset)}
     return trainloader, testloader, num_examples
-
-
-# #############################################################################
-# 2. Federation of the pipeline with Flower
-# #############################################################################
 
 
 def main(args):
     # Load model
     net = Net().to(DEVICE)
+    
+    if args.experiment_id:
+        experiment="experiment-"+args.experiment_id
+    else:
+        experiment="experiment-"+wandb.util.generate_id()
+    
+    wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
+    wandb.init(project="02460_federated_learning", entity="s175548", group=experiment,config=args.configs,mode=args.wandb_mode)
+    wandb.run.name = args.user+wandb.run.id
+    wandb.run.save()
 
     # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data(args.user, args.dataset_root)
+    trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
     
     class CifarClient(fl.client.NumPyClient):
+        def __init__(self) -> None:
+            self.round=0
+            super().__init__()
+
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -88,7 +102,9 @@ def main(args):
 
         def fit(self, parameters, config):
             self.set_parameters(parameters)
-            train(net, trainloader, epochs=1)
+            self.round+=1
+            train(net, trainloader, epochs=wandb.config.epochs)
+            wandb.log({"round": self.round})
             return self.get_parameters(), num_examples["trainset"], {}
 
         def evaluate(self, parameters, config):
@@ -102,10 +118,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_root',
-                    help='root to data ex. data/femnist')
     parser.add_argument('--user', 
-                help='user ex f0000_14')
-
+                help='user ex f0000_14', default='f0000_14')
+    parser.add_argument('--wandb_mode', 
+                help='use "online" to log and sync with cloud', default='disabled')
+    parser.add_argument('--configs', default='src/config/config.yaml')
+    parser.add_argument('--experiment_id', default=None)
     args = parser.parse_args()
     main(args)

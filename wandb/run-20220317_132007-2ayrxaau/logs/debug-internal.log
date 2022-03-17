@@ -1,0 +1,160 @@
+2022-03-17 13:20:11,034 INFO    MainThread:40875 [internal.py:wandb_internal():92] W&B internal server running at pid: 40875, started at: 2022-03-17 13:20:11.024246
+2022-03-17 13:20:11,045 DEBUG   SenderThread:40875 [sender.py:send():235] send: header
+2022-03-17 13:20:11,045 DEBUG   SenderThread:40875 [sender.py:send():235] send: run
+2022-03-17 13:20:11,049 INFO    WriterThread:40875 [datastore.py:open_for_write():77] open: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/run-2ayrxaau.wandb
+2022-03-17 13:20:11,529 INFO    SenderThread:40875 [dir_watcher.py:__init__():169] watching files in: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files
+2022-03-17 13:20:11,529 INFO    SenderThread:40875 [sender.py:_start_run_threads():812] run started: 2ayrxaau with start time 1647519607
+2022-03-17 13:20:11,530 DEBUG   SenderThread:40875 [sender.py:send():235] send: summary
+2022-03-17 13:20:11,531 INFO    SenderThread:40875 [sender.py:_save_file():947] saving file wandb-summary.json with policy end
+2022-03-17 13:20:11,534 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: check_version
+2022-03-17 13:20:11,534 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: check_version
+2022-03-17 13:20:11,769 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: run_start
+2022-03-17 13:20:11,772 DEBUG   HandlerThread:40875 [meta.py:__init__():37] meta init
+2022-03-17 13:20:11,772 DEBUG   HandlerThread:40875 [meta.py:__init__():51] meta init done
+2022-03-17 13:20:11,772 DEBUG   HandlerThread:40875 [meta.py:probe():211] probe
+2022-03-17 13:20:11,774 DEBUG   HandlerThread:40875 [meta.py:_setup_git():201] setup git
+2022-03-17 13:20:11,847 DEBUG   HandlerThread:40875 [meta.py:_setup_git():208] setup git done
+2022-03-17 13:20:11,848 DEBUG   HandlerThread:40875 [meta.py:_save_pip():55] save pip
+2022-03-17 13:20:11,849 DEBUG   HandlerThread:40875 [meta.py:_save_pip():69] save pip done
+2022-03-17 13:20:11,849 DEBUG   HandlerThread:40875 [meta.py:_save_conda():76] save conda
+2022-03-17 13:20:12,538 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_created():217] file/dir created: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-summary.json
+2022-03-17 13:20:12,538 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_created():217] file/dir created: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/requirements.txt
+2022-03-17 13:20:12,539 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_created():217] file/dir created: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/conda-environment.yaml
+2022-03-17 13:20:14,923 DEBUG   HandlerThread:40875 [meta.py:_save_conda():86] save conda done
+2022-03-17 13:20:14,923 DEBUG   HandlerThread:40875 [meta.py:probe():249] probe done
+2022-03-17 13:20:14,928 DEBUG   SenderThread:40875 [sender.py:send():235] send: files
+2022-03-17 13:20:14,928 INFO    SenderThread:40875 [sender.py:_save_file():947] saving file wandb-metadata.json with policy now
+2022-03-17 13:20:14,936 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: stop_status
+2022-03-17 13:20:14,940 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: stop_status
+2022-03-17 13:20:15,165 DEBUG   SenderThread:40875 [sender.py:send():235] send: telemetry
+2022-03-17 13:20:15,165 DEBUG   SenderThread:40875 [sender.py:send():235] send: telemetry
+2022-03-17 13:20:15,166 DEBUG   SenderThread:40875 [sender.py:send():235] send: run
+2022-03-17 13:20:15,191 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: partial_history
+2022-03-17 13:20:15,427 INFO    SenderThread:40875 [sender.py:send_run():710] updated run: 2ayrxaau
+2022-03-17 13:20:15,427 DEBUG   SenderThread:40875 [sender.py:send():235] send: telemetry
+2022-03-17 13:20:15,427 DEBUG   SenderThread:40875 [sender.py:send():235] send: telemetry
+2022-03-17 13:20:15,545 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/conda-environment.yaml
+2022-03-17 13:20:15,545 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/config.yaml
+2022-03-17 13:20:15,546 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_created():217] file/dir created: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/output.log
+2022-03-17 13:20:15,546 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_created():217] file/dir created: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-metadata.json
+2022-03-17 13:20:15,638 INFO    Thread-11 :40875 [upload_job.py:push():137] Uploaded file /var/folders/9k/yv9l3z555rqbpfjjrbqkks4r0000gn/T/tmpebx0azdjwandb/31s6nqy6-wandb-metadata.json
+2022-03-17 13:20:17,480 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:17,480 DEBUG   SenderThread:40875 [sender.py:send():235] send: exit
+2022-03-17 13:20:17,481 INFO    SenderThread:40875 [sender.py:send_exit():371] handling exit code: 1
+2022-03-17 13:20:17,481 INFO    SenderThread:40875 [sender.py:send_exit():373] handling runtime: 5
+2022-03-17 13:20:17,482 INFO    SenderThread:40875 [sender.py:_save_file():947] saving file wandb-summary.json with policy end
+2022-03-17 13:20:17,482 INFO    SenderThread:40875 [sender.py:send_exit():379] send defer
+2022-03-17 13:20:17,482 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:17,487 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,488 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 0
+2022-03-17 13:20:17,489 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,489 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 0
+2022-03-17 13:20:17,489 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 1
+2022-03-17 13:20:17,490 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,490 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 1
+2022-03-17 13:20:17,553 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-summary.json
+2022-03-17 13:20:17,555 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/output.log
+2022-03-17 13:20:17,584 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,585 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 1
+2022-03-17 13:20:17,585 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 2
+2022-03-17 13:20:17,585 DEBUG   SenderThread:40875 [sender.py:send():235] send: stats
+2022-03-17 13:20:17,585 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,586 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 2
+2022-03-17 13:20:17,586 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,586 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 2
+2022-03-17 13:20:17,586 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 3
+2022-03-17 13:20:17,586 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,586 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 3
+2022-03-17 13:20:17,586 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,587 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 3
+2022-03-17 13:20:17,587 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 4
+2022-03-17 13:20:17,588 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,588 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 4
+2022-03-17 13:20:17,588 DEBUG   SenderThread:40875 [sender.py:send():235] send: summary
+2022-03-17 13:20:17,589 INFO    SenderThread:40875 [sender.py:_save_file():947] saving file wandb-summary.json with policy end
+2022-03-17 13:20:17,589 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,589 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 4
+2022-03-17 13:20:17,589 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 5
+2022-03-17 13:20:17,589 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,589 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 5
+2022-03-17 13:20:17,589 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,589 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 5
+2022-03-17 13:20:17,597 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:17,889 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 6
+2022-03-17 13:20:17,889 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:17,890 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:17,890 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 6
+2022-03-17 13:20:17,890 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:17,890 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 6
+2022-03-17 13:20:17,890 INFO    SenderThread:40875 [dir_watcher.py:finish():283] shutting down directory watcher
+2022-03-17 13:20:17,993 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:18,552 INFO    Thread-7  :40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-summary.json
+2022-03-17 13:20:18,554 INFO    SenderThread:40875 [dir_watcher.py:_on_file_modified():230] file/dir modified: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/config.yaml
+2022-03-17 13:20:18,555 INFO    SenderThread:40875 [dir_watcher.py:finish():313] scan: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files
+2022-03-17 13:20:18,555 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/requirements.txt requirements.txt
+2022-03-17 13:20:18,556 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/output.log output.log
+2022-03-17 13:20:18,556 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/config.yaml config.yaml
+2022-03-17 13:20:18,556 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-summary.json wandb-summary.json
+2022-03-17 13:20:18,556 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/conda-environment.yaml conda-environment.yaml
+2022-03-17 13:20:18,556 INFO    SenderThread:40875 [dir_watcher.py:finish():327] scan save: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-metadata.json wandb-metadata.json
+2022-03-17 13:20:18,557 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 7
+2022-03-17 13:20:18,558 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:18,569 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:18,569 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 7
+2022-03-17 13:20:18,573 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:18,573 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 7
+2022-03-17 13:20:18,574 INFO    SenderThread:40875 [file_pusher.py:finish():145] shutting down file pusher
+2022-03-17 13:20:18,672 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:18,672 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:18,779 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:18,782 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:18,915 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:18,930 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,042 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,042 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,148 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,149 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,254 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,255 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,358 INFO    Thread-15 :40875 [upload_job.py:push():137] Uploaded file /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/wandb-summary.json
+2022-03-17 13:20:19,359 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,362 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,362 INFO    Thread-12 :40875 [upload_job.py:push():137] Uploaded file /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/requirements.txt
+2022-03-17 13:20:19,369 INFO    Thread-13 :40875 [upload_job.py:push():137] Uploaded file /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/output.log
+2022-03-17 13:20:19,381 INFO    Thread-16 :40875 [upload_job.py:push():137] Uploaded file /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/conda-environment.yaml
+2022-03-17 13:20:19,425 INFO    Thread-14 :40875 [upload_job.py:push():137] Uploaded file /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/files/config.yaml
+2022-03-17 13:20:19,465 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,465 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,568 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,569 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,628 INFO    Thread-6  :40875 [sender.py:transition_state():392] send defer: 8
+2022-03-17 13:20:19,629 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:19,629 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 8
+2022-03-17 13:20:19,629 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:19,629 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 8
+2022-03-17 13:20:19,674 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,875 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 9
+2022-03-17 13:20:19,875 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,876 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:19,876 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 9
+2022-03-17 13:20:19,876 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:19,876 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 9
+2022-03-17 13:20:19,876 INFO    SenderThread:40875 [sender.py:transition_state():392] send defer: 10
+2022-03-17 13:20:19,877 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: defer
+2022-03-17 13:20:19,878 INFO    HandlerThread:40875 [handler.py:handle_request_defer():164] handle defer: 10
+2022-03-17 13:20:19,878 DEBUG   SenderThread:40875 [sender.py:send():235] send: final
+2022-03-17 13:20:19,878 DEBUG   SenderThread:40875 [sender.py:send():235] send: footer
+2022-03-17 13:20:19,878 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: defer
+2022-03-17 13:20:19,878 INFO    SenderThread:40875 [sender.py:send_request_defer():388] handle sender defer: 10
+2022-03-17 13:20:19,980 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: poll_exit
+2022-03-17 13:20:19,980 DEBUG   SenderThread:40875 [sender.py:send_request():249] send_request: poll_exit
+2022-03-17 13:20:19,980 INFO    SenderThread:40875 [file_pusher.py:join():150] waiting for file pusher
+2022-03-17 13:20:20,580 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: sampled_history
+2022-03-17 13:20:20,583 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: get_summary
+2022-03-17 13:20:20,583 DEBUG   HandlerThread:40875 [handler.py:handle_request():141] handle_request: shutdown
+2022-03-17 13:20:20,584 INFO    HandlerThread:40875 [handler.py:finish():778] shutting down handler
+2022-03-17 13:20:20,883 INFO    WriterThread:40875 [datastore.py:close():281] close: /Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/02460_federated_learning/wandb/run-20220317_132007-2ayrxaau/run-2ayrxaau.wandb
+2022-03-17 13:20:21,479 INFO    SenderThread:40875 [sender.py:finish():1078] shutting down sender
+2022-03-17 13:20:21,479 INFO    SenderThread:40875 [file_pusher.py:finish():145] shutting down file pusher
+2022-03-17 13:20:21,479 INFO    SenderThread:40875 [file_pusher.py:join():150] waiting for file pusher
+2022-03-17 13:20:21,482 INFO    MainThread:40875 [internal.py:handle_exit():82] Internal process exited
