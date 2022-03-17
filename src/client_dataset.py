@@ -10,7 +10,7 @@ from dataset_utils import load_n_split, relabel_class
 class FemnistDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, user, root_dir, transform=None, train=True):
+    def __init__(self, user, transform=None, train=True):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -18,8 +18,8 @@ class FemnistDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-
-        self.imgs_labs = load_n_split(user, root_dir, train)
+        self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
+        self.imgs_labs = load_n_split(user, self.root_dir, train)
         self.root_dir = root_dir
         self.transform = transform
     
