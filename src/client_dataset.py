@@ -20,7 +20,6 @@ class FemnistDataset(Dataset):
         """
         self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
         self.imgs_labs = load_n_split(user, self.root_dir, train)
-        self.root_dir = root_dir
         self.transform = transform
     
     def __len__(self):
