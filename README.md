@@ -17,3 +17,12 @@
 
 ## Process data
     From inside '/dataset/femnist' run ./preprocess.sh
+
+## Run client 
+
+python src/client.py --dataset_root ROOT_TO_DATA --user USERNAME f0000_14
+
+ex.
+
+python src/client.py --dataset_root "/Users/villadsstokbro/Dokumenter/DTU/MMC /2. semester/Advanced Machine Learning/leaf/data/femnist" --user f0000_14
+

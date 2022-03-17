@@ -76,6 +76,7 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user, args.dataset_root)
 
     # Flower client
+    
     class CifarClient(fl.client.NumPyClient):
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
