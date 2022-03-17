@@ -4,5 +4,8 @@ epochs:
 batch_size:
   desc: Size of each mini-batch
   value: 8
-train_fn: 
-  value: train
+train_fn:
+  value: train_fed_prox
+mu: 
+  value: 1
+
