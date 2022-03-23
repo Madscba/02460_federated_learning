@@ -40,7 +40,7 @@ from .aggregate import aggregate_qffl, weighted_loss_avg
 from .fedavg import FedAvg
 
 
-class QFedAvg(FedAvg):
+class QFedAvg_manual(FedAvg):
     """Configurable QFedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
