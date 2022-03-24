@@ -1,0 +1,24 @@
+epochs:
+  desc: Number of epochs to train over
+  value: 1
+batch_size:
+  desc: Size of each mini-batch
+  value: 8
+train_fn:
+  value: train_dp_sgd
+sample_rate:
+  value: 0.01
+noise_multiplier:
+ value: 0.56
+max_grad_norm:
+  value: 1.1
+lr:
+  value: 0.001
+momentum:
+  value: 0.90
+target_delta:
+  value: 1e-6
+lib:
+  value: False
+
+

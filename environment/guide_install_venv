@@ -1,6 +1,6 @@
 1.Create virtual environment
 	#load and create enviroment
-	"module load python3/3.6.2"
+	"module load python3/3.8.0"
 	cd to desktop
 	"python3 -m venv fl_362"
 
