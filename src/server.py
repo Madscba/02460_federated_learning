@@ -10,8 +10,9 @@ if __name__ == "__main__":
 
     # Define strategy
     strategy = QFedAvg_manual(
-        fraction_fit=0.5,
-        fraction_eval=0.5,
+        fraction_fit=0.8,
+        fraction_eval=0.2,
+        min_fit_clients=2
 
         #eval_fn = CrossEntropyLoss
     )
@@ -27,6 +28,6 @@ if __name__ == "__main__":
     # Start server
     fl.server.start_server(
         server_address="[::]:8080",
-        config={"num_rounds": 3},
+        config={"num_rounds": 100},
         strategy=strategy,
     )
