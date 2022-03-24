@@ -1,7 +1,8 @@
 import wandb
+import sys
 
 
-parser_default={'max_grad_norm':1.0, 'target_delta':1e-5, 'dp_sgd':False, 'opacus':False, 
+parser_default={'max_grad_norm':1.0, 'target_delta':1e-5, 'dp_sgd':False, 'opacus':None, 
             'noise_multiplier':1.0, "sample_rate":0.01,'batch_size':8, 'epochs':1}
 
 
@@ -65,5 +66,6 @@ def update_config(args):
     for key, val in args._get_kwargs():
         if key in parser_default.keys():
             if parser_default[key] != val:
-                wandb.config[key]=val
+                wandb.config.update({key:val}, allow_val_change=True)
+                print(f'{key} was overidden with value: {val}', file=sys.stdout)
 
