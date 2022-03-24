@@ -34,6 +34,7 @@ def train_fed_prox(net, trainloader, epochs):
             optimizer.zero_grad()
             loss = criterion(net(images), labels, net.parameters())
             loss.backward()
+            wandb.log({"train_loss": loss.item()})
             optimizer.step()
 
 
