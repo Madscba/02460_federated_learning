@@ -46,5 +46,36 @@ if __name__ == "__main__":
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
     parser.add_argument('--experiment_id', default=None)
+    parser.add_argument("--dp_sgd",default=False)
+    parser.add_argument("--opacus", default=False, help="Set true to use opacus library")
+    parser.add_argument(
+        "--noise_multiplier",
+        type=float,
+        default=1.0,
+        metavar="S",
+        help="Noise multiplier",
+    )
+    parser.add_argument(
+        "-c",
+        "--max_grad_norm",
+        type=float,
+        default=1.0,
+        metavar="C",
+        help="Clip per-sample gradients to this norm",
+    )
+    parser.add_argument(
+        "--target_delta",
+        type=float,
+        default=1e-5,
+        metavar="D",
+        help="Target delta",
+    )
+    parser.add_argument(
+        "--sample_rate",
+        type=float,
+        default=0.01,
+        metavar="Q",
+        help="Sample rate (determined on server level)",
+    )
     args = parser.parse_args()
     main(args)
