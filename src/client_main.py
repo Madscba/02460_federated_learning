@@ -32,7 +32,7 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    client=FemnistClient(net, trainloader, testloader, num_examples, choose_train_fn(wandb.config.train_fn))
+    client=FemnistClient(net, trainloader, testloader, num_examples, choose_train_fn(wandb.config.train_fn), args)
 
     # Start client
     fl.client.start_numpy_client("[::]:8080", client=client)
