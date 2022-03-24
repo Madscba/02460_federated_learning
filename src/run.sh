@@ -19,21 +19,28 @@
 
 filename='/zhome/87/9/127623/Desktop/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
 n=1
+exp_id=date
 
 echo "starting bash script"
 
 module load python3/3.6.2
 source /zhome/87/9/127623/Desktop/env_fl/bin/activate
 
+
 echo "Starting server"
-python server.py &
+python src/server.py &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
-while read user && (($n<=10)); do
+while read user && (($n<=20)); do
 	echo "Starting client: $n , name: $user"
-   	python client.py --user=${user} &
+   	python src/client_main.py --user=${user} --wandb_mode="online" --experiment_id=$exp_id&
 	n=$((n+1))
+	##if [ $(expr $n % 20) == 0 ]
+	##then
+##		echo "sleeping for 5 sec"
+##		sleep 5
+##	fi
 done < $filename
 
 
@@ -58,4 +65,5 @@ wait
 
 ###ls | sed -n 's/\.pckl$//p' #can extract pckl file names without file extension
 ###shuf-n 4100 user_names.txt > user_names.txt
+
 
