@@ -1,0 +1,9 @@
+flwr==0.18.0
+matplotlib==3.3.1
+numpy==1.19.5
+opacus==0.14.0
+Pillow==9.0.1
+scipy==1.4.1
+tensorflow==2.3.0
+torch==1.10.1
+torchvision==0.11.2
