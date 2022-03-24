@@ -18,12 +18,17 @@ import argparse
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def train(net, trainloader, privacy_engine, epochs, target_delta):
+def train(net, trainloader, privacy_engine, epochs, target_delta, max_grad_norm):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    privacy_engine.attach(optimizer)
-
+    net, optimizer, trainloader = privacy_engine.make_private_with_epsilon(
+        module=net,
+        optimizer=optimizer,
+        data_loader=trainloader,
+        epochs=epochs,
+        target_delta=target_delta,
+        max_grad_norm=max_grad_norm)
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
@@ -97,6 +102,7 @@ def main(args):
                     target_delta=self.target_delta,
                     max_grad_norm=self.max_grad_norm,
                     noise_multiplier=self.noise_multiplier,
+                    accountant='gdp'
                 )
 
         def get_parameters(self):
