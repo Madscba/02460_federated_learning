@@ -41,7 +41,10 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    client=FemnistClient(net, trainloader, testloader, num_examples, choose_train_fn(wandb.config.train_fn))
+    qfed = True # default is false
+    client=FemnistClient(net, trainloader, testloader, num_examples,
+                         run_qfed= qfed,
+                         train_fn=choose_train_fn(wandb.config.train_fn))
 
     # Start client
     import sys

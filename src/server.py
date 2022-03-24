@@ -9,10 +9,10 @@ from torch.nn import CrossEntropyLoss
 if __name__ == "__main__":
 
     # Define strategy
-    strategy = QFedAvg(
+    strategy = QFedAvg_manual(
         fraction_fit=0.5,
         fraction_eval=0.5,
-        
+
         #eval_fn = CrossEntropyLoss
     )
 # uncomment this and outcomment what is above
