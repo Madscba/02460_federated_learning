@@ -23,42 +23,39 @@ def parse_args(parser):
         default=8)
     parser.add_argument('--epochs', 
         default=1)
-
-    parser.add_argument("--dp_sgd",
-        default=False)
-    parser.add_argument("--opacus", 
-        default=None, 
-        help="Set true to use opacus library")
+    parser.add_argument("--lib", default=False, help="Set true to use opacus library")
     parser.add_argument(
         "--noise_multiplier",
         type=float,
-        default=1.0,
+        default=0.56,
         metavar="S",
-        help="Noise multiplier",
+        help="Noise multiplier"
     )
     parser.add_argument(
-        "-c",
         "--max_grad_norm",
         type=float,
-        default=1.0,
-        metavar="C",
-        help="Clip per-sample gradients to this norm",
+        default=1.1
     )
     parser.add_argument(
         "--target_delta",
         type=float,
-        default=1e-5,
-        metavar="D",
-        help="Target delta",
+        default=1e-5
     )
     parser.add_argument(
         "--sample_rate",
         type=float,
-        default=0.01,
-        metavar="Q",
-        help="Sample rate (determined on server level)",
+        default=0.01
     )
-
+    parser.add_argument(
+        "--lr",
+        type=float,
+        default=0.001
+    )
+    parser.add_argument(
+        "--momentum",
+        type=float,
+        default=0.90
+    )
     args = parser.parse_args()
     return args
 

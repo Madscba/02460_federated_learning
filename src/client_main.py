@@ -46,51 +46,7 @@ def main(args):
     # Start client
     fl.client.start_numpy_client("[::]:8080", client=client)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-<<<<<<< Updated upstream
     args=parse_args(parser)
-=======
-    parser.add_argument('--user', 
-                help='user ex f0000_14', default='f0000_14')
-    parser.add_argument('--wandb_mode', 
-                help='use "online" to log and sync with cloud', default='disabled')
-    parser.add_argument('--configs', default='config.yaml')
-    parser.add_argument('--experiment_id', default=None)
-    parser.add_argument("--lib", default=False, help="Set true to use opacus library")
-    parser.add_argument(
-        "--noise_multiplier",
-        type=float,
-        default=0.56,
-        metavar="S",
-        help="Noise multiplier"
-    )
-    parser.add_argument(
-        "--max_grad_norm",
-        type=float,
-        default=1.1
-    )
-    parser.add_argument(
-        "--target_delta",
-        type=float,
-        default=1e-5
-    )
-    parser.add_argument(
-        "--sample_rate",
-        type=float,
-        default=0.01
-    )
-    parser.add_argument(
-        "--lr",
-        type=float,
-        default=0.001
-    )
-    parser.add_argument(
-        "--momentum",
-        type=float,
-        default=0.90
-    )
-    args = parser.parse_args()
->>>>>>> Stashed changes
     main(args)
