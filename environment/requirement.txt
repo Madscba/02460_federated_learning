@@ -15,7 +15,7 @@ importlib-metadata==1.7.0
 Markdown==3.3.6
 numpy==1.19.5
 oauthlib==3.2.0
-opacus==1.1.0
+opacus==0.14.0
 protobuf==3.19.4
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
