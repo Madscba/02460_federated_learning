@@ -1,27 +1,28 @@
 import flwr as fl
 
-# outcomment this:
-###################################################################
+
 from strategies.fedavg import FedAvg
 from strategies.qfedavg import QFedAvg
 from strategies.qfedavg_manual_impl import QFedAvg_manual
-###################################################################
+from torch.nn import CrossEntropyLoss
 
 if __name__ == "__main__":
 
     # Define strategy
-    strategy = FedAvg(
+    strategy = QFedAvg(
         fraction_fit=0.5,
         fraction_eval=0.5,
+        
+        #eval_fn = CrossEntropyLoss
     )
 # uncomment this and outcomment what is above
 ###################################################################
     # # Define strategy
-    # strategy = fl.server.strategy.FedAvg(
+    # strategy = fl.server.strategy.QFedAvg(
     #     fraction_fit=0.5,
     #     fraction_eval=0.5,
     # )
-###################################################################
+# #################################################################
 
     # Start server
     fl.server.start_server(
