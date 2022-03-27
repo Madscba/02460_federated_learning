@@ -41,10 +41,15 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    client=FemnistClient(net, trainloader, testloader, num_examples, choose_train_fn(wandb.config.train_fn))
+    qfed = True # default is false
+    client=FemnistClient(net, trainloader, testloader, num_examples,
+                         run_qfed= qfed,
+                         train_fn=choose_train_fn(wandb.config.train_fn))
 
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=client)
+    import sys
+    host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
+    fl.client.start_numpy_client(host, client=client)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

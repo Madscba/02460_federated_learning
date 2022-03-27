@@ -188,7 +188,9 @@ class QFedAvg(FedAvg):
         if eval_result is not None:
             loss, _ = eval_result
 
-        for _, fit_res in results:
+        for client_prox, fit_res in results:
+            print(fit_res.metrics)
+
             new_weights = parameters_to_weights(fit_res.parameters)
             # plug in the weight updates into the gradient
             grads = [
