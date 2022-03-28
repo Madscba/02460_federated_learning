@@ -56,6 +56,16 @@ def parse_args(parser):
         type=float,
         default=0.90
     )
+    parser.add_argument(
+        "--qfed",
+        type=bool,
+        default=False
+    )
+    parser.add_argument(
+        "--straggler",
+        type=bool,
+        default=False
+    )
     args = parser.parse_args()
     return args
 

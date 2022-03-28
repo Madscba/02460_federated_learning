@@ -18,9 +18,11 @@
 
 
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
-count=1 #spawned_clients
-N=500 #amount of clients
-exp_id=$(date +"%d%b%T")
+n=1 #spawned_clients
+N=12 #amount of clients
+n_wait=9
+epoch_num=2
+exp_id=$(date +"FedAvg_%d%b%T")
 
 echo "starting bash script"
 
@@ -33,16 +35,15 @@ python src/server.py &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
-while read user && (($count<=spawn_clients)); do
-	echo "Starting client: $count , name: $user"
-   	timeout 4m python src/client_main.py --user=${user} --wandb_mode="online" --experiment_id=$exp_id&
-
-	if [ $(expr $n % 10) == 0 && $n<=10 ]
-	then
-		echo "sleeping for 2 min"
+while read user && (($n<=$N)); do
+	echo "Starting client: $n , name: $user"
+   	##timeout 4m 
+	python src/client_main.py --user=${user} --experiment_id=$exp_id --epochs=$epoch_num --wandb_mode="online"&
+	if [ $(expr $n % 10) == 0 ] && [ $n>$n_wait ]; then
+		echo "sleeping for 120 sec" ##120 sec
 		sleep 120
 	fi
-	count=$((clients+1))
+	n=$(($n+1))
 done < $filename
 
 

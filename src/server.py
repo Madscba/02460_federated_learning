@@ -5,16 +5,46 @@ from strategies.fedavg import FedAvg
 from strategies.qfedavg import QFedAvg
 from strategies.qfedavg_manual_impl import QFedAvg_manual
 from torch.nn import CrossEntropyLoss
+import argparse
+
+FRACTION_FIT_ = 0.5
+FRACTION_EVAL_ = 0.5
+MIN_FIT_CLIENTS_ = 5
+MIN_EVAL_CLIENTS_ = 5
+MIN_AVAILABLE_CLIENTS_ = 5
+
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Select strategy')
+    parser.add_argument("--strategy",type=str,default="FedAvg")
+    args = parser.parse_args()
 
-    # Define strategy
-    strategy = QFedAvg_manual(
-        fraction_fit=0.8,
-        fraction_eval=0.2,
-        min_fit_clients=2
-
-        #eval_fn = CrossEntropyLoss
+    # Define strategy based on argument
+    if args.strategy == "QFed_man":
+        strategy = QFedAvg_manual(
+            q_param = 0.2,
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_,
+            min_available_clients_ = MIN_AVAILABLE_CLIENTS_)
+    elif args.strategy == "QFed":
+        strategy = QFedAvg(
+            q_param = 0.2,
+            qffl_learning_rate = 0.1,
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_,
+            min_available_clients_ = MIN_AVAILABLE_CLIENTS_)
+    else:
+        strategy = FedAvg(
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_, 
+            min_available_clients = MIN_AVAILABLE_CLIENTS_
     )
 # uncomment this and outcomment what is above
 ###################################################################
@@ -28,6 +58,6 @@ if __name__ == "__main__":
     # Start server
     fl.server.start_server(
         server_address="[::]:8080",
-        config={"num_rounds": 100},
+        config={"num_rounds": 200},
         strategy=strategy,
     )

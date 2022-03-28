@@ -28,6 +28,7 @@ def main(args):
 
     
     config=os.path.join(os.getcwd(),'src','config',args.configs)
+    print(config)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode)
     update_config(args)
@@ -41,7 +42,7 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    qfed = True # default is false
+    qfed = args.qfed # default is false
     client=FemnistClient(net, trainloader, testloader, num_examples,
                          run_qfed= qfed,
                          train_fn=choose_train_fn(wandb.config.train_fn))
