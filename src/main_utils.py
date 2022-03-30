@@ -20,8 +20,10 @@ def parse_args(parser):
     parser.add_argument('--wandb_username', 
         default=None)
     parser.add_argument('--batch_size', 
+        type=int,
         default=8)
     parser.add_argument('--epochs', 
+        type=int,
         default=1)
     parser.add_argument("--lib", default=False, help="Set true to use opacus library")
     parser.add_argument(
