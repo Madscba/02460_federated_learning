@@ -40,6 +40,9 @@ class FemnistDataset(Dataset):
         if self.transform:
             img = self.transform(img)
 
+        # image is 3x128x128 but is grayscale so 1x128x128 is more apropriate
+        img = img[0, :, :]
+        img = img.unsqueeze(0)
         return img, tensor(target)
 
 

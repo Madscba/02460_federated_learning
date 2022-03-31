@@ -45,21 +45,22 @@ if __name__ == "__main__":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
             q_param = 0.2,
+            qffl_learning_rate = 0.01,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
-            min_available_clients_ = MIN_AVAILABLE_CLIENTS_)
+            min_available_clients = MIN_AVAILABLE_CLIENTS_)
     elif args.strategy == "QFed":
         print("Strategy: Qfed_flwr")
         strategy = QFedAvg(
             q_param = 0.2,
-            qffl_learning_rate = 0.1,
+            qffl_learning_rate = 0.01,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
-            min_available_clients_ = MIN_AVAILABLE_CLIENTS_)
+            min_available_clients = MIN_AVAILABLE_CLIENTS_)
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
