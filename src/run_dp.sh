@@ -19,8 +19,8 @@
 
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
 n=1 #spawned_clients
-N=500 #amount of clients
-n_wait=10
+N=20 #amount of clients
+n_wait=9
 epoch_num=1
 exp_id=$(date +"DP_%d%b%T")
 
@@ -31,7 +31,7 @@ source /zhome/dd/4/128822/fl_362/bin/activate
 
 
 echo "Starting server"
-python src/server.py &
+python src/server.py --experiment_id=$exp_id & ##--wandb_user='s173934' wandb_mode="online"
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
