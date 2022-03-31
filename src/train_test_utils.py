@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 from dp_sgd_utils import clip_gradients, add_noise
 from FedOptLoss import FedOptLoss
-#from privacy_opt import DP_SGD
+from privacy_opt import DP_SGD
 from client_dataset import FemnistDataset
 from torch.utils.data import DataLoader
 
