@@ -9,7 +9,7 @@ def clip_gradients(net, optimizer, theta0, device):
 def add_noise(net, optimizer):
     sigma = (optimizer.noise_multiplier*optimizer.max_grad_norm)/optimizer.noise_scale
     for param in net.parameters():
-        param.data += torch.normal(mean=0, std=sigma)
+        param.data += torch.normal(mean=0, std=torch.tensor(sigma))
 
 def per_layer_clip(layer_gradient, max_grad_norm,device):
     clipping_value = max_grad_norm/math.sqrt(5)
