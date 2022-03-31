@@ -5,6 +5,7 @@ import numpy as np
 from torch import tensor
 import torch
 from PIL import Image
+import wandb
 from dataset_utils import load_n_split, relabel_class 
 
 class FemnistDataset(Dataset):
