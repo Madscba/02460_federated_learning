@@ -27,12 +27,11 @@ class FemnistClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        info = {}
         self.set_parameters(parameters)
         self.round+=1
 
         # only return something meaningfull if self.qfed == true
-        info["loss_prior_to_training"] = self.loss_prior_to_training()
+        info = self.loss_prior_to_training()
 
         self.train(self.net, self.trainloader, epochs=wandb.config.epochs)
         wandb.log({"round": self.round})
@@ -45,17 +44,39 @@ class FemnistClient(fl.client.NumPyClient):
 
     # only needed for q fed
     def loss_prior_to_training(self):
+        info = {}
         if not self.run_qfed:
-            return None # only return meaningfull value if we run qfed
+            return info # only return meaningfull value if we run qfed
 
         else:
-            losses = []
             with torch.no_grad():
                 loss_func = torch.nn.CrossEntropyLoss()
-                for x, y in self.trainloader:
-                    x, y = x.to(self.DEVICE), y.to(self.DEVICE)
-                    pred = self.net(x)
-                    loss = loss_func(pred, y)
-                    losses.append(loss)
 
-            return torch.mean(torch.stack(losses)).item()
+                # just make a forward pass with all of the data to optimize speed
+                try:
+                    x, y = [], []
+                    for x_, y_ in self.trainloader:
+                        x.append(x_.to(self.DEVICE))
+                        y.append(y_.to(self.DEVICE))
+                    x = torch.cat(x)
+                    y = torch.cat(y)
+                    print(x.shape)
+                    pred = self.net(x)
+                    loss = loss_func(pred, y).item()
+                    info["loss_prior_to_training"] = loss
+
+                # for some reason we couldnt pass all of the data through in one batch most liekly due to
+                # memory limitations.
+                except RuntimeError:
+                    print("exception happened, prolly memory error in client.py line 72")
+                    losses = []
+                    for x, y in self.trainloader:
+                        x, y = x.to(self.DEVICE), y.to(self.DEVICE)
+                        pred = self.net(x)
+                        loss = loss_func(pred, y)
+                        losses.append(loss)
+
+                    info["loss_prior_to_training"] = torch.mean(torch.stack(losses)).item()
+
+            return info
+
