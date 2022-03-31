@@ -2,10 +2,6 @@ import wandb
 import sys
 
 
-parser_default={'max_grad_norm':1.1, 'noise_scale':1.0, 'target_delta':1e-5, 'dp_sgd':False, 'opacus':None,
-            'noise_multiplier':1.0, "sample_rate":0.01,'batch_size':8, 'epochs':1}
-
-
 def parse_args(parser):
     subparsers = parser.add_subparsers(help='sub-command help')
     parser_a = subparsers.add_parser('wand_config', help='a help')
@@ -15,6 +11,7 @@ def parse_args(parser):
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', 
         default='config.yaml')
+    
     parser.add_argument('--experiment_id', 
         default=None)
     parser.add_argument('--wandb_username', 
@@ -76,8 +73,8 @@ def parse_args(parser):
 
 def update_config(args):
     for key, val in args._get_kwargs():
-        if key in parser_default.keys():
-            if parser_default[key] != val:
+        if key in wandb.config._items.keys():
+            if wandb.config[key] != val:
                 wandb.config.update({key:val}, allow_val_change=True)
                 print(f'{key} was overidden with value: {val}', file=sys.stdout)
 
