@@ -14,6 +14,7 @@ class DP_SGD():
             alphas: list = DEFAULT_ALPHAS,
             max_grad_norm: float = None,
             noise_multiplier: float = None,
+            noise_scale: float = 1.0,
             target_delta: float = 1e-6,
             lib: bool = False):
 
@@ -22,6 +23,7 @@ class DP_SGD():
         self.alphas = alphas
         self.sample_rate = sample_rate
         self.noise_multiplier = noise_multiplier
+        self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = target_delta
         self.lib = lib
