@@ -7,14 +7,14 @@ from train_test_utils import test
 
 
 class FemnistClient(fl.client.NumPyClient):
-    def __init__(self, net, trainloader, testloader, num_examples, run_qfed=False, train_fn=None) -> None:
+    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=True, train_fn=None) -> None:
         self.train=train_fn
         self.net=net
         self.num_examples=num_examples
         self.trainloader=trainloader
         self.testloader=testloader
         self.round=0
-        self.run_qfed = run_qfed
+        self.qfed_client = qfed_client
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         super().__init__()
 
@@ -45,7 +45,7 @@ class FemnistClient(fl.client.NumPyClient):
     # only needed for q fed
     def loss_prior_to_training(self):
         info = {}
-        if not self.run_qfed:
+        if not self.qfed_client:
             return info # only return meaningfull value if we run qfed
 
         else:
@@ -60,7 +60,6 @@ class FemnistClient(fl.client.NumPyClient):
                         y.append(y_.to(self.DEVICE))
                     x = torch.cat(x)
                     y = torch.cat(y)
-                    print(x.shape)
                     pred = self.net(x)
                     loss = loss_func(pred, y).item()
                     info["loss_prior_to_training"] = loss

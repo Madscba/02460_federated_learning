@@ -43,7 +43,7 @@ def main(args):
     # Flower client
     qfed = args.qfed # default is false
     client=FemnistClient(net, trainloader, testloader, num_examples,
-                         run_qfed= qfed,
+                         qfed_client=qfed,
                          train_fn=choose_train_fn(wandb.config.train_fn))
     print("Printing client type:", type(client))
     # Start client
