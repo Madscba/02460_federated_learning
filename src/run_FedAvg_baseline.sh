@@ -2,7 +2,7 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J intro_FL_exp
-#BSUB -n 20 ##Number of cores
+#BSUB -n 2 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
@@ -36,7 +36,7 @@ sleep 3  # Sleep for 3s to give the server enough time to start
 
 while read user && (($n<=$N)); do
 	echo "Starting client: $n , name: $user"
-   	timeout 3m python src/client_main.py --user=${user} --experiment_id=$exp_id --& ##epochs=$epoch_num wandb_mode="online" --wandb_user='s173934'
+   	timeout 3m python src/client_main.py --user=${user} --experiment_id=$exp_id & ##epochs=$epoch_num wandb_mode="online" --wandb_user='s173934'
 	if [ $(expr $n % 10) == 0 ] && [ $n > $n_wait ]; then
 		echo "sleeping for 90 sec" ##90 sec
 		sleep 90

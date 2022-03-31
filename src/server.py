@@ -6,6 +6,10 @@ from strategies.qfedavg import QFedAvg
 from strategies.qfedavg_manual_impl import QFedAvg_manual
 from torch.nn import CrossEntropyLoss
 import argparse
+import wandb
+import os
+
+
 
 FRACTION_FIT_ = 0.5
 FRACTION_EVAL_ = 0.5
@@ -20,6 +24,8 @@ if __name__ == "__main__":
     parser.add_argument("--strategy",type=str,default="FedAvg")
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
+    parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
+    parser.add_argument('--configs', default='config.yaml')
     args = parser.parse_args()
     if args.experiment_id:
         experiment="experiment-"+args.experiment_id
@@ -28,9 +34,10 @@ if __name__ == "__main__":
     if args.wandb_username:
         os.environ['WANDB_USERNAME']=args.wandb_username
 
+    config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,jobtype='server')
-    wandb.run.name = args.user+wandb.run.id
+    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+    wandb.run.name = wandb.run.id
     wandb.run.save()
 
     # Define strategy based on argument
