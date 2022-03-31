@@ -10,6 +10,8 @@ sample_rate:
   value: 0.01
 noise_multiplier:
  value: 0.56
+noise_scale:
+  value: 1.0
 max_grad_norm:
   value: 1.1
 lr:

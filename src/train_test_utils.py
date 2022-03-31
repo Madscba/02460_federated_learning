@@ -41,10 +41,10 @@ def train_fed_prox(net, trainloader, epochs):
 def train_dp_sgd(net, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = DP_SGD(net, learning_rate=wandb.config.lr,momentum=wandb.config.momentum,
-                       sample_rate=wandb.config.sample_rate,max_grad_norm=wandb.config.max_grad_norm,
-                       noise_multiplier=wandb.config.noise_multiplier,target_delta=wandb.config.target_delta,
-                       lib=wandb.config.lib)
+    optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
+                       sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
+                       noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
+                       target_delta=wandb.config.target_delta, lib=wandb.config.lib)
     net.train()
     theta0 = deepcopy(net.state_dict())
     for _ in range(epochs):
