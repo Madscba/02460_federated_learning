@@ -46,7 +46,7 @@ def main(args):
     client=FemnistClient(net, trainloader, testloader, num_examples,
                          run_qfed= qfed,
                          train_fn=choose_train_fn(wandb.config.train_fn))
-
+    print("Printing client type:", type(client))
     # Start client
     import sys
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
@@ -56,3 +56,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args=parse_args(parser)
     main(args)
+
