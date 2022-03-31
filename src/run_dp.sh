@@ -30,7 +30,7 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_362/bin/activate
 
 echo "Starting server"
-python src/server.py --experiment_id=$exp_id & ##--wandb_user='s173934' wandb_mode="online"
+python src/server.py --experiment_id=$exp_id ##--wandb_username='johannes_boe' --wandb_mode="online"
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
