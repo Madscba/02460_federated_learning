@@ -18,9 +18,15 @@ MIN_AVAILABLE_CLIENTS_ = 1
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
     parser.add_argument("--strategy",type=str,default="FedAvg")
-    args = parser.parse_args()
-    print("printing args type: ",type(args)," args: ",args)
-    print("Strategy arg: ",args.strategy)
+    parser.add_argument('--experiment_id', default=None)
+    parser.add_argument('--wandb_username', default=None)
+     args = parser.parse_args()
+    if args.experiment_id:
+        experiment="experiment-"+args.experiment_id
+    else:
+        experiment="experiment-"+wandb.util.generate_id()
+    if args.wandb_username:
+        os.environ['WANDB_USERNAME']=args.wandb_username
     # Define strategy based on argument
     if args.strategy == "QFed_man":
         print("Strategy: Qfed_manual")
