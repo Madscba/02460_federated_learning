@@ -20,13 +20,19 @@ if __name__ == "__main__":
     parser.add_argument("--strategy",type=str,default="FedAvg")
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
-     args = parser.parse_args()
+    args = parser.parse_args()
     if args.experiment_id:
         experiment="experiment-"+args.experiment_id
     else:
         experiment="experiment-"+wandb.util.generate_id()
     if args.wandb_username:
         os.environ['WANDB_USERNAME']=args.wandb_username
+
+    wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
+    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,jobtype='server')
+    wandb.run.name = args.user+wandb.run.id
+    wandb.run.save()
+
     # Define strategy based on argument
     if args.strategy == "QFed_man":
         print("Strategy: Qfed_manual")
