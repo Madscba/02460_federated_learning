@@ -2,7 +2,7 @@ import wandb
 import sys
 
 
-parser_default={'max_grad_norm':1.0, 'target_delta':1e-5, 'dp_sgd':False, 'opacus':None, 
+parser_default={'max_grad_norm':1.1, 'noise_scale':1.0, 'target_delta':1e-5, 'dp_sgd':False, 'opacus':None,
             'noise_multiplier':1.0, "sample_rate":0.01,'batch_size':8, 'epochs':1}
 
 
@@ -30,13 +30,16 @@ def parse_args(parser):
         "--noise_multiplier",
         type=float,
         default=0.56,
-        metavar="S",
-        help="Noise multiplier"
+    )
+    parser.add_argument(
+        "--noise_scale",
+        type=float,
+        default=1.0,
     )
     parser.add_argument(
         "--max_grad_norm",
         type=float,
-        default=1.1
+        default=1.1,
     )
     parser.add_argument(
         "--target_delta",
