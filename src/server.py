@@ -9,15 +9,15 @@ import argparse
 
 FRACTION_FIT_ = 0.5
 FRACTION_EVAL_ = 0.5
-MIN_FIT_CLIENTS_ = 5
-MIN_EVAL_CLIENTS_ = 5
-MIN_AVAILABLE_CLIENTS_ = 5
+MIN_FIT_CLIENTS_ = 2
+MIN_EVAL_CLIENTS_ = 2
+MIN_AVAILABLE_CLIENTS_ = 2
 
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
-    parser.add_argument("--strategy",type=str,default="FedAvg")
+    parser.add_argument("--strategy", type=str, default="FedAvg")
     args = parser.parse_args()
 
     # Define strategy based on argument

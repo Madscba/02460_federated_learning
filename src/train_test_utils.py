@@ -64,7 +64,7 @@ def train_fed_prox(net, trainloader, epochs):
 #     epsilon = optimizer.get_privacy_spent()
 #     wandb.log({"epsilon": epsilon})
 
-train_dict={'train': train, 'train_fed_prox': train_fed_prox, 'train_dp_sgd': None }#train_dp_sgd}
+train_dict={'train': train, 'train_fed_prox': train_fed_prox, 'train_dp_sgd': None } #train_dp_sgd}
 
 def choose_train_fn(train_fn='train'):
         return train_dict[train_fn]

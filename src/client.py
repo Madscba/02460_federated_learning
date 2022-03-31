@@ -27,12 +27,11 @@ class FemnistClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        info = {}
         self.set_parameters(parameters)
         self.round+=1
 
         # only return something meaningfull if self.qfed == true
-        info["loss_prior_to_training"] = self.loss_prior_to_training()
+        info = self.loss_prior_to_training()
 
         self.train(self.net, self.trainloader, epochs=wandb.config.epochs)
         wandb.log({"round": self.round})
@@ -45,8 +44,9 @@ class FemnistClient(fl.client.NumPyClient):
 
     # only needed for q fed
     def loss_prior_to_training(self):
+        info = {}
         if not self.run_qfed:
-            return None # only return meaningfull value if we run qfed
+            return info # only return meaningfull value if we run qfed
 
         else:
             losses = []
@@ -58,4 +58,6 @@ class FemnistClient(fl.client.NumPyClient):
                     loss = loss_func(pred, y)
                     losses.append(loss)
 
-            return torch.mean(torch.stack(losses)).item()
+            info["loss_prior_to_training"] = torch.mean(torch.stack(losses)).item()
+            return info
+
