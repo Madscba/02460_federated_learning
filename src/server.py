@@ -2,16 +2,16 @@ import flwr as fl
 
 
 from strategies.fedavg import FedAvg
-from strategies.qfedavg import QFedAvg
+from strategies.qfedavg_fixed import QFedAvg
+#from strategies.qfedavg import QFedAvg
 from strategies.qfedavg_manual_impl import QFedAvg_manual
-from torch.nn import CrossEntropyLoss
 import argparse
 
 FRACTION_FIT_ = 0.5
 FRACTION_EVAL_ = 0.5
-MIN_FIT_CLIENTS_ = 1
-MIN_EVAL_CLIENTS_ = 1
-MIN_AVAILABLE_CLIENTS_ = 1
+MIN_FIT_CLIENTS_ = 2
+MIN_EVAL_CLIENTS_ = 2
+MIN_AVAILABLE_CLIENTS_ = 2
 
 
 
