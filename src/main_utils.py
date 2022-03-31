@@ -3,8 +3,6 @@ import sys
 
 
 def parse_args(parser):
-    subparsers = parser.add_subparsers(help='sub-command help')
-    parser_a = subparsers.add_parser('wand_config', help='a help')
     parser.add_argument('--user', 
                 help='user ex f0000_14', default='f0000_14')
     parser.add_argument('--wandb_mode', 
@@ -16,13 +14,23 @@ def parse_args(parser):
         default=None)
     parser.add_argument('--wandb_username', 
         default=None)
+    parser.add_argument('--job_type', 
+        default='client')
+    parser.add_argument('--dataset_path',
+        default=None)
+
+    #arguments used to overwrite config files
+
     parser.add_argument('--batch_size', 
         type=int,
         default=8)
     parser.add_argument('--epochs', 
         type=int,
         default=1)
-    parser.add_argument("--lib", default=False, help="Set true to use opacus library")
+    parser.add_argument("--lib", 
+        default=False, 
+        help="Set true to use opacus library")
+    
     parser.add_argument(
         "--noise_multiplier",
         type=float,

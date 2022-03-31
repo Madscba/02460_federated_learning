@@ -10,6 +10,7 @@ import os
 import wandb
 from train_test_utils import choose_train_fn, load_data
 from main_utils import parse_args, update_config
+import sys
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -29,9 +30,9 @@ def main(args):
     
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='client')
-    update_config(args)
-    wandb.run.name = args.user+wandb.run.id
+    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, job_type='client', mode=args.wandb_mode)
+    wandb.config.update(args, allow_val_change=True)
+    wandb.run.name = args.user+'_'+wandb.run.id
     wandb.run.save()
 
 
@@ -47,7 +48,6 @@ def main(args):
                          train_fn=choose_train_fn(wandb.config.train_fn))
     print("Printing client type:", type(client))
     # Start client
-    import sys
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
     fl.client.start_numpy_client(host, client=client)
 

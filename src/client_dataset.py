@@ -18,7 +18,10 @@ class FemnistDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
+        try:
+            self.root_dir=wandb.config.dataset_path    
+        except:
+            self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
         self.imgs_labs = load_n_split(user, self.root_dir, train)
         self.transform = transform
     
