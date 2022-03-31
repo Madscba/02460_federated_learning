@@ -7,9 +7,9 @@ batch_size:
 train_fn:
   value: train_dp_sgd
 sample_rate:
-  value: 0.01
+  value: 0.0025
 noise_multiplier:
- value: 0.56
+ value: 0.01
 noise_scale:
   value: 1.0
 max_grad_norm:
