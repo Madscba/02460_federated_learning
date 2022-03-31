@@ -29,15 +29,14 @@ echo "starting bash script"
 module load python3/3.8.0
 source /zhome/dd/4/128822/fl_362/bin/activate
 
-
 echo "Starting server"
-python src/server.py --experiment_id=$exp_id & ##--wandb_user='s173934' wandb_mode="online"
+python server.py --experiment_id=$exp_id & ##--wandb_user='s173934' wandb_mode="online"
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
 while read user && (($n<=$N)); do
 	echo "Starting client: $n , name: $user"
-   	timeout 4m python src/client_main.py --user=${user} --wandb_mode="online" --experiment_id=$exp_id --wandb_username="johannes_boe"\
+   	timeout 4m python client_main.py --user=${user} --wandb_mode="online" --experiment_id=$exp_id --wandb_username="johannes_boe"\
 	--configs=dp_sgd.yaml --epochs=$epoch_num --dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'& 
 
 	if [ $(expr $n % 10) == 0 ] && [ $n>$n_wait ]; then
