@@ -3,42 +3,19 @@ from collections import OrderedDict
 import flwr as fl
 import torch
 import wandb
-from opacus import PrivacyEngine
-from privacy_opt import DP_SGD
 from train_test_utils import test  
 
 
 class FemnistClient(fl.client.NumPyClient):
-    def __init__(self, net, trainloader, testloader, num_examples, train_fn=None, args=None) -> None:
+    def __init__(self, net, trainloader, testloader, num_examples, run_qfed=False, train_fn=None) -> None:
         self.train=train_fn
         self.net=net
         self.num_examples=num_examples
         self.trainloader=trainloader
         self.testloader=testloader
         self.round=0
-        self.dp_sgd = args.dp_sgd
-        self.opacus = args.opacus
-        if self.dp_sgd:
-            self.noise_multiplier = args.noise_multiplier
-            self.max_grad_norm = args.max_grad_norm
-            self.target_delta = args.target_delta
-            self.sample_rate = args.sample_rate
-            if self.opacus:
-                self.privacy_engine = PrivacyEngine(
-                    self.net,
-                    sample_rate=self.sample_rate,
-                    target_delta=self.target_delta,
-                    max_grad_norm=self.max_grad_norm,
-                    noise_multiplier=self.noise_multiplier,
-                    accountant='gdp'
-                )
-            else:
-                self.privacy_engine = DP_SGD(
-                    sample_rate=self.sample_rate,
-                    max_grad_norm=self.max_grad_norm,
-                    noise_multiplier=self.noise_multiplier,
-                    target_delta=self.target_delta
-                )
+        self.run_qfed = run_qfed
+        self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         super().__init__()
 
     def get_parameters(self):
@@ -50,25 +27,35 @@ class FemnistClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
+        info = {}
         self.set_parameters(parameters)
         self.round+=1
-        if self.dp_sgd:
-            if self.opacus:
-                self.train(net=self.net, trainloader=self.trainloader,
-                             privacy_engine=self.privacy_engine,
-                             epochs=wandb.config.epochs, target_delta=self.target_delta)
-            else:
-                self.train(net=self.net, trainloader=self.trainloader,
-                             privacy_engine=self.privacy_engine,
-                             epochs=wandb.config.epochs, target_delta=self.target_delta,
-                             noise_multiplier=self.noise_multiplier,
-                             max_grad_norm=self.max_grad_norm)
-        else:
-            self.train(self.net, self.trainloader, epochs=wandb.config.epochs)
+
+        # only return something meaningfull if self.qfed == true
+        info["loss_prior_to_training"] = self.loss_prior_to_training()
+
+        self.train(self.net, self.trainloader, epochs=wandb.config.epochs)
         wandb.log({"round": self.round})
-        return self.get_parameters(), self.num_examples["trainset"], {}
+        return self.get_parameters(), self.num_examples["trainset"], info
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.testloader)
         return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
+
+    # only needed for q fed
+    def loss_prior_to_training(self):
+        if not self.run_qfed:
+            return None # only return meaningfull value if we run qfed
+
+        else:
+            losses = []
+            with torch.no_grad():
+                loss_func = torch.nn.CrossEntropyLoss()
+                for x, y in self.trainloader:
+                    x, y = x.to(self.DEVICE), y.to(self.DEVICE)
+                    pred = self.net(x)
+                    loss = loss_func(pred, y)
+                    losses.append(loss)
+
+            return torch.mean(torch.stack(losses)).item()

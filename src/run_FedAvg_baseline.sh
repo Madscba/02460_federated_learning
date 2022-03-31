@@ -2,12 +2,12 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J intro_FL_exp
-#BSUB -n 11 ##Number of cores
+#BSUB -n 20 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 00:25 ##20 minutes (hh:mm)
+#BSUB -W 00:10 ##20 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
 #BSUB -o O_fl_%J.out 
@@ -17,9 +17,12 @@
 #rm -f *.out
 
 
-filename='/zhome/87/9/127623/Desktop/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
-n=1
-exp_id=date
+filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names.txt'
+n=1 #spawned_clients
+N=10 #amount of clients
+n_wait=9
+epoch_num=2
+exp_id=$(date +"FedAvg_%d%b%T")
 
 echo "starting bash script"
 
@@ -28,20 +31,19 @@ source /zhome/87/9/127623/Desktop/env_fl/bin/activate
 
 
 echo "Starting server"
-python src/server.py &
+python src/server.py&
 sleep 3  # Sleep for 3s to give the server enough time to start
 
-
-while read user && (($n<=20)); do
+while read user && (($n<=$N)); do
 	echo "Starting client: $n , name: $user"
-   	python src/client_main.py --user=${user} --wandb_mode="online" --experiment_id=$exp_id&
-	n=$((n+1))
-	##if [ $(expr $n % 20) == 0 ]
-	##then
-##		echo "sleeping for 5 sec"
-##		sleep 5
-##	fi
+   	timeout 3m python src/client_main.py --user=${user} --experiment_id=$exp_id --wandb_mode="online"& ##epochs=$epoch_num
+	if [ $(expr $n % 10) == 0 ] && [ $n > $n_wait ]; then
+		echo "sleeping for 90 sec" ##90 sec
+		sleep 90
+	fi
+	n=$(($n+1))
 done < $filename
+
 
 
 ## This will allow you to use CTRL+C to stop all background processesb

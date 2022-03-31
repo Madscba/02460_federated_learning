@@ -28,6 +28,7 @@ def main(args):
 
     
     config=os.path.join(os.getcwd(),'src','config',args.configs)
+    print(config)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode)
     update_config(args)
@@ -41,13 +42,18 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    client=FemnistClient(net, trainloader, testloader, num_examples, choose_train_fn(wandb.config.train_fn), args)
-
+    qfed = args.qfed # default is false
+    client=FemnistClient(net, trainloader, testloader, num_examples,
+                         run_qfed= qfed,
+                         train_fn=choose_train_fn(wandb.config.train_fn))
+    print("Printing client type:", type(client))
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=client)
-
+    import sys
+    host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
+    fl.client.start_numpy_client(host, client=client)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args=parse_args(parser)
     main(args)
+

@@ -175,6 +175,7 @@ class FedAvg(Strategy):
             # No evaluation function provided
             return None
         weights = parameters_to_weights(parameters)
+        print("fedavg uses aswell")
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
