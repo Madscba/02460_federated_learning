@@ -11,6 +11,7 @@ def parse_args(parser):
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', 
         default='config.yaml')
+    
     parser.add_argument('--experiment_id', 
         default=None)
     parser.add_argument('--wandb_username', 
@@ -26,13 +27,16 @@ def parse_args(parser):
         "--noise_multiplier",
         type=float,
         default=0.56,
-        metavar="S",
-        help="Noise multiplier"
+    )
+    parser.add_argument(
+        "--noise_scale",
+        type=float,
+        default=1.0,
     )
     parser.add_argument(
         "--max_grad_norm",
         type=float,
-        default=1.1
+        default=1.1,
     )
     parser.add_argument(
         "--target_delta",
