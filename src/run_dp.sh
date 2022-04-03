@@ -2,7 +2,7 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J dp_exp
-#BSUB -n 11 ##Number of cores
+#BSUB -n 2 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
@@ -21,7 +21,7 @@ filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img
 n=1 #spawned_clients
 N=20 #amount of clients
 n_wait=9
-epoch_num=1
+epoch_num=2
 exp_id=$(date +"DP_%d%b%T")
 
 echo "starting bash script"
@@ -30,7 +30,7 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_362/bin/activate
 
 echo "Starting server"
-python src/server.py --experiment_id=$exp_id & ##--wandb_username='johannes_boe' --wandb_mode="online"
+python src/server.py --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yam &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
