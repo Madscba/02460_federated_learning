@@ -17,7 +17,7 @@
 #rm -f *.out
 
 
-filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/user_names_train.txt'
+filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
 N=20 #amount of clients
 n_wait=9
