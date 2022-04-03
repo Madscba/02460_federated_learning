@@ -41,10 +41,12 @@ def train_fed_prox(net, trainloader, epochs):
 def train_dp_sgd(net, trainloader, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
-                       sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
-                       noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
-                       target_delta=wandb.config.target_delta, lib=wandb.config.lib)
+    #optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
+    #                   sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
+    #                   noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
+    #                   target_delta=wandb.config.target_delta, lib=wandb.config.lib)
+    max_grad_norm = wandb.config.max_grad_norm
+    optimizer = torch.optim.SGD(net.parameters(), lr=wandb.config.lr, momentum=wandb.config.momentum)
     net.train()
     theta0 = deepcopy(net.state_dict())
     for _ in range(epochs):
@@ -56,13 +58,13 @@ def train_dp_sgd(net, trainloader, epochs):
             wandb.log({"train_loss": loss.item()})
             optimizer.step()
             if not optimizer.lib:
-                clip_gradients(net=net,optimizer=optimizer,theta0=theta0,device=DEVICE)
+                clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
 
-    if not optimizer.lib:
-        add_noise(net=net,optimizer=optimizer)
+    #if not optimizer.lib:
+    #    add_noise(net=net,optimizer=optimizer)
 
-    epsilon = optimizer.get_privacy_spent()
-    wandb.log({"epsilon": epsilon})
+    #epsilon = optimizer.get_privacy_spent()
+    #wandb.log({"epsilon": epsilon})
 
 train_dict={'train': train, 'train_fed_prox': train_fed_prox, 'train_dp_sgd': train_dp_sgd}
 
