@@ -20,7 +20,7 @@ momentum:
   value: 0.90
 target_delta:
   value: 1e-6
-lib:
-  value: False
+strategy:
+  value: DP_Fed
 
 
