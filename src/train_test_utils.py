@@ -57,8 +57,6 @@ def train_dp_sgd(net, trainloader, round, epochs):
 
     avg_train_loss=loss_agg/(len(trainloader)*epochs)
     wandb.log({'round': round,"train_loss_round": avg_train_loss})
-    epsilon = optimizer.get_privacy_spent()
-    wandb.log({"epsilon": epsilon})
     return 0
 
 def configure_criterion(parameters):
