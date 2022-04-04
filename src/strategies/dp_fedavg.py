@@ -278,8 +278,8 @@ class DPFedAvg(Strategy):
         aggregated_weights = aggregate(weights_results)
         print("Adding noise")
         sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
-        for p, _ in aggregated_weights:
-            p += np.random.normal(loc=0, scale=sigma, size=np.shape(p))
+        for w in aggregated_weights:
+            w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
         self.privacy_account.step()
         self.eps += self.privacy_account.get_privacy_spent()
         wandb.log({"iteration": self.privacy_account.steps})
