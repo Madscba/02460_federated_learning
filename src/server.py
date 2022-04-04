@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('--configs', default='config.yaml')
     parser.add_argument('--rounds', default=200, type=int)
     parser.add_argument('--run_name', default='')
-    parser.add_argument("--num_rounds", type=int, default=20)
+    parser.add_argument("--num_rounds", type=int, default=200)
     parser.add_argument("--noise_multiplier",type=float,default=0.56)
     parser.add_argument("--noise_scale",type=float,default=1.0)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)

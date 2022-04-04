@@ -42,6 +42,7 @@ def train_dp_sgd(net, trainloader, round, epochs):
     max_grad_norm = wandb.config.max_grad_norm
     optimizer = torch.optim.SGD(net.parameters(), lr=wandb.config.lr, momentum=wandb.config.momentum)
     net.train()
+    loss_agg=0
     theta0 = deepcopy(net.state_dict())
     for _ in range(epochs):
         for images, labels in trainloader:
@@ -49,15 +50,13 @@ def train_dp_sgd(net, trainloader, round, epochs):
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
+            loss_agg+=loss.item()
             wandb.log({"train_loss": loss.item()})
             optimizer.step()
-            if not optimizer.lib:
-                clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
-    if not optimizer.lib:
-        add_noise(net=net,optimizer=optimizer)
+            clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
 
-    epsilon = optimizer.get_privacy_spent()
-    wandb.log({"epsilon": epsilon})
+    avg_train_loss=loss_agg/(len(trainloader)*epochs)
+    wandb.log({'round': round,"train_loss_round": avg_train_loss})
     return 0
 
 def configure_criterion(parameters):
