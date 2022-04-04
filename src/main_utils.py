@@ -27,34 +27,10 @@ def parse_args(parser):
     parser.add_argument('--epochs', 
         type=int,
         default=1)
-    parser.add_argument("--lib", 
-        default=False, 
-        help="Set true to use opacus library")
-    
-    parser.add_argument(
-        "--noise_multiplier",
-        type=float,
-        default=0.56,
-    )
-    parser.add_argument(
-        "--noise_scale",
-        type=float,
-        default=1.0,
-    )
     parser.add_argument(
         "--max_grad_norm",
         type=float,
         default=1.1,
-    )
-    parser.add_argument(
-        "--target_delta",
-        type=float,
-        default=1e-5
-    )
-    parser.add_argument(
-        "--sample_rate",
-        type=float,
-        default=0.01
     )
     parser.add_argument(
         "--lr",

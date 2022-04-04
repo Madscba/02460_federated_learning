@@ -1,10 +1,10 @@
 import torch
 import math
 
-def clip_gradients(net, optimizer, theta0, device):
+def clip_gradients(net, max_grad_norm, theta0, device):
     for layer, params in net.state_dict().items():
         diff = params - theta0[layer]
-        params.data = theta0[layer] + per_layer_clip(diff, optimizer.max_grad_norm, device)
+        params.data = theta0[layer] + per_layer_clip(diff, max_grad_norm, device)
 
 def add_noise(net, optimizer):
     sigma = (optimizer.noise_multiplier*optimizer.max_grad_norm)/optimizer.noise_scale

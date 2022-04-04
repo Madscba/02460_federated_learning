@@ -1,6 +1,6 @@
 import flwr as fl
 
-
+from strategies.dp_fedavg import DPFedAvg
 from strategies.fedavg import FedAvg
 from strategies.qfedavg_fixed import QFedAvg
 #from strategies.qfedavg import QFedAvg
@@ -28,6 +28,12 @@ if __name__ == "__main__":
     parser.add_argument('--configs', default='config.yaml')
     parser.add_argument('--rounds', default=200, type=int)
     parser.add_argument('--run_name', default='')
+    parser.add_argument("--num_rounds", type=int, default=20)
+    parser.add_argument("--noise_multiplier",type=float,default=0.56)
+    parser.add_argument("--noise_scale",type=float,default=1.0)
+    parser.add_argument("--max_grad_norm",type=float,default=1.1)
+    parser.add_argument("--target_delta",type=float,default=1e-5)
+    parser.add_argument("--sample_rate",type=float,default=0.01)
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -41,7 +47,9 @@ if __name__ == "__main__":
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
     wandb.run.name = args.run_name+'_'+wandb.run.id
-    wandb.run.save()
+    wandb.config.update(args, allow_val_change=True)
+
+
 
     # Define strategy based on argument
     if args.strategy == "QFed_man":
@@ -64,6 +72,21 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
+    elif args.strategy == "DP_Fed":
+        print("Strategy: DP_FedAvg")
+        strategy = DPFedAvg(
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_,
+            min_available_clients=MIN_AVAILABLE_CLIENTS_,
+            num_rounds=args.num_rounds,
+            sample_rate=wandb.config.sample_rate,
+            noise_multiplier=wandb.config.noise_multiplier,
+            noise_scale=wandb.config.noise_scale,
+            max_grad_norm=wandb.config.max_grad_norm,
+            target_delta=wandb.config.target_delta
+            )
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(

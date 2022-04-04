@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 from dp_sgd_utils import clip_gradients, add_noise
 from FedOptLoss import FedOptLoss
-from privacy_opt import DP_SGD
+from privacy_opt import PrivacyAccount
 from client_dataset import FemnistDataset
 from torch.utils.data import DataLoader
 
@@ -35,10 +35,12 @@ def train(net, trainloader,round, epochs):
 def train_dp_sgd(net, trainloader, round, epochs):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
-                       sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
-                       noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
-                       target_delta=wandb.config.target_delta, lib=wandb.config.lib)
+    #optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
+    #                   sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
+    #                   noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
+    #                   target_delta=wandb.config.target_delta, lib=wandb.config.lib)
+    max_grad_norm = wandb.config.max_grad_norm
+    optimizer = torch.optim.SGD(net.parameters(), lr=wandb.config.lr, momentum=wandb.config.momentum)
     net.train()
     theta0 = deepcopy(net.state_dict())
     for _ in range(epochs):
@@ -50,7 +52,7 @@ def train_dp_sgd(net, trainloader, round, epochs):
             wandb.log({"train_loss": loss.item()})
             optimizer.step()
             if not optimizer.lib:
-                clip_gradients(net=net,optimizer=optimizer,theta0=theta0,device=DEVICE)
+                clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
     if not optimizer.lib:
         add_noise(net=net,optimizer=optimizer)
 
