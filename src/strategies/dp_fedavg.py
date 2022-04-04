@@ -279,6 +279,10 @@ class DPFedAvg(Strategy):
         print("Adding noise")
         sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
         for param in aggregated_weights:
+            print(np.shape(param))
+        for p, v in aggregated_weights:
+            print(np.shape(p))
+            print(np.shape(v))
             param += np.random.normal(loc=0, scale=sigma, size=np.size(param))
         self.privacy_account.step()
         self.eps += self.privacy_account.get_privacy_spent()
