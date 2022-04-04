@@ -276,14 +276,16 @@ class DPFedAvg(Strategy):
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
         aggregated_weights = aggregate(weights_results)
-        print("Adding noise")
-        sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
-        for w in aggregated_weights:
-            w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
-        self.privacy_account.step()
-        self.eps += self.privacy_account.get_privacy_spent()
-        wandb.log({"iteration": self.privacy_account.steps})
-        wandb.log({"epsilon": self.eps})
+        if self.noise_multiplier > 0.0:
+            print("Adding noise")
+            sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
+            for w in aggregated_weights:
+                w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
+            self.privacy_account.step()
+            self.epsilon += self.privacy_account.get_privacy_spent()
+            wandb.log({"epsilon": self.epsilon})
+        else:
+            print("Not adding noise")
         loss_aggregated = weighted_loss_avg(
             [
                 (fit_res.num_examples, fit_res.metrics['loss'])

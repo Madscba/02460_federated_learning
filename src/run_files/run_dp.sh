@@ -7,7 +7,7 @@
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 00:25 ##20 minutes (hh:mm)
+#BSUB -W 00:50 ##20 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
 #BSUB -o O_fl_%J.out 
@@ -21,13 +21,13 @@ filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img
 n=1 #spawned_clients
 N=500 #amount of clients
 n_wait=9
-epoch_num=5
+epoch_num=3
 exp_id=$(date +"DP_%d%b%T")
 
 echo "starting bash script"
 
 module load python3/3.8.0
-source /zhome/dd/4/128822/fl_362/bin/activate
+source /zhome/dd/4/128822/fl_380/bin/activate
 
 echo "Starting server"
 python src/server.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml &
