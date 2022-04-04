@@ -5,7 +5,6 @@ dataset/*/data
 .vscode/
 src/__pycache__
 wandb/
-src/run_files/run_villads.sh
 src/run_gpu.sh
 *.err
 *.out
