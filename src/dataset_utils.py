@@ -2,11 +2,11 @@ import pickle
 import numpy as np
 import os
 
-def load_n_split(user, root_dir, train=True):
+def load_n_split(user, root_dir, train=True, train_proportion = 0.8):
     user_f=user+'.pckl'
     f=open(os.path.join(root_dir,'data/img_lab_by_user',user_f,), 'rb')
     imgs = pickle.load(f)
-    idx = int(0.8*len(imgs))
+    idx = int(train_proportion*len(imgs))
     if train:
         return np.array(imgs)[:idx]
     else:
