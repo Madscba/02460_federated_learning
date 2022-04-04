@@ -7,20 +7,20 @@ batch_size:
 train_fn:
   value: train_dp_sgd
 sample_rate:
-  value: 0.01
+  value: 0.0025
 noise_multiplier:
- value: 0.56
+ value: 0.0
 noise_scale:
   value: 1.0
 max_grad_norm:
-  value: 1.1
+  value: 10000.1
 lr:
   value: 0.001
 momentum:
   value: 0.90
 target_delta:
   value: 1e-6
-lib:
-  value: False
+strategy:
+  value: DP_Fed
 
 

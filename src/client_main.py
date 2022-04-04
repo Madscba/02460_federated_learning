@@ -30,13 +30,10 @@ def main(args):
     
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, job_type='client', mode=args.wandb_mode)
+    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, job_type=args.job_type, mode=args.wandb_mode)
     wandb.config.update(args, allow_val_change=True)
     wandb.run.name = args.user+'_'+wandb.run.id
     wandb.run.save()
-
-
-
 
     # Load data (CIFAR-10)
     trainloader, testloader, num_examples = load_data(args.user)
@@ -46,7 +43,8 @@ def main(args):
     client=FemnistClient(net, trainloader, testloader, num_examples,
                          qfed_client=qfed,
                          train_fn=choose_train_fn(wandb.config.train_fn))
-    print("Printing client type:", type(client))
+
+    #client.fit(Net().parameters(),config={'round':1})
     # Start client
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
     fl.client.start_numpy_client(host, client=client)

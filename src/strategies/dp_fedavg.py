@@ -17,7 +17,8 @@
 Paper: https://arxiv.org/abs/1602.05629
 """
 
-
+import numpy as np
+import wandb
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -38,6 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
+from privacy_opt import PrivacyAccount
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -76,8 +78,8 @@ than or equal to the values of `min_fit_clients` and `min_eval_clients`.
 """
 
 
-class FedAvg(Strategy):
-    """Configurable FedAvg strategy implementation."""
+class DPFedAvg(Strategy):
+    """Configurable DP FedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -94,6 +96,12 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        num_rounds: int = 0,
+        sample_rate: float = 0.001,
+        noise_multiplier: float = 0.56,
+        noise_scale: float = 1.0,
+        max_grad_norm: float = 1.1,
+        target_delta: float = 1e-6,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -130,6 +138,8 @@ class FedAvg(Strategy):
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
+        self.num_rounds = num_rounds
+        self.rounds = 0
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
         self.min_fit_clients = min_fit_clients
@@ -140,10 +150,23 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
+        self.sample_rate = sample_rate
+        self.noise_multiplier = noise_multiplier
+        self.noise_scale = noise_scale
+        self.max_grad_norm = max_grad_norm
+        self.target_delta = target_delta
+        self.epsilon = 0
+        self.privacy_account = self.init_privacy_account()
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
+
+    def init_privacy_account(self):
+        privacy_account = PrivacyAccount(sample_rate=self.sample_rate,max_grad_norm=self.max_grad_norm,
+                                    noise_multiplier=self.noise_multiplier,noise_scale=self.noise_scale,
+                                    target_delta=self.target_delta)
+        return privacy_account
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
@@ -191,7 +214,7 @@ class FedAvg(Strategy):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        config = {}
+        config = {'round':rnd}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
@@ -217,7 +240,7 @@ class FedAvg(Strategy):
             return []
 
         # Parameters and config
-        config = {}
+        config = {'round':rnd}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
@@ -252,7 +275,15 @@ class FedAvg(Strategy):
         # Convert results
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
-
+        aggregated_weights = aggregate(weights_results)
+        print("Adding noise")
+        sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
+        for p, _ in aggregated_weights:
+            p += np.random.normal(loc=0, scale=sigma, size=np.shape(p))
+        self.privacy_account.step()
+        self.eps += self.privacy_account.get_privacy_spent()
+        wandb.log({"iteration": self.privacy_account.steps})
+        wandb.log({"epsilon": self.eps})
         loss_aggregated = weighted_loss_avg(
             [
                 (fit_res.num_examples, fit_res.metrics['loss'])
@@ -260,11 +291,7 @@ class FedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-
-        weights_aggregated = aggregate(weights_results)
-        self.save_final_global_model(weights_aggregated)# only does something if its the final iteration: rounds == num_rounds
-
-        return weights_to_parameters(weights_aggregated), {}
+        return weights_to_parameters(aggregated_weights), {}
 
     def aggregate_evaluate(
         self,
@@ -284,4 +311,13 @@ class FedAvg(Strategy):
                 for _, evaluate_res in results
             ]
         )
+        accuracy_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
+                for _, evaluate_res in results
+            ]
+        )
+
+        wandb.log({'round': rnd, 'test_accuracy_aggregated': accuracy_aggregated})
+        wandb.log({'round': rnd, 'test_loss_aggregated': loss_aggregated})
         return loss_aggregated, {}

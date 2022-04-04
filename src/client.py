@@ -13,7 +13,6 @@ class FemnistClient(fl.client.NumPyClient):
         self.num_examples=num_examples
         self.trainloader=trainloader
         self.testloader=testloader
-        self.round=0
         self.qfed_client = qfed_client
         self.loss_func = torch.nn.CrossEntropyLoss()
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -29,18 +28,18 @@ class FemnistClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        self.round+=1
 
         # only return something meaningfull if self.qfed == true
         info = self.loss_prior_to_training()
 
-        self.train(self.net, self.trainloader, epochs=wandb.config.epochs)
-        wandb.log({"round": self.round})
+        train_loss=self.train(self.net, self.trainloader, round=config['round'], epochs=wandb.config.epochs)
+
+        info['loss']=train_loss
         return self.get_parameters(), self.num_examples["trainset"], info
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.testloader)
+        loss, accuracy = test(self.net, self.testloader,config['round'])
         return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
     # only needed for q fed

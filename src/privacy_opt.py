@@ -1,53 +1,30 @@
 import torch
-from opacus import PrivacyEngine
+from typing import List
 from opacus.privacy_engine import privacy_analysis
 
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
-class DP_SGD():
+class PrivacyAccount():
     def __init__(
             self,
-            net,
-            learning_rate: float = 0.001,
-            momentum: float = 0.90,
+            step: int = 0,
             sample_rate: float = None,
-            alphas: list = DEFAULT_ALPHAS,
-            max_grad_norm: float = 1.1,
-            noise_multiplier: float = 0.56,
-            noise_scale: float = 1.0,
-            target_delta: float = 1e-6,
-            lib: bool = False):
+            alphas: List = DEFAULT_ALPHAS,
+            max_grad_norm: float = None,
+            noise_multiplier: float = None,
+            noise_scale: float = None,
+            target_delta: float = None):
 
-        self.net = net
-        self.steps = 0
+        self.steps = step
         self.alphas = alphas
         self.sample_rate = sample_rate
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = target_delta
-        self.lib = lib
-        self.optimizer = torch.optim.SGD(self.net.parameters(), lr=learning_rate, momentum=momentum)
-        self.privacy_engine = self.set_privacy_engine()
-
-    def set_privacy_engine(self, privacy_engine=None):
-        if self.lib:
-            privacy_engine = PrivacyEngine(self.net,
-                                           sample_rate=self.sample_rate,
-                                           target_delta=self.target_delta,
-                                           max_grad_norm=self.max_grad_norm,
-                                           noise_multiplier=self.noise_multiplier,
-                                           accountant='gdp'
-                                           )
-            privacy_engine.attach(self.optimizer)
-        return privacy_engine
 
     def step(self):
         self.steps += 1
-        self.optimizer.step()
-
-    def zero_grad(self):
-        self.optimizer.zero_grad()
 
     def get_renyi_divergence(self):
         rdp = torch.tensor(
