@@ -30,7 +30,7 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_362/bin/activate
 
 echo "Starting server"
-python src/server.py --"DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml &
+python src/server.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
