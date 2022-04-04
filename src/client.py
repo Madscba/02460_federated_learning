@@ -7,13 +7,14 @@ from train_test_utils import test
 
 
 class FemnistClient(fl.client.NumPyClient):
-    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=True, train_fn=None) -> None:
+    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=False, train_fn=None) -> None:
         self.train=train_fn
         self.net=net
         self.num_examples=num_examples
         self.trainloader=trainloader
         self.testloader=testloader
         self.qfed_client = qfed_client
+        self.loss_func = torch.nn.CrossEntropyLoss()
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         super().__init__()
 
@@ -49,9 +50,8 @@ class FemnistClient(fl.client.NumPyClient):
 
         else:
             with torch.no_grad():
-                loss_func = torch.nn.CrossEntropyLoss()
-
                 # just make a forward pass with all of the data to optimize speed
+                # this could instead be done with if self.trainloader.__len__() < 100.
                 try:
                     x, y = [], []
                     for x_, y_ in self.trainloader:
@@ -60,18 +60,18 @@ class FemnistClient(fl.client.NumPyClient):
                     x = torch.cat(x)
                     y = torch.cat(y)
                     pred = self.net(x)
-                    loss = loss_func(pred, y).item()
+                    loss = self.loss_func(pred, y).item()
                     info["loss_prior_to_training"] = loss
 
                 # for some reason we couldnt pass all of the data through in one batch most liekly due to
                 # memory limitations.
                 except RuntimeError:
-                    print("exception happened, prolly memory error in client.py line 72")
+                    print("exception happened, prolly memory error in client.py line 63")
                     losses = []
                     for x, y in self.trainloader:
                         x, y = x.to(self.DEVICE), y.to(self.DEVICE)
                         pred = self.net(x)
-                        loss = loss_func(pred, y)
+                        loss = self.loss_func(pred, y)
                         losses.append(loss)
 
                     info["loss_prior_to_training"] = torch.mean(torch.stack(losses)).item()

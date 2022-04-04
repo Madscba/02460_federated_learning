@@ -46,6 +46,7 @@ class QFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        num_rounds=200,
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
@@ -73,6 +74,8 @@ class QFedAvg(FedAvg):
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
         )
+        self.num_rounds = num_rounds
+        self.rounds = 0
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.fraction_fit = fraction_fit
@@ -209,6 +212,8 @@ class QFedAvg(FedAvg):
             )
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
+        self.save_final_global_model(weights_aggregated)
+
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
@@ -232,3 +237,25 @@ class QFedAvg(FedAvg):
             ),
             {},
         )
+
+    def save_final_global_model(self, weights_aggregated):
+        self.rounds += 1
+        if self.rounds == self.num_rounds:
+            import sys
+            import os
+
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            sys.path.append(BASE_DIR)
+            import torch
+            from collections import OrderedDict
+            from model import Net
+
+            # this could maybe be simplified but i wont bother
+            net = Net()
+            params_dict = zip(net.state_dict().keys(), weights_aggregated)
+            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+            # this step might not be necessary
+            # net.load_state_dict(state_dict, strict=True)
+            print("Saving saved_models/Qfed_fixed_state_dict.pt")
+            torch.save(state_dict, "saved_models/Qfed_fixed_state_dict.pt")
+

@@ -11,7 +11,7 @@ from dataset_utils import load_n_split, relabel_class
 class FemnistDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, user, transform=None, train=True):
+    def __init__(self, user, transform=None, train=True, train_proportion = 0.8):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -23,7 +23,7 @@ class FemnistDataset(Dataset):
             self.root_dir=wandb.config.dataset_path    
         except:
             self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
-        self.imgs_labs = load_n_split(user, self.root_dir, train)
+        self.imgs_labs = load_n_split(user, self.root_dir, train, train_proportion = train_proportion)
         self.transform = transform
     
     def __len__(self):

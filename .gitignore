@@ -8,3 +8,4 @@ wandb/
 src/run_gpu.sh
 *.err
 *.out
+*.pt
