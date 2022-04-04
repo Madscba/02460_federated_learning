@@ -28,8 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('--configs', default='config.yaml')
     parser.add_argument('--rounds', default=200, type=int)
     parser.add_argument('--run_name', default='')
-    parser.add_argument("--num_rounds", type=int, default=200)
-    parser.add_argument("--noise_multiplier",type=float,default=0.56)
+    parser.add_argument("--noise_multiplier",type=float,default=0.1)
     parser.add_argument("--noise_scale",type=float,default=1.0)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
@@ -80,7 +79,7 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
-            num_rounds=args.num_rounds,
+            num_rounds=args.rounds,
             sample_rate=wandb.config.sample_rate,
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,

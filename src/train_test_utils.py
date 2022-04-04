@@ -53,7 +53,8 @@ def train_dp_sgd(net, trainloader, round, epochs):
             loss_agg+=loss.item()
             wandb.log({"train_loss": loss.item()})
             optimizer.step()
-            clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
+            if max_grad_norm<10.0:
+                clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
 
     avg_train_loss=loss_agg/(len(trainloader)*epochs)
     wandb.log({'round': round,"train_loss_round": avg_train_loss})
