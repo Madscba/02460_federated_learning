@@ -26,7 +26,10 @@ if __name__ == "__main__":
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
+    parser.add_argument('--rounds', default=200, type=int)
+    parser.add_argument('--run_name', default='')
     args = parser.parse_args()
+
     if args.experiment_id:
         experiment="experiment-"+args.experiment_id
     else:
@@ -37,7 +40,7 @@ if __name__ == "__main__":
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
-    wandb.run.name = wandb.run.id
+    wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.run.save()
 
     # Define strategy based on argument
@@ -81,6 +84,6 @@ if __name__ == "__main__":
     # Start server
     fl.server.start_server(
         server_address="[::]:8080",
-        config={"num_rounds": 200},
+        config={"num_rounds": args.rounds},
         strategy=strategy,
     )
