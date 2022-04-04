@@ -10,7 +10,7 @@ import wandb
 import os
 
 
-
+num_rounds = 2
 FRACTION_FIT_ = 0.5
 FRACTION_EVAL_ = 0.5
 MIN_FIT_CLIENTS_ = 2
@@ -44,6 +44,7 @@ if __name__ == "__main__":
     if args.strategy == "QFed_man":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
+            num_rounds = num_rounds,
             q_param = 0.2,
             qffl_learning_rate = 0.01,
             fraction_fit=FRACTION_FIT_,
@@ -54,6 +55,7 @@ if __name__ == "__main__":
     elif args.strategy == "QFed":
         print("Strategy: Qfed_flwr")
         strategy = QFedAvg(
+            num_rounds=num_rounds,
             q_param = 0.2,
             qffl_learning_rate = 0.01,
             fraction_fit=FRACTION_FIT_,
@@ -64,6 +66,7 @@ if __name__ == "__main__":
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
+            num_rounds=num_rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -81,6 +84,6 @@ if __name__ == "__main__":
     # Start server
     fl.server.start_server(
         server_address="[::]:8080",
-        config={"num_rounds": 200},
+        config={"num_rounds": num_rounds},
         strategy=strategy,
     )
