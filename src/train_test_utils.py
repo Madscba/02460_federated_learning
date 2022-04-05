@@ -55,7 +55,8 @@ def train_dp_sgd(net, trainloader, round, epochs):
             optimizer.step()
             if max_grad_norm<10.0:
                 clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
-
+    if max_grad_norm < 10.0:
+        print("Clipped gradients")
     avg_train_loss=loss_agg/(len(trainloader)*epochs)
     wandb.log({'round': round,"train_loss_round": avg_train_loss})
     return 0
