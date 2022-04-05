@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--noise_scale",type=float,default=1.0)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
-    parser.add_argument("--sample_rate",type=float,default=0.01)
+    parser.add_argument("--sample_rate",type=float,default=0.0025)
     args = parser.parse_args()
 
     if args.experiment_id:

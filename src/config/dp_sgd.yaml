@@ -9,17 +9,17 @@ train_fn:
 sample_rate:
   value: 0.0025
 noise_multiplier:
- value: 0.0
+ value: 0.1
 noise_scale:
   value: 1.0
 max_grad_norm:
-  value: 10000.0
+  value: 1.1
 lr:
   value: 0.001
 momentum:
   value: 0.90
 target_delta:
-  value: 1e-6
+  value: 1e-5
 strategy:
   value: DP_Fed
 

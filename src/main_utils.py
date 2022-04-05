@@ -9,7 +9,6 @@ def parse_args(parser):
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', 
         default='config.yaml')
-    
     parser.add_argument('--experiment_id', 
         default=None)
     parser.add_argument('--wandb_username', 
@@ -27,11 +26,6 @@ def parse_args(parser):
     parser.add_argument('--epochs', 
         type=int,
         default=1)
-    parser.add_argument(
-        "--max_grad_norm",
-        type=float,
-        default=1.1,
-    )
     parser.add_argument(
         "--lr",
         type=float,
