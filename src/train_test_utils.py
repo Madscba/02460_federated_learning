@@ -16,6 +16,7 @@ def train(net, trainloader,round, epochs):
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     loss_agg=0
+    theta0 = deepcopy(net.state_dict())
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
@@ -28,38 +29,11 @@ def train(net, trainloader,round, epochs):
             loss_agg+=loss.item()
             wandb.log({"train_loss": loss.item()})
             optimizer.step()
+            if wandb.config.strategy=='DP_Fed':
+                clip_gradients(net=net,max_grad_norm=wandb.config.max_grad_norm,theta0=theta0,device=DEVICE)
     avg_train_loss=loss_agg/(len(trainloader)*epochs)
     wandb.log({'round': round,"train_loss_round": avg_train_loss})
     return avg_train_loss
-
-def train_dp_sgd(net, trainloader, round, epochs):
-    """Train the network on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    #optimizer = DP_SGD(net, learning_rate=wandb.config.lr, momentum=wandb.config.momentum,
-    #                   sample_rate=wandb.config.sample_rate, max_grad_norm=wandb.config.max_grad_norm,
-    #                   noise_multiplier=wandb.config.noise_multiplier, noise_scale=wandb.config.noise_scale,
-    #                   target_delta=wandb.config.target_delta, lib=wandb.config.lib)
-    max_grad_norm = wandb.config.max_grad_norm
-    optimizer = torch.optim.SGD(net.parameters(), lr=wandb.config.lr, momentum=wandb.config.momentum)
-    net.train()
-    loss_agg=0
-    theta0 = deepcopy(net.state_dict())
-    for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            optimizer.zero_grad()
-            loss = criterion(net(images), labels)
-            loss.backward()
-            loss_agg+=loss.item()
-            wandb.log({"train_loss": loss.item()})
-            optimizer.step()
-            if max_grad_norm<10.0:
-                clip_gradients(net=net,max_grad_norm=max_grad_norm,theta0=theta0,device=DEVICE)
-    if max_grad_norm < 10.0:
-        print("Clipped gradients")
-    avg_train_loss=loss_agg/(len(trainloader)*epochs)
-    wandb.log({'round': round,"train_loss_round": avg_train_loss})
-    return 0
 
 def configure_criterion(parameters):
     if wandb.config.strategy=='FedProx':
@@ -68,7 +42,7 @@ def configure_criterion(parameters):
         criterion=torch.nn.CrossEntropyLoss()
     return criterion
 
-train_dict={'train': train, 'train_dp_sgd': train_dp_sgd}
+train_dict={'train': train}
 
 def choose_train_fn(train_fn='train'):
         return train_dict[train_fn]

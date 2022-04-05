@@ -214,7 +214,7 @@ class DPFedAvg(Strategy):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        config = {'round':rnd}
+        config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
@@ -240,7 +240,7 @@ class DPFedAvg(Strategy):
             return []
 
         # Parameters and config
-        config = {'round':rnd}
+        config = {}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
@@ -275,11 +275,11 @@ class DPFedAvg(Strategy):
         # Convert results
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
-        aggregated_weights = aggregate(weights_results)
+        weights_aggregated = aggregate(weights_results)
         if self.noise_multiplier > 0.0:
             print("Adding noise")
             sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
-            for w in aggregated_weights:
+            for w in weights_aggregated:
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
             self.privacy_account.step()
             self.epsilon += self.privacy_account.get_privacy_spent()
@@ -293,7 +293,8 @@ class DPFedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        return weights_to_parameters(aggregated_weights), {}
+        self.save_final_global_model(weights_aggregated)  # only does something if its the final iteration: rounds == num_rounds
+        return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
         self,
@@ -313,13 +314,4 @@ class DPFedAvg(Strategy):
                 for _, evaluate_res in results
             ]
         )
-        accuracy_aggregated = weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
-                for _, evaluate_res in results
-            ]
-        )
-
-        wandb.log({'round': rnd, 'test_accuracy_aggregated': accuracy_aggregated})
-        wandb.log({'round': rnd, 'test_loss_aggregated': loss_aggregated})
         return loss_aggregated, {}

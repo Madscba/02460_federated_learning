@@ -5,7 +5,7 @@ batch_size:
   desc: Size of each mini-batch
   value: 8
 train_fn:
-  value: train_dp_sgd
+  value: train
 sample_rate:
   value: 0.0025
 noise_multiplier:
