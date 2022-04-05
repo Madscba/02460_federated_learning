@@ -252,7 +252,19 @@ class FedAvg(Strategy):
         # Convert results
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
-        return weights_to_parameters(aggregate(weights_results)), {}
+
+        loss_aggregated = weighted_loss_avg(
+            [
+                (fit_res.num_examples, fit_res.metrics['loss'])
+                for _, fit_res in results
+            ]
+        )
+        wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
+
+        weights_aggregated = aggregate(weights_results)
+        self.save_final_global_model(weights_aggregated)# only does something if its the final iteration: rounds == num_rounds
+
+        return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
         self,

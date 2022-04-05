@@ -6,3 +6,5 @@ batch_size:
   value: 8
 train_fn: 
   value: train
+strategy:
+  value: FedAvg
