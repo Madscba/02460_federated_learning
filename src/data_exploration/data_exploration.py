@@ -89,20 +89,27 @@ if __name__ == "__main__":
     # train_users = all_users[:3000]
     # test_users = all_users[3000:]
     #
+    ## The folowing file names users_<
     with open("dataset_stats_all_users_train_data.picl", "rb") as f:
         users_all_train = pickle.load(f)
     with open("dataset_stats_all__users_test_data.picl", "rb") as f:
         users_all_test = pickle.load(f)
+    with open("dataset_stats_all__users_all_data.picl", "rb") as f:
+        users_all_all = pickle.load(f)
 
     with open("dataset_stats_test_users_train_data.picl", "rb") as f:
-        users_test_train = pickle.load(f)
+        users_val_train = pickle.load(f)
     with open("dataset_stats_test_users_test_data.picl", "rb") as f:
-        users_test_test = pickle.load(f)
+        users_val_test = pickle.load(f)
+    with open("dataset_stats_test_users_all_data.picl", "rb") as f:
+        users_val_all = pickle.load(f)
 
     with open("dataset_stats_train_users_train_data.picl", "rb") as f:
         users_train_train = pickle.load(f)
     with open("dataset_stats_train_users_test_data.picl", "rb") as f:
         users_train_test = pickle.load(f)
+    with open("dataset_stats_train_users_all_data.picl", "rb") as f:
+        users_train_all = pickle.load(f)
 
 
     #### PLOT CATEGORY EXAMPLES
@@ -111,10 +118,10 @@ if __name__ == "__main__":
     # plot_classes(category_examples_all)
 
     ##### Visualize the category distribution from all users, test and train users.
-    # photos_in_cat_all = np.sum(users_all_train, 0) + np.sum(users_all_test, 0)
-    # photos_in_cat_train = np.sum(users_train_train, 0) + np.sum(users_train_test, 0)
-    # photos_in_cat_test = np.sum(users_test_train, 0) + np.sum(users_test_test, 0)
-    # photos = [photos_in_cat_all,photos_in_cat_train, photos_in_cat_test]
+    # photos_in_cat_all = np.sum(users_all_all, 0)
+    # photos_in_cat_train = np.sum(users_train_all, 0)
+    # photos_in_cat_val = np.sum(users_val_all, 0)
+    # photos = [photos_in_cat_all,photos_in_cat_train, photos_in_cat_val]
     # pct_photos = [photo/np.sum(photo) for photo in photos]
     # visualize_category_distribution_over_classes(pct_photos,title="Histogram of class distribution across data pools")
     ##### Print summary statistics for the same pools of data -> Used in a table
@@ -123,16 +130,31 @@ if __name__ == "__main__":
 
     category_labels = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","",""]
     #MAKE A HEATMAP OF THE HOW MANY USERS WITH EACH CLASS AND EXAMPLES IN EACH (PRINT NUMBER INSIDE)
-    datasets = np.array([users_all_train, users_all_test,users_train_train,users_train_test,users_test_train,users_test_test])
+    datasets = np.array([users_all_train, users_all_test,users_all_all,users_train_train,users_train_test,users_train_all,users_val_train,users_val_test,users_val_all])
     users_with_category, category_totals,categories_per_user = format_data_to_users_with_each_category(datasets)
 
     #["All data","Active users train data","Active users test data","Validatation data"]
-    # heatmap( ((users_with_category[0] + users_with_category[1]) / (np.sum(users_with_category[0] + users_with_category[1] )))*100,title="Percentage of users with each class. All data",class_labels=category_labels)
-    # heatmap( (users_with_category[2] / np.sum(users_with_category[2]))*100,title="Percentage of samples in each class training data (active clients)",class_labels=category_labels)
-    # heatmap( (users_with_category[3] / np.sum(users_with_category[3]))*100,title="Percentage of samples in each class test data (active clients)",class_labels=category_labels)
-    # heatmap( ((users_with_category[4] + users_with_category[5]) / np.sum(users_with_category[4] + users_with_category[5]))*100,title="Percentage of users with each class. Validation data",class_labels=category_labels)
-    # heatmap( 100*abs( (users_with_category[3] / np.sum(users_with_category[3])-users_with_category[2] / np.sum(users_with_category[2]) ) ),title="Difference in class percentage between active clients train/test",class_labels=category_labels)
+    #INVESTIGATE HOW THE CATEGORIES ARE SPREAD OUT AMONGST THE USERS
+    heatmap( ((users_with_category[2] ) / (np.sum( users_with_category[2] )))*100,title="Percentage of users with each class. All data",class_labels=category_labels)
+    heatmap( (users_with_category[3] / np.sum(users_with_category[3]))*100,title="Percentage of users with each class training data (active clients)",class_labels=category_labels)
+    heatmap( (users_with_category[4] / np.sum(users_with_category[4]))*100,title="Percentage of users with each class test data (active clients)",class_labels=category_labels)
+    heatmap( ((users_with_category[8] ) / np.sum(users_with_category[8]))*100,title="Percentage of users with each class. Validation data",class_labels=category_labels)
+    heatmap( 100*abs( ( (users_with_category[3] / np.sum(users_with_category[3]) )- (users_with_category[4] / np.sum(users_with_category[4])) ) ),title="Difference in user percentages between active clients train/test",class_labels=category_labels)
 
+    #INVESTIGATE HOW THE AMOUNT OF EXAMPLES IS DISTRIBUTED OVER THE CLASSES
+    heatmap(((category_totals[2]) / (np.sum(category_totals[2]))) * 100,
+            title="Percentage of samples within each class. All data", class_labels=category_labels)
+    heatmap((category_totals[3] / np.sum(category_totals[3])) * 100,
+            title="Percentage of samples within each class training data (active clients)", class_labels=category_labels)
+    heatmap((category_totals[4] / np.sum(category_totals[4])) * 100,
+            title="Percentage of samples within each class test data (active clients)", class_labels=category_labels)
+    heatmap(((category_totals[8]) / np.sum(category_totals[8])) * 100,
+            title="Percentage of samples within each class. Validation data", class_labels=category_labels)
+    heatmap(100 * abs(((category_totals[3] / np.sum(category_totals[3])) - (
+                category_totals[4] / np.sum(category_totals[4])))),
+            title="Difference in sample percentages across classes between active clients train/test", class_labels=category_labels)
+
+    visualize_category_distribution_over_classes([categories_per_user[2],categories_per_user[5],categories_per_user[8]], title="Histogram of classes per user across data pools")
     print("A")
     #visualize_category_distribution_over_classes(categories_per_user)
     #MAKE HISTOGRAM OF CLASSES PER USER, EXAMPLES PER USER.
