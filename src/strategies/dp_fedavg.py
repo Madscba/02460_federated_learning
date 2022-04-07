@@ -288,7 +288,7 @@ class DPFedAvg(Strategy):
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
             self.privacy_account.step()
             self.epsilon += self.privacy_account.get_privacy_spent()
-            wandb.log({"epsilon": self.epsilon})
+            wandb.log({'round': rnd, "epsilon": self.epsilon})
         else:
             print("Not adding noise")
         loss_aggregated = weighted_loss_avg(
