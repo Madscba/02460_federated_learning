@@ -39,12 +39,12 @@ def main(args):
     trainloader, testloader, num_examples = load_data(args.user)
 
     # Flower client
-    qfed = args.qfed # default is false
+    qfed_client = args.qfed # default is false
     client=FemnistClient(net, trainloader, testloader, num_examples,
-                         qfed_client=qfed,
+                         qfed_client=qfed_client,
                          train_fn=choose_train_fn(wandb.config.train_fn))
 
-    client.fit(Net().parameters(),config={'round':1})
+    # client.fit(Net().parameters(),config={'round':1})
     # Start client
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
     fl.client.start_numpy_client(host, client=client)

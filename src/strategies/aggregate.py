@@ -67,6 +67,7 @@ def aggregate_qffl(
 
 
 def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
+    rounds += 1
     if rounds == num_rounds:
         import sys
         import os

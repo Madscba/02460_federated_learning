@@ -21,12 +21,12 @@ MIN_AVAILABLE_CLIENTS_ = 2
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
-    parser.add_argument("--strategy",type=str,default="FedAvg")
+    parser.add_argument("--strategy",type=str,default="Fed_avg")
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
-    parser.add_argument('--rounds', default=200, type=int)
+    parser.add_argument('--rounds', default=2, type=int)
     parser.add_argument('--run_name', default='')
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
     parser.add_argument("--noise_scale",type=float,default=1.0)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
 
     # Define strategy based on argument
-    if args.strategy == "QFed_man":
+    if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
             q_param = 0.2,
@@ -62,8 +62,8 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
-    elif args.strategy == "QFed":
-        print("Strategy: Qfed_flwr")
+    elif args.strategy == "Qfed_flwr":
+        print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
             qffl_learning_rate = 0.01,

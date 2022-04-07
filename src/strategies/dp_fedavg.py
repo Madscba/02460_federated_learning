@@ -297,7 +297,7 @@ class DPFedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        self.save_final_global_model(weights_aggregated)  # only does something if its the final iteration: rounds == num_rounds
+        #self.save_final_global_model(weights_aggregated)  # only does something if its the final iteration: rounds == num_rounds
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
