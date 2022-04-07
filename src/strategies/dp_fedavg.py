@@ -37,7 +37,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
+from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 from privacy_opt import PrivacyAccount
 
