@@ -6,8 +6,6 @@ batch_size:
   value: 8
 train_fn:
   value: train
-sample_rate:
-  value: 0.0025
 noise_multiplier:
  value: 0.1
 noise_scale:

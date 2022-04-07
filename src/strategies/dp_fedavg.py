@@ -97,11 +97,11 @@ class DPFedAvg(Strategy):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         num_rounds: int = 0,
-        sample_rate: float = 0.001,
+        batch_size: int = 8,
         noise_multiplier: float = 0.56,
         noise_scale: float = 1.0,
         max_grad_norm: float = 1.1,
-        target_delta: float = 1e-6,
+        target_delta: float = None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -150,23 +150,26 @@ class DPFedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.sample_rate = sample_rate
+        self.batch_size = batch_size
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = target_delta
         self.epsilon = 0
-        self.privacy_account = self.init_privacy_account()
+        self.privacy_account = None
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
-    def init_privacy_account(self):
-        privacy_account = PrivacyAccount(sample_rate=self.sample_rate,max_grad_norm=self.max_grad_norm,
-                                    noise_multiplier=self.noise_multiplier,noise_scale=self.noise_scale,
-                                    target_delta=self.target_delta)
-        return privacy_account
+    def init_privacy_account(self, results):
+        num_examples = sum([fit_res.num_examples for _, fit_res in results])
+        if not self.target_delta:
+            self.target_delta = 0.1 * (1 / num_examples)
+        print("Sample size = {} & target delta = {}".format(num_examples,self.target_delta))
+        self.privacy_account = PrivacyAccount(batch_size=self.batch_size, sample_size=num_examples,
+                                         max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
+                                         noise_scale=self.noise_scale, target_delta=self.target_delta)
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
@@ -276,6 +279,7 @@ class DPFedAvg(Strategy):
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
         weights_aggregated = aggregate(weights_results)
+        self.init_privacy_account(results=results)
         if self.noise_multiplier > 0.0:
             print("Adding noise")
             sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
