@@ -28,7 +28,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
         [transforms.ToTensor()]
     )
     acc, loss, num_obs_per_user = [], [], []
-    for user in tqdm(user_names_test):
+    for user in user_names_test:
         dataset = FemnistDataset(user, transform, train=True, train_proportion=1)
         # set arbitrary big batch size such that we only get one batch
         # with all the data
