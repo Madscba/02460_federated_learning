@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 def global_model_eval(state_dict ="Qfed_manual_state_dict.pt",
                       state_dict_folder = "saved_models",
-                      data_folder = "data_stored_as_tensors",
+                      data_folder = "dataset/train_stored_as_tensors",
                       num_test_clients = None,  # this is the indexing of the list so None means all
                       get_loss = False):
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     t = time.time()
     acc, loss, num_obs_per_user = global_model_eval(state_dict = "Fedavg_state_dict.pt",
                                                     state_dict_folder = "saved_models",
-                                                    data_folder = "data_stored_as_tensors",
+                                                    data_folder = "dataset/train_stored_as_tensors",
                                                     num_test_clients = 100, # i.e. the 10 first
                                                     get_loss = True)
 
