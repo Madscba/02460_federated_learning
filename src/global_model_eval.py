@@ -22,7 +22,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
     )
     acc, loss, num_obs_per_user = [], [], []
     with torch.no_grad():
-        for user in tqdm(user_names_test):
+        for user in user_names_test:
             dataset = FemnistDataset(user, transform, train=True, train_proportion=1)
             # set arbitrary big batch size such that we only get one batch
             # with all the data
@@ -46,13 +46,6 @@ if __name__ == '__main__':
     import time
     os.chdir("..")
     print(os.getcwd())
-    #
-    # import wandb
-    #
-    # dataset_path = None#'/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
-    # wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    # wandb.init(project="02460_federated_learning", entity="02460-federated-learning")
-    # wandb.config.update({'dataset_path': dataset_path})
 
     state_dict = "saved_models/fedavg_state_dict.pt"
     user_names_test_file = "dataset/femnist/data/img_lab_by_user/user_names_test.txt"

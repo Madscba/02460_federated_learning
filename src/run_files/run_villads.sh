@@ -18,9 +18,9 @@ filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img
 n=1 #spawned_clients
 N=1000 #amount of clients
 epoch_num=20
-rounds=200
+rounds=2
 strategy='FedAvg'
-wandb_mode='online'
+wandb_mode='disabled'
 straggler_pct=0.5
 exp_id='FedProx_vs_FedAvg'
 config=config.yaml
@@ -32,7 +32,7 @@ module load python3/3.8.0
 source /zhome/db/f/128823/Desktop/fl_362/bin/activate
 
 echo "Starting server"
-python src/server.py --wandb_mode=online --experiment_id=$exp_id --wandb_username='s175548' --run_name=$strategy --rounds $rounds &pid=$!
+python src/server.py --wandb_mode=$wandb_mode --experiment_id=$exp_id --wandb_username='s175548' --run_name=$strategy --rounds $rounds &pid=$!
 sleep 3  # Sleep for 3s to give the server enough time to start
 while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	if [ $(expr $n % 2) == 0 ]
