@@ -4,14 +4,21 @@ import torchvision.transforms as transforms
 import torch
 from model import Net
 from tqdm import tqdm
+from collections import OrderedDict
 
 def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
                       user_names_test_file = "dataset/femnist/data/img_lab_by_user/user_names_test.txt",
+                      parameters=None,
                       num_test_clients = None,  # this is the indexing of the list so None means all
                       get_loss = False):
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net = Net().to(DEVICE)
-    net.load_state_dict(torch.load(state_dict))
+    if parameters:
+        params_dict = zip(net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        net.load_state_dict(state_dict, strict=True)
+    else:    
+        net.load_state_dict(torch.load(state_dict))
     loss_func = torch.nn.CrossEntropyLoss()
 
     with open(user_names_test_file) as file:
@@ -25,7 +32,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
         dataset = FemnistDataset(user, transform, train=True, train_proportion=1)
         # set arbitrary big batch size such that we only get one batch
         # with all the data
-        data_loader = DataLoader(dataset, batch_size=8)
+        data_loader = DataLoader(dataset, batch_size=100)
 
 
         for x, y in data_loader:
