@@ -36,7 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 import wandb
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 import numpy as np
 
@@ -85,6 +85,7 @@ class FedAvg(Strategy):
         self,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
+        num_rounds: int = 200,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
@@ -134,6 +135,8 @@ class FedAvg(Strategy):
 
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
+        self.num_rounds = num_rounds
+        self.rounds = 0
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
@@ -145,6 +148,7 @@ class FedAvg(Strategy):
         self.round=0
         self.test_file_path=user_names_test_file
 
+        self.name = "Fedavg"
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -267,9 +271,11 @@ class FedAvg(Strategy):
         
         wandb.log({'round':rnd, 'train_loss_aggregated':loss_aggregated})
 
-
         weights_aggregated = aggregate(weights_results)
-        #self.save_final_global_model(weights_aggregated)# only does something if its the final iteration: rounds == num_rounds
+
+        # only does something if its the final iteration: rounds == num_rounds.
+        # The function counts aswell
+        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
 
         return weights_to_parameters(weights_aggregated), {}
 

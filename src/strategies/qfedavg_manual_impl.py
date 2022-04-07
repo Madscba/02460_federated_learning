@@ -36,7 +36,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate_qffl, weighted_loss_avg
+from .aggregate import aggregate_qffl, weighted_loss_avg, save_final_global_model
 from .fedavg import FedAvg
 
 
@@ -76,6 +76,7 @@ class QFedAvg_manual(FedAvg):
         )
         self.num_rounds = num_rounds
         self.rounds = 0
+        self.name = "Qfed_manual"
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.fraction_fit = fraction_fit
@@ -114,7 +115,7 @@ class QFedAvg_manual(FedAvg):
         weights = parameters_to_weights(parameters)
         self.pre_weights = weights
         parameters = weights_to_parameters(weights)
-        config = {}
+        config = {"round":rnd}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(rnd)
@@ -140,7 +141,7 @@ class QFedAvg_manual(FedAvg):
             return []
 
         # Parameters and config
-        config = {}
+        config = {"round":rnd}
         if self.on_evaluate_config_fn is not None:
             # Custom evaluation config function provided
             config = self.on_evaluate_config_fn(rnd)
@@ -194,7 +195,9 @@ class QFedAvg_manual(FedAvg):
         eps = 1e-10
 
         for _, params in results:
-            loss = params.metrics["loss_prior_to_training"]
+            loss = params.metrics.get("loss_prior_to_training", None)
+            if loss == None: print("please enable qfed_client = True in client_main")
+
             weights_new = parameters_to_weights(params.parameters)
             grads = [
                     (weights_before - weights_after) * self.L for
@@ -212,8 +215,9 @@ class QFedAvg_manual(FedAvg):
                    )
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
-        self.save_final_global_model(weights_aggregated) # safe the model at the final round
 
+        # safe the model at the final round and keep track of the number of
+        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
@@ -238,24 +242,3 @@ class QFedAvg_manual(FedAvg):
             {},
         )
 
-
-    def save_final_global_model(self, weights_aggregated):
-        self.rounds += 1
-        if self.rounds == self.num_rounds:
-            import sys
-            import os
-
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            sys.path.append(BASE_DIR)
-            import torch
-            from collections import OrderedDict
-            from model import Net
-
-            # this could maybe be simplified but i wont bother
-            net = Net()
-            params_dict = zip(net.state_dict().keys(), weights_aggregated)
-            state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-            # this step might not be necessary
-            # net.load_state_dict(state_dict, strict=True)
-            print("Saving saved_models/Qfed_manual_state_dict.pt")
-            torch.save(state_dict, "saved_models/Qfed_manual_state_dict.pt")

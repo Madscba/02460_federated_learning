@@ -97,11 +97,11 @@ class DPFedAvg(Strategy):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         num_rounds: int = 0,
-        sample_rate: float = 0.001,
-        noise_multiplier: float = 0.56,
-        noise_scale: float = 1.0,
+        batch_size: int = 8,
+        noise_multiplier: float = None,
+        noise_scale: float = None,
         max_grad_norm: float = 1.1,
-        target_delta: float = 1e-6,
+        total_num_clients: int = 1000
     ) -> None:
         """Federated Averaging strategy.
 
@@ -145,28 +145,39 @@ class DPFedAvg(Strategy):
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
+        self.total_num_clients = total_num_clients
         self.eval_fn = eval_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.sample_rate = sample_rate
+        self.batch_size = batch_size
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
-        self.target_delta = target_delta
+        self.target_delta = None
         self.epsilon = 0
-        self.privacy_account = self.init_privacy_account()
+        self.privacy_account = None
+        self.name = "DP_Fedavg"
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
-    def init_privacy_account(self):
-        privacy_account = PrivacyAccount(sample_rate=self.sample_rate,max_grad_norm=self.max_grad_norm,
-                                    noise_multiplier=self.noise_multiplier,noise_scale=self.noise_scale,
-                                    target_delta=self.target_delta)
-        return privacy_account
+    def set_privacy_account(self, results):
+        num_examples = sum([fit_res.num_examples for _, fit_res in results]) 
+        if not self.target_delta:
+            self.target_delta = 0.1 * (1 / num_examples)
+        C = len([fit_res.num_examples for _, fit_res in results]) 
+        sensitivity = self.max_grad_norm / C
+        self.noise_scale = self.noise_multiplier / sensitivity
+        if not self.noise_multiplier:
+            self.noise_multiplier = self.noise_scale * sensitivity
+        sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
+        steps = int(num_examples / self.batch_size) 
+        self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
+                                              max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
+                                              noise_scale=self.noise_scale, target_delta=self.target_delta)
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
@@ -276,16 +287,17 @@ class DPFedAvg(Strategy):
         weights_results = [
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
         weights_aggregated = aggregate(weights_results)
-        if self.noise_multiplier > 0.0:
-            print("Adding noise")
-            sigma = (self.noise_multiplier * self.max_grad_norm) / self.noise_scale
+        self.set_privacy_account(results=results)
+        if self.noise_scale:
+            sigma = self.privacy_account.noise_multiplier
             for w in weights_aggregated:
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
-            self.privacy_account.step()
-            self.epsilon += self.privacy_account.get_privacy_spent()
-            wandb.log({"epsilon": self.epsilon})
-        else:
-            print("Not adding noise")
+            self.epsilon = self.privacy_account.get_privacy_spent()
+            wandb.log({'round': rnd, "epsilon": self.epsilon})
+            wandb.log({'round': rnd, "sigma": self.privacy_account.noise_multiplier})
+            wandb.log({'round': rnd, "z": self.privacy_account.noise_scale})
+            wandb.log({'round': rnd, "C": self.privacy_account.sample_size})
+
         loss_aggregated = weighted_loss_avg(
             [
                 (fit_res.num_examples, fit_res.metrics['loss'])
@@ -293,7 +305,7 @@ class DPFedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        self.save_final_global_model(weights_aggregated)  # only does something if its the final iteration: rounds == num_rounds
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)  # only does something if its the final iteration: rounds == num_rounds
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(

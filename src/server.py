@@ -20,19 +20,21 @@ test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/da
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
-    parser.add_argument("--strategy",type=str,default="FedAvg")
+    parser.add_argument("--strategy",type=str,default="Fed_avg")
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
-    parser.add_argument('--rounds', default=200, type=int)
+    parser.add_argument('--rounds', default=2, type=int)
     parser.add_argument('--run_name', default='')
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
-    parser.add_argument("--noise_scale",type=float,default=1.0)
+    parser.add_argument("--noise_scale",type=float,default=None)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
+    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--total_num_clients", type=int, default=1000)
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -51,21 +53,23 @@ if __name__ == "__main__":
 
 
     # Define strategy based on argument
-    if args.strategy == "QFed_man":
+    if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
             q_param = 0.2,
             qffl_learning_rate = 0.01,
+            num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
-    elif args.strategy == "QFed":
-        print("Strategy: Qfed_flwr")
+    elif args.strategy == "Qfed_flwr":
+        print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
             qffl_learning_rate = 0.01,
+            num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -80,11 +84,11 @@ if __name__ == "__main__":
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
             num_rounds=args.rounds,
-            sample_rate=wandb.config.sample_rate,
+            batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
-            target_delta=wandb.config.target_delta
+            total_num_clients=wandb.config.total_num_clients
             )
     else:
         print("Strategy: FedAvg")
@@ -92,6 +96,7 @@ if __name__ == "__main__":
             user_names_test_file=test_file_path,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
+            num_rounds=args.rounds,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_, 
             min_available_clients = MIN_AVAILABLE_CLIENTS_)

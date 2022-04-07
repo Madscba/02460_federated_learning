@@ -32,7 +32,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
         dataset = FemnistDataset(user, transform, train=True, train_proportion=1)
         # set arbitrary big batch size such that we only get one batch
         # with all the data
-        data_loader = DataLoader(dataset, batch_size=100)
+        data_loader = DataLoader(dataset, batch_size=8000)
 
 
         for x, y in data_loader:
