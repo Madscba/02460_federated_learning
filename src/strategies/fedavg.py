@@ -35,7 +35,7 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-
+import wandb
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
@@ -262,10 +262,12 @@ class FedAvg(Strategy):
                 for _, fit_res in results
             ]
         )
-        wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
+        
+        wandb.log({'round':rnd, 'train_loss_aggregated':loss_aggregated})
+
 
         weights_aggregated = aggregate(weights_results)
-        self.save_final_global_model(weights_aggregated)# only does something if its the final iteration: rounds == num_rounds
+        #self.save_final_global_model(weights_aggregated)# only does something if its the final iteration: rounds == num_rounds
 
         return weights_to_parameters(weights_aggregated), {}
 
@@ -287,4 +289,13 @@ class FedAvg(Strategy):
                 for _, evaluate_res in results
             ]
         )
+        accuracy_aggregated = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
+                for _, evaluate_res in results
+            ]
+        )
+
+        wandb.log({'round':rnd,'test_accuracy_aggregated':accuracy_aggregated})
+        wandb.log({'round':rnd,'test_loss_aggregated':loss_aggregated})
         return loss_aggregated, {}
