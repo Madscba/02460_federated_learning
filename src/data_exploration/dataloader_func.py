@@ -39,6 +39,7 @@ class FEMNISTDatasetExplorer():
                 return os.path.join(self.username_filepath,"usernames_test.txt")
         
     def get_dataset_stats(self):
+        photos_in_categories_total_all = []
         photos_in_categories_total_train = []
         photos_in_categories_total_test = []
 
@@ -52,6 +53,7 @@ class FEMNISTDatasetExplorer():
 
         for user in tqdm(users):
             if user != "":
+                photos_in_categories_all = np.zeros(62)
                 photos_in_categories_train = np.zeros(62)
                 photos_in_categories_test = np.zeros(62)
 
@@ -59,14 +61,17 @@ class FEMNISTDatasetExplorer():
                 #Run through train data
                 for _, labels in trainloader:
                     for label in labels:
+                        photos_in_categories_all[label-1] +=1
                         photos_in_categories_train[label-1] += 1
                 photos_in_categories_total_train.append(photos_in_categories_train)
                 #Run through test data
                 for _, labels in testloader:
                     for label in labels:
+                        photos_in_categories_all[label - 1] += 1
                         photos_in_categories_test[label-1] += 1
                 photos_in_categories_total_test.append(photos_in_categories_test)
-        return photos_in_categories_total_train, photos_in_categories_total_test
+                photos_in_categories_total_all.append(photos_in_categories_all)
+        return photos_in_categories_total_train, photos_in_categories_total_test,photos_in_categories_total_all
 
 if __name__ == "__main__":
     config=os.path.join("/work3/s173934/AdvML/02460_federated_learning/",'src','config',"config.yaml")
@@ -74,42 +79,51 @@ if __name__ == "__main__":
     wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group="dummy", config=config, mode="disabled",job_type='client')
 
     #Get full dataset statistics
-    # dataexplorer = FEMNISTDatasetExplorer()
-    # photos_in_categories_all_train, photos_in_categories_all_test = dataexplorer.get_dataset_stats()
-    # with open("dataset_stats_all_users_train_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_all_train, f)
+    dataexplorer = FEMNISTDatasetExplorer()
+    photos_in_categories_all_train, photos_in_categories_all_test,photos_in_categories_all_all = dataexplorer.get_dataset_stats()
+    with open("dataset_stats_all_users_train_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_all_train, f)
 
-    # with open("dataset_stats_all__users_test_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_all_test, f)
+    with open("dataset_stats_all__users_test_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_all_test, f)
 
-    # print("Succesful retrieving full data")
+    with open("dataset_stats_all__users_all_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_all_all, f)
+
+    print("Succesful retrieving full data")
     #Get test dataset statistics
-    # dataexplorer = FEMNISTDatasetExplorer(subset=True,subset_name="Test")
-    # photos_in_categories_test_train, photos_in_categories_test_test = dataexplorer.get_dataset_stats()
-    # with open("dataset_stats_test_users_train_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_test_train, f)
+    dataexplorer = FEMNISTDatasetExplorer(subset=True,subset_name="Test")
+    photos_in_categories_test_train, photos_in_categories_test_test,photos_in_categories_test_all = dataexplorer.get_dataset_stats()
+    with open("dataset_stats_test_users_train_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_test_train, f)
 
-    # with open("dataset_stats_test_users_test_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_test_test, f)
+    with open("dataset_stats_test_users_test_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_test_test, f)
+
+    with open("dataset_stats_test_users_all_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_test_all, f)
     
-    # print("Succesful retrieving test data")
+    print("Succesful retrieving test data")
 
     # #Get train dataset statistics
-    # dataexplorer = FEMNISTDatasetExplorer(subset=True,subset_name="Train")
-    # photos_in_categories_train_train, photos_in_categories_train_test = dataexplorer.get_dataset_stats()
-    # with open("dataset_stats_train_users_train_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_train_train, f)
+    dataexplorer = FEMNISTDatasetExplorer(subset=True,subset_name="Train")
+    photos_in_categories_train_train, photos_in_categories_train_test,photos_in_categories_train_all = dataexplorer.get_dataset_stats()
+    with open("dataset_stats_train_users_train_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_train_train, f)
 
-    # with open("dataset_stats_train_users_test_data.picl","wb") as f:
-    #     pickle.dump(photos_in_categories_train_test, f)
+    with open("dataset_stats_train_users_test_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_train_test, f)
+
+    with open("dataset_stats_train_users_all_data.picl","wb") as f:
+        pickle.dump(photos_in_categories_train_all, f)
 
     # print("Succesful retrieving train data")
 
-    with open("dataset_stats_all_users_train_data.picl", "rb") as f:
-        users_all_train = pickle.load(f)
-        print(np.shape(test),test)
-    with open("dataset_stats_all_users_test_data.picl", "rb") as f:
-        users_all_test = pickle.load(f)
+    #with open("dataset_stats_all_users_train_data.picl", "rb") as f:
+    #    users_all_train = pickle.load(f)
+    #    print(np.shape(users_all_train),users_all_train)
+    #with open("dataset_stats_all_users_test_data.picl", "rb") as f:
+    #    users_all_test = pickle.load(f)
 
     
 
