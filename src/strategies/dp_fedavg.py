@@ -157,6 +157,7 @@ class DPFedAvg(Strategy):
         self.target_delta = target_delta
         self.epsilon = 0
         self.privacy_account = None
+        self.name = "DP_Fedavg"
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
