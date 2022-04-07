@@ -44,7 +44,9 @@ def main(args):
                          qfed_client=qfed,
                          train_fn=choose_train_fn(wandb.config.train_fn))
 
-    client.fit(Net().parameters(),config={'round':1})
+    parameters=client.get_parameters()
+    client.fit(parameters,{'round':1})
+
     # Start client
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
     fl.client.start_numpy_client(host, client=client)

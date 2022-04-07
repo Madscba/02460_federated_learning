@@ -38,6 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 import wandb
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
+import numpy as np
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -94,6 +95,7 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        user_names_test_file=None
     ) -> None:
         """Federated Averaging strategy.
 
@@ -140,6 +142,9 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
+        self.round=0
+        self.test_file_path=user_names_test_file
+
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -171,21 +176,21 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        if self.eval_fn is None:
-            # No evaluation function provided
-            return None
-        weights = parameters_to_weights(parameters)
+        self.round+=1
         print("fedavg uses aswell")
-        eval_res = self.eval_fn(weights)
+        weights=parameters_to_weights(parameters)
+        eval_res = self.eval_fn(parameters=weights,user_names_test_file=self.test_file_path,num_test_clients=60,get_loss=True)
         if eval_res is None:
             return None
-        loss, other = eval_res
-        if isinstance(other, float):
-            print(DEPRECATION_WARNING)
-            metrics = {"accuracy": other}
-        else:
-            metrics = other
-        return loss, metrics
+        acc, loss, num_observations  = eval_res
+        sum_obs=np.sum(np.array(num_observations))
+        test_acc=np.array(acc)*np.array(num_observations)/sum_obs
+        test_loss=np.array(loss)*np.array(num_observations)/sum_obs
+        wandb.log({'round':self.round,
+                   'global_test_loss':test_loss,
+                   'global_test_accuracy':test_acc})
+
+        return None
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -293,6 +298,7 @@ class FedAvg(Strategy):
             ]
         )
 
-        wandb.log({'round':rnd,'test_accuracy_aggregated':accuracy_aggregated})
-        wandb.log({'round':rnd,'test_loss_aggregated':loss_aggregated})
+        wandb.log({'round':rnd,
+                   'test_accuracy_aggregated':accuracy_aggregated,
+                   'test_loss_aggregated':loss_aggregated})
         return loss_aggregated, {}
