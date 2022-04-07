@@ -109,3 +109,4 @@ if __name__ == "__main__":
         config={"num_rounds": args.rounds},
         strategy=strategy,
     )
+    print(1)
