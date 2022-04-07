@@ -31,8 +31,8 @@ if __name__ == "__main__":
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
     parser.add_argument("--noise_scale",type=float,default=1.0)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
-    parser.add_argument("--target_delta",type=float,default=1e-5)
-    parser.add_argument("--sample_rate",type=float,default=0.0025)
+    parser.add_argument("--target_delta",default=None)
+    parser.add_argument("--batch_size", type=int, default=8)
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
             num_rounds=args.rounds,
-            sample_rate=wandb.config.sample_rate,
+            batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
