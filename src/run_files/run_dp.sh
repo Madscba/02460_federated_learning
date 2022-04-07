@@ -21,7 +21,7 @@ filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img
 n=1 #spawned_clients
 N=1000 #amount of clients
 n_wait=9
-epoch_num=10
+epoch_num=2
 exp_id='DP_FedAvg_001'
 batch_size=8
 
@@ -37,10 +37,10 @@ sleep 3  # Sleep for 3s to give the server enough time to start
 
 while read user && (($n<=$N)); do
 	echo "Starting client: $n , name: $user"
-   	timeout 6m python src/client_main.py --user=${user} --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --epochs=$epoch_num --batch_size=$batch_size --dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist' & 
+   	timeout 2m python src/client_main.py --user=${user} --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --epochs=$epoch_num --batch_size=$batch_size --dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist' & 
 	if [ $(expr $n % 10) == 0 ] && [ $n>$n_wait ]; then
-		echo "sleeping for 180 sec" ##120 sec
-		sleep 180
+		echo "sleeping for 60 sec" ##60 sec
+		sleep 60
 	fi
 	n=$((n+1))
 done < $filename
