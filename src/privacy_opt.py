@@ -7,7 +7,7 @@ DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 class PrivacyAccount():
     def __init__(
             self,
-            step: int = 0,
+            steps: int = 0,
             alphas: List = DEFAULT_ALPHAS,
             sample_size: int = None,
             sample_rate: float = None,
@@ -16,7 +16,7 @@ class PrivacyAccount():
             max_grad_norm: float = None,
             target_delta: float = None):
 
-        self.steps = step
+        self.steps = steps
         self.alphas = alphas
         self.sample_size = sample_size
         self.sample_rate = sample_rate

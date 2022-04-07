@@ -155,6 +155,7 @@ class DPFedAvg(Strategy):
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
+        self.target_delta = None
         self.epsilon = 0
         self.privacy_account = None
         self.name = "DP_Fedavg"
@@ -169,10 +170,9 @@ class DPFedAvg(Strategy):
             self.target_delta = 0.1 * (1 / num_examples)
         C = len([fit_res.num_examples for _, fit_res in results]) 
         sensitivity = self.max_grad_norm / C
-        if not self.noise_scale:
-            self.noise_scale = self.noise_multiplier / sensitivity
-        else:
-            self.noise_multiplier = self.noise_scale*sensitivity
+        self.noise_scale = self.noise_multiplier / sensitivity
+        if not self.noise_multiplier:
+            self.noise_multiplier = self.noise_scale * sensitivity
         sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
         steps = int(num_examples / self.batch_size) 
         self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
@@ -292,9 +292,11 @@ class DPFedAvg(Strategy):
             sigma = self.privacy_account.noise_multiplier
             for w in weights_aggregated:
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
-            self.epsilon += self.privacy_account.get_privacy_spent()
+            self.epsilon = self.privacy_account.get_privacy_spent()
             wandb.log({'round': rnd, "epsilon": self.epsilon})
-            wandb.log({'round': rnd, "sigma": sigma})
+            wandb.log({'round': rnd, "sigma": self.privacy_account.noise_multiplier})
+            wandb.log({'round': rnd, "z": self.privacy_account.noise_scale})
+            wandb.log({'round': rnd, "C": self.privacy_account.sample_size})
 
         loss_aggregated = weighted_loss_avg(
             [
