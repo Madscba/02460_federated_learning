@@ -8,11 +8,12 @@ class PrivacyAccount():
     def __init__(
             self,
             step: int = 0,
+            alphas: List = DEFAULT_ALPHAS,
             sample_size: int = None,
             sample_rate: float = None,
-            alphas: List = DEFAULT_ALPHAS,
-            max_grad_norm: float = None,
             noise_multiplier: float = None,
+            noise_scale: float = None,
+            max_grad_norm: float = None,
             target_delta: float = None):
 
         self.steps = step
@@ -20,6 +21,7 @@ class PrivacyAccount():
         self.sample_size = sample_size
         self.sample_rate = sample_rate
         self.noise_multiplier = noise_multiplier
+        self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = target_delta
         self._set_target_delta()
@@ -29,17 +31,14 @@ class PrivacyAccount():
             self.target_delta = 0.1 * (1 / self.sample_size)
 
     def get_renyi_divergence(self):
-        sensitivity = self.max_grad_norm / (self.sample_size*self.sample_rate)
-        z = self.noise_multiplier/sensitivity
-
         rdp = torch.tensor(
             privacy_analysis.compute_rdp(
-                self.sample_rate, self.noise_multiplier, 1, self.alphas
+                self.sample_rate, self.noise_scale, 1, self.alphas
             )
         )
         return rdp
 
-    def get_privacy_spent(self, target_delta: float = None, steps: int = None):
+    def get_privacy_spent(self, target_delta: float = None):
         """
         Computes the (epsilon, delta) privacy budget spent so far.
 

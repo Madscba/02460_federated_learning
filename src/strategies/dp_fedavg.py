@@ -168,13 +168,16 @@ class DPFedAvg(Strategy):
         if not self.target_delta:
             self.target_delta = 0.1 * (1 / num_examples)
         C = len([fit_res.num_examples for _, fit_res in results]) 
-        sensitivity = self.max_grad_norm / C 
-        sigma = self.noise_scale*sensitivity if self.noise_scale else self.noise_multiplier
+        sensitivity = self.max_grad_norm / C
+        if not self.noise_scale:
+            self.noise_scale = self.noise_multiplier / sensitivity
+        else:
+            self.noise_multiplier = self.noise_scale*sensitivity
         sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
         steps = int(num_examples / self.batch_size) 
         self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
-                                              max_grad_norm=self.max_grad_norm, noise_multiplier=sigma,
-                                              target_delta=self.target_delta)
+                                              max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
+                                              noise_scale=self.noise_scale, target_delta=self.target_delta)
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return the sample size and the required number of available
