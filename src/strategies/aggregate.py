@@ -90,6 +90,6 @@ def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
         torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
-        print("Saving model at" "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
 
     return rounds

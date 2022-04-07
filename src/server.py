@@ -16,7 +16,7 @@ FRACTION_EVAL_ = 0.5
 MIN_FIT_CLIENTS_ = 2
 MIN_EVAL_CLIENTS_ = 2
 MIN_AVAILABLE_CLIENTS_ = 2
-test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_test.txt'
+test_data_folder='dataset/test_stored_as_tensors'
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
@@ -25,14 +25,14 @@ if __name__ == "__main__":
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
-    parser.add_argument('--rounds', default=2, type=int)
+    parser.add_argument('--rounds', default=10, type=int)
     parser.add_argument('--run_name', default='')
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
     parser.add_argument("--noise_scale",type=float,default=None)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
-    parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
+    parser.add_argument("--dataset_path",default='dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
     args = parser.parse_args()
@@ -93,8 +93,9 @@ if __name__ == "__main__":
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
-            eval_fn=None,# global_model_eval,
-            user_names_test_file=test_file_path,
+            #eval_fn=None,# global_model_eval,
+            eval_fn=global_model_eval,
+            data_folder=test_data_folder,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             num_rounds=args.rounds,

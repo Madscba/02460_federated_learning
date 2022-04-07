@@ -96,7 +96,7 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        user_names_test_file=None
+        data_folder=None
     ) -> None:
         """Federated Averaging strategy.
 
@@ -145,8 +145,7 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.round=0
-        self.test_file_path=user_names_test_file
+        self.data_folder=data_folder
 
         self.name = "Fedavg"
 
@@ -180,21 +179,22 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        self.round+=1
-        print("fedavg uses aswell")
-        weights=parameters_to_weights(parameters)
-        eval_res = self.eval_fn(state_dict=None,
-                                user_names_test_file=self.test_file_path,
-                                parameters=weights,
-                                num_test_clients=60,
-                                get_loss=True)
-        if eval_res is None:
+
+        if self.eval_fn is not None:
+            weights=parameters_to_weights(parameters)
+            eval_res = self.eval_fn(state_dict=None,
+                                    data_folder=self.data_folder,
+                                    parameters=weights,
+                                    num_test_clients=60,
+                                    get_loss=True)
+        else:
             return None
+
         acc, loss, num_observations  = eval_res
         sum_obs=np.sum(np.array(num_observations))
         test_acc=np.array(acc)*np.array(num_observations)/sum_obs
         test_loss=np.array(loss)*np.array(num_observations)/sum_obs
-        wandb.log({'round':self.round,
+        wandb.log({'round':self.rounds,
                    'global_test_loss':test_loss,
                    'global_test_accuracy':test_acc})
 
@@ -280,7 +280,6 @@ class FedAvg(Strategy):
         # only does something if its the final iteration: rounds == num_rounds.
         # The function counts aswell
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
