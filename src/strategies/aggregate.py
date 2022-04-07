@@ -67,7 +67,6 @@ def aggregate_qffl(
 
 
 def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
-    num_rounds += 1
     if rounds == num_rounds:
         import sys
         import os
@@ -88,4 +87,4 @@ def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
         torch.save(state_dict, "saved_models/" + name + "_state_dict.pt")
         print("Saving model at saved_models/" + name + "_state_dict.pt")
 
-    return num_rounds
+    return rounds
