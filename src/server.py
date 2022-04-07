@@ -29,10 +29,11 @@ if __name__ == "__main__":
     parser.add_argument('--rounds', default=2, type=int)
     parser.add_argument('--run_name', default='')
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
-    parser.add_argument("--noise_scale",type=float,default=1.0)
+    parser.add_argument("--noise_scale",type=float,default=None)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",default=None)
     parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--total_num_clients", type=int, default=1000)
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -86,7 +87,7 @@ if __name__ == "__main__":
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
-            target_delta=wandb.config.target_delta
+            total_num_clients=wandb.config.total_num_clients
             )
     else:
         print("Strategy: FedAvg")
