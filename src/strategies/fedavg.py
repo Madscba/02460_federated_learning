@@ -183,7 +183,11 @@ class FedAvg(Strategy):
         self.round+=1
         print("fedavg uses aswell")
         weights=parameters_to_weights(parameters)
-        eval_res = self.eval_fn(parameters=weights,user_names_test_file=self.test_file_path,num_test_clients=60,get_loss=True)
+        eval_res = self.eval_fn(state_dict=None,
+                                user_names_test_file=self.test_file_path,
+                                parameters=weights,
+                                num_test_clients=60,
+                                get_loss=True)
         if eval_res is None:
             return None
         acc, loss, num_observations  = eval_res

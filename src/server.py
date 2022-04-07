@@ -92,7 +92,8 @@ if __name__ == "__main__":
             )
     else:
         print("Strategy: FedAvg")
-        strategy = FedAvg(eval_fn=global_model_eval,
+        strategy = FedAvg(
+            eval_fn=None,# global_model_eval,
             user_names_test_file=test_file_path,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
