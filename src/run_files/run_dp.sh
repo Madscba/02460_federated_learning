@@ -1,7 +1,7 @@
 #!/bin/bash
 ## 02460 FL, template
 #BSUB -q hpc
-#BSUB -J dp_exp_n01
+#BSUB -J dp_exp
 #BSUB -n 20 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
@@ -22,7 +22,7 @@ n=1 #spawned_clients
 N=1000 #amount of clients
 n_wait=9
 epoch_num=2
-exp_id='DP_s001_S2'
+exp_id='DP_Fed'
 batch_size=8
 
 echo "starting bash script"
@@ -31,7 +31,7 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_380/bin/activate
 
 echo "Starting server"
-python src/server.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --run_name='DP' --rounds=200 --noise_multiplier=0.001 --max_grad_norm=1.0 --batch_size=$batch_size --total_num_clients=$N &
+python src/server.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --run_name='DP' --rounds=200 --noise_multiplier=0.001 --max_grad_norm=2.0 --batch_size=$batch_size --total_num_clients=$N &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 
