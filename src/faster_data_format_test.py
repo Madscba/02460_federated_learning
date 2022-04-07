@@ -29,6 +29,8 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
             num_obs_per_user.append(x.shape[0])
             #batch_size = num_obs_per_user[-1] # use all the data
             batch_size = 8
+
+            # depending on the batch size this is not acutally a loop
             for i in range(num_obs_per_user[-1] // batch_size):
                 #print(i*batch_size+batch_size, num_obs_per_user[-1])
                 x_ = x[i*batch_size:i*batch_size+batch_size]

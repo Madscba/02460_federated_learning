@@ -84,6 +84,7 @@ class FedAvg(Strategy):
         self,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
+        num_rounds: int = 200,
         min_fit_clients: int = 2,
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
@@ -132,6 +133,8 @@ class FedAvg(Strategy):
 
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
+        self.num_rounds = num_rounds
+        self.rounds = 0
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients

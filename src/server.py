@@ -56,6 +56,7 @@ if __name__ == "__main__":
         strategy = QFedAvg_manual(
             q_param = 0.2,
             qffl_learning_rate = 0.01,
+            num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -66,6 +67,7 @@ if __name__ == "__main__":
         strategy = QFedAvg(
             q_param = 0.2,
             qffl_learning_rate = 0.01,
+            num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -91,6 +93,7 @@ if __name__ == "__main__":
         strategy = FedAvg(
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
+            num_rounds=args.rounds,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_, 
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
