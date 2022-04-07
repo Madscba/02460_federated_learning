@@ -37,7 +37,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 from privacy_opt import PrivacyAccount
 
@@ -157,6 +157,7 @@ class DPFedAvg(Strategy):
         self.target_delta = target_delta
         self.epsilon = 0
         self.privacy_account = None
+        self.name = "DP_Fedavg"
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -297,7 +298,7 @@ class DPFedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        self.save_final_global_model(weights_aggregated)  # only does something if its the final iteration: rounds == num_rounds
+        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)  # only does something if its the final iteration: rounds == num_rounds
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
