@@ -4,10 +4,9 @@ import torchvision.transforms as transforms
 import torch
 from model import Net
 from collections import OrderedDict
-import os
 
 def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
-                      data_folder = "dataset/test_stored_as_tensor",
+                      data_folder ="dataset/femnist/data/img_lab_by_user/user_names_test.txt",
                       parameters = None,
                       num_test_clients = None,  # this is the indexing of the list so None means all
                       get_loss = False
@@ -24,34 +23,30 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
 
     if get_loss: loss_func = torch.nn.CrossEntropyLoss()
 
-    cwd = os.getcwd()
-    client_names = os.listdir(os.path.join(cwd, data_folder))
-    x_data = sorted([os.path.join(cwd, data_folder, client)
-                     for client in client_names if client.endswith("x.pt")])[:num_test_clients]
-    y_data = sorted([os.path.join(cwd, data_folder, client)
-                     for client in client_names if client.endswith("y.pt")])[:num_test_clients]
+    with open(data_folder) as file:
+        user_names_test = sorted([line.strip() for line in file][:num_test_clients])
 
+    transform = transforms.Compose(
+        [transforms.ToTensor()]
+    )
     import time
     t = time.time()
     acc, loss, num_obs_per_user = [], [], []
     with torch.no_grad():
-        for x, y in zip(x_data, y_data):
-            x = torch.load(x).to(DEVICE)
-            y = torch.load(y).to(DEVICE)
-            num_obs_per_user.append(x.shape[0])
+        for user in user_names_test:
+            dataset = FemnistDataset(user, transform, train=True, train_proportion=1)
+            # set arbitrary big batch size such that we only get one batch
+            # with all the data
+            data_loader = DataLoader(dataset, batch_size=8000)
 
-            # batch_size = 8
-            # use all the data instead of an actual batch size
-            batch_size = num_obs_per_user[-1]
-            for i in range(num_obs_per_user[-1] // batch_size):
-                x_ = x[i * batch_size:i * batch_size + batch_size]
-                y_ = y[i * batch_size:i * batch_size + batch_size]
-
-                pred = net(x_)
-                acc.append(torch.mean((torch.argmax(pred, axis=1) == y_).type(torch.float)).item() * 100)
+            for x, y in data_loader:
+                x, y = x.to(DEVICE), y.to(DEVICE)
+                num_obs_per_user.append(x.shape[0])
+                pred = net(x)
+                acc.append(torch.mean((torch.argmax(pred, axis = 1) == y).type(torch.float)).item()*100)
 
                 if get_loss:
-                    loss.append(loss_func(pred, y_).item())
+                    loss.append(loss_func(pred, y).item())
 
     print("time:", time.time() - t)
     return acc, loss, num_obs_per_user

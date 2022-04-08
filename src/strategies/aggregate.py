@@ -67,6 +67,7 @@ def aggregate_qffl(
 
 
 def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
+    rounds += 1
     if rounds == num_rounds:
         import sys
         import os
@@ -77,6 +78,10 @@ def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
         from collections import OrderedDict
         from model import Net
 
+        import datetime
+        now = datetime.datetime.now()
+        day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
+
         # this could maybe be simplified but i wont bother
         net = Net()
         params_dict = zip(net.state_dict().keys(), weights_aggregated)
@@ -84,7 +89,7 @@ def save_final_global_model(weights_aggregated, name, rounds, num_rounds):
         # this step might not be necessary
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
-        torch.save(state_dict, "saved_models/" + name + "_state_dict.pt")
-        print("Saving model at saved_models/" + name + "_state_dict.pt")
+        torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
 
     return rounds

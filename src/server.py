@@ -3,7 +3,7 @@ import flwr as fl
 from strategies.dp_fedavg import DPFedAvg
 from strategies.fedavg import FedAvg
 from strategies.qfedavg_fixed import QFedAvg
-#from strategies.qfedavg import QFedAvg
+from global_model_eval import global_model_eval
 from strategies.qfedavg_manual_impl import QFedAvg_manual
 import argparse
 import wandb
@@ -16,23 +16,25 @@ FRACTION_EVAL_ = 0.5
 MIN_FIT_CLIENTS_ = 2
 MIN_EVAL_CLIENTS_ = 2
 MIN_AVAILABLE_CLIENTS_ = 2
-
-
+test_data_folder='dataset/test_stored_as_tensors'
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
-    parser.add_argument("--strategy",type=str,default="FedAvg")
+    parser.add_argument("--strategy",type=str,default="Fed_avg")
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--wandb_mode', help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', default='config.yaml')
-    parser.add_argument('--rounds', default=200, type=int)
+    parser.add_argument('--rounds', default=10, type=int)
     parser.add_argument('--run_name', default='')
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
-    parser.add_argument("--noise_scale",type=float,default=1.0)
+    parser.add_argument("--noise_scale",type=float,default=None)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
-    parser.add_argument("--target_delta",default=None)
+    parser.add_argument("--target_delta",type=float,default=1e-5)
+    parser.add_argument("--sample_rate",type=float,default=0.0025)
+    parser.add_argument("--dataset_path",default='dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--total_num_clients", type=int, default=1000)
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -51,7 +53,7 @@ if __name__ == "__main__":
 
 
     # Define strategy based on argument
-    if args.strategy == "QFed_man":
+    if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
             q_param = 0.2,
@@ -62,8 +64,8 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
-    elif args.strategy == "QFed":
-        print("Strategy: Qfed_flwr")
+    elif args.strategy == "Qfed_flwr":
+        print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
             qffl_learning_rate = 0.01,
@@ -86,25 +88,20 @@ if __name__ == "__main__":
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
-            target_delta=wandb.config.target_delta
+            total_num_clients=wandb.config.total_num_clients
             )
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
+            #eval_fn=None,# global_model_eval,
+            eval_fn=global_model_eval,
+            data_folder=test_data_folder,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             num_rounds=args.rounds,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_, 
             min_available_clients = MIN_AVAILABLE_CLIENTS_)
-# uncomment this and outcomment what is above
-###################################################################
-    # # Define strategy
-    # strategy = fl.server.strategy.QFedAvg(
-    #     fraction_fit=0.5,
-    #     fraction_eval=0.5,
-    # )
-# #################################################################
 
     # Start server
     fl.server.start_server(
@@ -112,4 +109,3 @@ if __name__ == "__main__":
         config={"num_rounds": args.rounds},
         strategy=strategy,
     )
-
