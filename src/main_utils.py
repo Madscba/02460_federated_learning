@@ -1,10 +1,14 @@
 import wandb
 import sys
+import random
+import numpy as np
+import torch
+
 
 
 def parse_args(parser):
-    parser.add_argument('--user', 
-                help='user ex f0000_14', default='f0000_14')
+    #parser.add_argument('--user', 
+    #            help='user ex f0000_14', default='f0000_14')
     parser.add_argument('--wandb_mode', 
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', 
@@ -17,6 +21,8 @@ def parse_args(parser):
         default='client')
     parser.add_argument('--dataset_path',
         default=None)
+    parser.add_argument('--seed', type=int,
+            help='set integer seed', default=1)
 
     #arguments used to overwrite config files
 
@@ -56,3 +62,24 @@ def update_config(args):
                 wandb.config.update({key:val}, allow_val_change=True)
                 print(f'{key} was overidden with value: {val}', file=sys.stdout)
 
+def sample_client(data_pool="Active"):
+    """
+    returns a sample from specified data_pool (Active: 2996 user) (Test: 596 users)
+    """
+
+    if data_pool == "Active":
+        usernames = open('src/data/usernames_test.txt').read().splitlines()
+    else:
+        usernames = open('src/data/usernames_test.txt').read().splitlines()
+
+    username = random.choice(usernames)
+    return username
+
+def set_seed(seed):
+    """
+    Seed sampling of clients, random noise, etc.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
