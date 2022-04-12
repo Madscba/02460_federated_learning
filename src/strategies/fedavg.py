@@ -180,7 +180,6 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        print('uses fedavg aswell')
         weights=parameters_to_weights(parameters)
         eval_res = self.eval_fn(state_dict=None,
                                 user_names_test_file=self.test_file_path,
@@ -279,7 +278,6 @@ class FedAvg(Strategy):
         # only does something if its the final iteration: rounds == num_rounds.
         # The function counts aswell
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(

@@ -1,6 +1,6 @@
 import flwr as fl
 from strategies.fedavg import FedAvg
-from global_model_eval import global_model_eval
+from global_model_eval_deprecated import global_model_eval
 from model import Net
 import wandb
 

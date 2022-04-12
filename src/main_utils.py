@@ -1,11 +1,13 @@
 from email.policy import default
 import wandb
 import sys
-from client import FemnistClient
 import wandb
 from client_dataset import FemnistDataset
 from torchvision import transforms
 from torch.utils.data import DataLoader 
+import random
+import numpy as np
+import torch
 
 def load_data(user,num_classes): 
     """Load Femnist (training and test set)."""
@@ -20,9 +22,10 @@ def load_data(user,num_classes):
     return trainloader, testloader, num_examples
 
 
+
 def parse_args(parser):
-    parser.add_argument('--user', 
-                help='user ex f0000_14', default='f0000_14')
+    #parser.add_argument('--user', 
+    #            help='user ex f0000_14', default='f0000_14')
     parser.add_argument('--wandb_mode', 
                 help='use "online" to log and sync with cloud', default='disabled')
     parser.add_argument('--configs', 
@@ -36,6 +39,8 @@ def parse_args(parser):
     parser.add_argument('--dataset_path',
         default=None)
     parser.add_argument('--num_classes',default=None,type=int)
+    parser.add_argument('--seed', type=int,
+            help='set integer seed', default=1)
 
     #arguments used to overwrite config files
 
@@ -68,3 +73,25 @@ def parse_args(parser):
     args = parser.parse_args()
     return args
 
+
+def sample_client(data_pool="Active"):
+    """
+    returns a sample from specified data_pool (Active: 2996 user) (Test: 596 users)
+    """
+
+    if data_pool == "Active":
+        usernames = open('src/data/usernames_test.txt').read().splitlines()
+    else:
+        usernames = open('src/data/usernames_test.txt').read().splitlines()
+
+    username = random.choice(usernames)
+    return username
+
+def set_seed(seed):
+    """
+    Seed sampling of clients, random noise, etc.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
