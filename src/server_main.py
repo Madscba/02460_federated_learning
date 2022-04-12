@@ -58,6 +58,7 @@ if __name__ == "__main__":
     if args.wandb_username:
         os.environ['WANDB_USERNAME']=args.wandb_username
 
+       
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key=args.api_key)
     wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type='server')
