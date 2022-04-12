@@ -39,6 +39,7 @@ import wandb
 from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 import numpy as np
+from model import Net
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -96,7 +97,8 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        user_names_test_file=None
+        user_names_test_file=None,
+        model=Net
     ) -> None:
         """Federated Averaging strategy.
 
@@ -147,8 +149,8 @@ class FedAvg(Strategy):
         self.initial_parameters = initial_parameters
         self.round=1
         self.test_file_path=user_names_test_file
-
         self.name = "Fedavg"
+        self.model=model
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -182,9 +184,10 @@ class FedAvg(Strategy):
         """Evaluate model parameters using an evaluation function."""
         weights=parameters_to_weights(parameters)
         eval_res = self.eval_fn(state_dict=None,
-                                user_names_test_file=self.test_file_path,
+                                data_folder=self.test_file_path,
                                 parameters=weights,
                                 num_test_clients=60,
+                                model=self.model,
                                 get_loss=True)
         acc, loss, num_observations  = eval_res
         sum_obs=np.sum(np.array(num_observations))

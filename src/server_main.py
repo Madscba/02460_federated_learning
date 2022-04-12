@@ -1,3 +1,4 @@
+from email.policy import default
 import flwr as fl
 
 from strategies.dp_fedavg import DPFedAvg
@@ -10,6 +11,7 @@ import wandb
 import os
 from flwr.server.client_manager import SimpleClientManager
 from server import ServerDisconnect
+from main_utils import choose_model
 
 
 
@@ -18,7 +20,8 @@ FRACTION_EVAL_ = 0.5
 MIN_FIT_CLIENTS_ = 10
 MIN_EVAL_CLIENTS_ = 2
 MIN_AVAILABLE_CLIENTS_ = 10
-test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_test.txt'
+test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/test_stored_as_tensors'
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select strategy')
@@ -37,6 +40,15 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
+    parser.add_argument("--model", default='Net', type=str)
+    parser.add_argument(
+        "--api_key",
+        default=None
+    )
+    parser.add_argument(
+        "--entity",
+        default=None
+    )
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -47,8 +59,8 @@ if __name__ == "__main__":
         os.environ['WANDB_USERNAME']=args.wandb_username
 
     config=os.path.join(os.getcwd(),'src','config',args.configs)
-    wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+    wandb.login(key=args.api_key)
+    wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type='server')
     wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.config.update(args, allow_val_change=True)
 
@@ -95,6 +107,7 @@ if __name__ == "__main__":
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
+            model=choose_model(args.model),
             eval_fn=global_model_eval,
             user_names_test_file=test_file_path,
             fraction_fit=FRACTION_FIT_,

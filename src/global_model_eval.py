@@ -6,15 +6,16 @@ from model import Net
 from collections import OrderedDict
 import os
 
+
 def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
                       data_folder = "dataset/test_stored_as_tensor",
                       parameters = None,
                       num_test_clients = None,  # this is the indexing of the list so None means all
-                      get_loss = False
-                      ):
+                      get_loss = False, 
+                      model=Net):
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    net = Net().to(DEVICE)
+    net = model().to(DEVICE)
     if parameters:
         params_dict = zip(net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})

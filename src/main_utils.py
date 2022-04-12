@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 import random
 import numpy as np
 import torch
+from model import mlr, Net
 
 def load_data(user,num_classes): 
     """Load Femnist (training and test set)."""
@@ -41,12 +42,10 @@ def parse_args(parser):
     parser.add_argument('--num_classes',default=None,type=int)
     parser.add_argument('--seed', type=int,
             help='set integer seed', default=1)
-
-    #arguments used to overwrite config files
-
     parser.add_argument('--batch_size', 
         type=int,
-        default=8)
+        default=8
+    )
     parser.add_argument('--epochs', 
         type=int,
         default=1)
@@ -69,6 +68,18 @@ def parse_args(parser):
         "--straggler",
         type=bool,
         default=False
+    )
+    parser.add_argument(
+        "--model",
+        default='Net'
+    )
+    parser.add_argument(
+        "--api_key",
+        default=None
+    )
+    parser.add_argument(
+        "--entity",
+        default=None
     )
     args = parser.parse_args()
     return args
@@ -95,3 +106,7 @@ def set_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
+
+def choose_model(model_name):
+    model_dict={'Net': Net, 'mlr': mlr}
+    return model_dict[model_name]

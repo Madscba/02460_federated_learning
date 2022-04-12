@@ -6,6 +6,7 @@ dataset/*/data
 src/__pycache__
 wandb/
 src/run_gpu.sh
+src/debug.py
 *.err
 *.out
 *.pt

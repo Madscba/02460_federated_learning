@@ -1,3 +1,4 @@
+from turtle import forward
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
@@ -22,6 +23,17 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+class mlr(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fc1 = nn.Linear(128**2, 62)
+    
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.view(-1,128**2)
+        x = self.fc1(x)
+        return x
+
 if __name__ == '__main__':
     net = Net()
     net(torch.rand(3000, 1, 128, 128))
+
