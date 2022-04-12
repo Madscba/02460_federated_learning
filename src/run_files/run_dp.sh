@@ -31,7 +31,7 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_380/bin/activate
 
 echo "Starting server"
-python src/server.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --run_name='DP' --rounds=200 --noise_multiplier=0.001 --max_grad_norm=2.0 --batch_size=$batch_size --total_num_clients=$N &
+python src/server_main.py --strategy="DP_Fed" --experiment_id=$exp_id --wandb_username='johannes_boe' --wandb_mode="online" --configs=dp_sgd.yaml --run_name='DP' --rounds=200 --noise_multiplier=0.001 --max_grad_norm=2.0 --batch_size=$batch_size --total_num_clients=$N &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 

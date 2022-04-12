@@ -32,7 +32,7 @@ source /zhome/87/9/127623/Desktop/env_fl_380/bin/activate
 
 
 echo "Starting server"
-python src/server.py --wandb_mode="disabled" --experiment_id=$exp_id --wandb_username='s175548' --run_name='FedProx' --rounds=200& 
+python src/server_main.py --wandb_mode="disabled" --experiment_id=$exp_id --wandb_username='s175548' --run_name='FedProx' --rounds=200& 
 sleep 3 # Sleep for 3s to give the server enough time to start
 
 while read user && (($n<=$N)); do

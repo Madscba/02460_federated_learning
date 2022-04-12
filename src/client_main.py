@@ -1,5 +1,3 @@
-from collections import OrderedDict
-from mimetypes import init
 import warnings
 from client import FemnistClient
 import flwr as fl
@@ -8,8 +6,8 @@ from model import Net
 import argparse
 import os
 import wandb
-from train_test_utils import choose_train_fn, load_data
-from main_utils import parse_args, update_config
+from main_utils import load_data
+from main_utils import parse_args
 import sys
 
 
@@ -35,16 +33,16 @@ def main(args):
     wandb.run.name = args.user+'_'+wandb.run.id
     wandb.run.save()
 
+
     # Load data (CIFAR-10)
-    trainloader, testloader, num_examples = load_data(args.user)
+    trainloader, testloader, num_examples = load_data(args.user, args.num_classes)
 
     # Flower client
     qfed_client = args.qfed # default is false
     client=FemnistClient(net, trainloader, testloader, num_examples,
-                         qfed_client=qfed_client,
-                         train_fn=choose_train_fn(wandb.config.train_fn))
+                         qfed_client=qfed_client)
 
-    # client.fit(Net().parameters(),config={'round':1})
+ #   client.fit(Net().parameters(),config={'round':1})
     # Start client
     host = "localhost:8080" if sys.platform == "win32" else "[::]:8080" # needed for windows
     fl.client.start_numpy_client(host, client=client)

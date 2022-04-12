@@ -4,9 +4,7 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 from dp_sgd_utils import clip_gradients, add_noise
 from FedOptLoss import FedOptLoss
-from privacy_opt import PrivacyAccount
-from client_dataset import FemnistDataset
-from torch.utils.data import DataLoader
+
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -65,15 +63,3 @@ def test(net, testloader,round):
     wandb.log({"round":round,"test_loss": loss, "test_accuracy": accuracy})
     return loss, accuracy
 
-
-def load_data(user): 
-    """Load Femnist (training and test set)."""
-    transform = transforms.Compose(
-        [transforms.ToTensor()]
-    )
-    trainset = FemnistDataset(user, transform, train=True)
-    testset = FemnistDataset(user, transform, train=False)
-    trainloader = DataLoader(trainset, batch_size=wandb.config.batch_size, shuffle=True)
-    testloader = DataLoader(testset, batch_size=wandb.config.batch_size)
-    num_examples = {"trainset": len(trainset), "testset": len(testset)}
-    return trainloader, testloader, num_examples

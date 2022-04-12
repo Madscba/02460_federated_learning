@@ -1,5 +1,23 @@
+from email.policy import default
 import wandb
 import sys
+from client import FemnistClient
+import wandb
+from client_dataset import FemnistDataset
+from torchvision import transforms
+from torch.utils.data import DataLoader 
+
+def load_data(user,num_classes): 
+    """Load Femnist (training and test set)."""
+    transform = transforms.Compose(
+        [transforms.ToTensor()])
+
+    trainset = FemnistDataset(user, transform, train=True,num_classes=num_classes)
+    testset = FemnistDataset(user, transform, train=False,num_classes=num_classes)
+    trainloader = DataLoader(trainset, batch_size=wandb.config.batch_size, shuffle=True)
+    testloader = DataLoader(testset, batch_size=wandb.config.batch_size)
+    num_examples = {"trainset": len(trainset), "testset": len(testset)}
+    return trainloader, testloader, num_examples
 
 
 def parse_args(parser):
@@ -17,6 +35,7 @@ def parse_args(parser):
         default='client')
     parser.add_argument('--dataset_path',
         default=None)
+    parser.add_argument('--num_classes',default=None,type=int)
 
     #arguments used to overwrite config files
 
@@ -48,11 +67,4 @@ def parse_args(parser):
     )
     args = parser.parse_args()
     return args
-
-def update_config(args):
-    for key, val in args._get_kwargs():
-        if key in wandb.config._items.keys():
-            if wandb.config[key] != val:
-                wandb.config.update({key:val}, allow_val_change=True)
-                print(f'{key} was overidden with value: {val}', file=sys.stdout)
 

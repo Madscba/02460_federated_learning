@@ -3,12 +3,11 @@ from collections import OrderedDict
 import flwr as fl
 import torch
 import wandb
-from train_test_utils import test  
+from train_test_utils import test, train  
 
 
 class FemnistClient(fl.client.NumPyClient):
-    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=False, train_fn=None) -> None:
-        self.train=train_fn
+    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=False) -> None:
         self.net=net
         self.num_examples=num_examples
         self.trainloader=trainloader
@@ -32,7 +31,7 @@ class FemnistClient(fl.client.NumPyClient):
         # only return something meaningfull if self.qfed == true
         info = self.loss_prior_to_training()
 
-        train_loss=self.train(self.net, self.trainloader, round=config['round'], epochs=wandb.config.epochs)
+        train_loss=train(self.net, self.trainloader, round=config['round'], epochs=wandb.config.epochs)
 
         info['loss']=train_loss
         return self.get_parameters(), self.num_examples["trainset"], info

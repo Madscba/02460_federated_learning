@@ -145,7 +145,7 @@ class FedAvg(Strategy):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.round=0
+        self.round=1
         self.test_file_path=user_names_test_file
 
         self.name = "Fedavg"
@@ -180,23 +180,21 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        self.round+=1
-        print("fedavg uses aswell")
+        print('uses fedavg aswell')
         weights=parameters_to_weights(parameters)
         eval_res = self.eval_fn(state_dict=None,
                                 user_names_test_file=self.test_file_path,
                                 parameters=weights,
                                 num_test_clients=60,
                                 get_loss=True)
-        if eval_res is None:
-            return None
         acc, loss, num_observations  = eval_res
         sum_obs=np.sum(np.array(num_observations))
-        test_acc=np.array(acc)*np.array(num_observations)/sum_obs
-        test_loss=np.array(loss)*np.array(num_observations)/sum_obs
+        test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
+        test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
         wandb.log({'round':self.round,
-                   'global_test_loss':test_loss,
-                   'global_test_accuracy':test_acc})
+                   'mean_global_test_loss':test_loss,
+                   'mean_global_test_accuracy':test_acc,
+                   'dis_global_test_accuracy':np.array(acc)})
 
         return None
 
@@ -257,6 +255,7 @@ class FedAvg(Strategy):
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
+        self.round=rnd
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted

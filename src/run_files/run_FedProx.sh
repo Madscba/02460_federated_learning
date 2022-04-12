@@ -32,7 +32,7 @@ source /zhome/87/9/127623/Desktop/env_fl/bin/activate
 
 
 echo "Starting server"
-python src/server.py &
+python src/server_main.py &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 

@@ -31,7 +31,7 @@ source /zhome/87/9/127623/Desktop/env_fl/bin/activate
 
 
 echo "Starting server"
-python src/server.py --strategy="QFed_man" &
+python src/server_main.py --strategy="QFed_man" &
 sleep 3  # Sleep for 3s to give the server enough time to start
 
 

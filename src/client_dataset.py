@@ -11,7 +11,7 @@ from dataset_utils import load_n_split, relabel_class
 class FemnistDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, user, transform=None, train=True, train_proportion = 0.8):
+    def __init__(self, user, transform=None, train=True, train_proportion = 0.8, num_classes=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -23,7 +23,7 @@ class FemnistDataset(Dataset):
             self.root_dir=wandb.config.dataset_path    
         else:
             self.root_dir=os.path.join(os.getcwd(),'dataset/femnist')
-        self.imgs_labs = load_n_split(user, self.root_dir, train, train_proportion = train_proportion)
+        self.imgs_labs = load_n_split(user, self.root_dir, train, train_proportion,num_classes)
         self.transform = transform
     
     def __len__(self):
@@ -36,14 +36,14 @@ class FemnistDataset(Dataset):
         img_name = os.path.join(self.root_dir,
                                   self.imgs_labs[idx, 0])
         img = Image.open(img_name)
-        target=relabel_class(self.imgs_labs[idx, 1])
+        target=tensor(int(self.imgs_labs[idx, 1]))
         if self.transform:
             img = self.transform(img)
 
         # image is 3x128x128 but is grayscale so 1x128x128 is more apropriate
         img = img[0, :, :]
         img = img.unsqueeze(0)
-        return img, tensor(target)
+        return img, target
 
 
 
