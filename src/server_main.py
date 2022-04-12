@@ -46,9 +46,16 @@ if __name__ == "__main__":
     if args.wandb_username:
         os.environ['WANDB_USERNAME']=args.wandb_username
 
+       
     config=os.path.join(os.getcwd(),'src','config',args.configs)
-    wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
-    wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+    if args.wandb_username == 's173934':
+        wandb.login(key='a49a6933370e2c529423c7f224c5e773600b033b')
+        wandb.init(project="02460_FL", entity="madscba", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+   
+    else:
+           
+        wandb.login(key='47304b319fc295d13e84bba0d4d020fc41bd0629')
+        wandb.init(project="02460_federated_learning", entity="02460-federated-learning", group=experiment, config=config, mode=args.wandb_mode,job_type='server')
     wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.config.update(args, allow_val_change=True)
 
