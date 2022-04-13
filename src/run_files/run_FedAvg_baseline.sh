@@ -14,14 +14,14 @@
 #BSUB -e E_fl_%J.err 
 
 
-filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
-datapath='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
+##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
+
 n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 epoch_num=1
-rounds=200
-wandb_mode="online"
+rounds=20
+wandb_mode="disabled"
 exp_id='FedAvg_E1'
 strategy='FedAvg'
 ##exp_id=$(date +"FedAvg_%d%b%T")
@@ -33,12 +33,29 @@ source /zhome/87/9/127623/Desktop/env_fl_380/bin/activate
 
 
 echo "Starting server"
-python src/server_main.py --wandb_mode=$wandb_mode --experiment_id=$exp_id --wandb_username='s173934' --run_name=$strategy --rounds=$rounds&pid=$!
+python src/server_main.py --wandb_mode=$wandb_mode \
+--experiment_id=$exp_id \
+--wandb_username='s173934' \
+--run_name=$strategy \
+--entity madscba \
+--api_key a49a6933370e2c529423c7f224c5e773600b033b \
+--wandb_project 02460_FL \
+--rounds=$rounds&pid=$!
+
 sleep 3 # Sleep for 3s to give the server enough time to start
 
 while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	echo "Starting client: $n , name: $user"
-   	timeout 2m python src/client_main.py --seed=$n --experiment_id=$exp_id --epochs=$epoch_num --wandb_mode=$wandb_mode --wandb_username='s173934' --job_type="client_$strategy" --config=config.yaml --dataset_path=$datapath& 
+   	timeout 2m python src/client_main.py \
+	--seed=$n \
+	--experiment_id=$exp_id \
+	--epochs=$epoch_num \
+	--wandb_mode=$wandb_mode \
+	--wandb_username='s173934' \
+	--job_type="client_$strategy" \
+	--config=config.yaml\
+	 --dataset_path=$datapath& 
+
 	if [ $(expr $n % 10) == 0 ]; then
 		echo "sleeping for 60 sec" ##90 sec
 		sleep 60
