@@ -2,7 +2,7 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J intro_FL_exp
-#BSUB -n 20 ##Number of cores
+#BSUB -n 10 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
@@ -20,8 +20,8 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 epoch_num=1
-rounds=20
-wandb_mode="disabled"
+rounds=1
+wandb_mode="online"
 exp_id='FedAvg_E1'
 strategy='FedAvg'
 ##exp_id=$(date +"FedAvg_%d%b%T")
@@ -57,8 +57,8 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	 --dataset_path=$datapath& 
 
 	if [ $(expr $n % 10) == 0 ]; then
-		echo "sleeping for 60 sec" ##90 sec
-		sleep 60
+		echo "sleeping for" $((30+5*$epoch_num)) 
+		sleep $((30+5*$epoch_num))
 	fi
 	n=$(($n+1))
 done
