@@ -34,7 +34,7 @@ def main(args):
     
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key=args.api_key)
-    wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, job_type=args.job_type, mode=args.wandb_mode)
+    wandb.init(project=args.wandb_project, entity=args.entity, group=experiment, config=config, job_type=args.job_type, mode=args.wandb_mode)
     wandb.config.update(args, allow_val_change=True)
     wandb.run.name = user+'_'+wandb.run.id
     wandb.run.save()

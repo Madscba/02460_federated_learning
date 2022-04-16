@@ -10,16 +10,16 @@
 #BSUB -W 24:00 ##20 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
-#BSUB -o O_fl_%J.out 
-#BSUB -e E_fl_%J.err 
+#BSUB -o O_fl_epoch_%J.out 
+#BSUB -e E_fl_epoch_%J.err 
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 n=1 #spawned_clients
-N=2950 #amount of clients
+N=25000 #amount of clients
 n_wait=9
-epoch_numbers="1 2 4 8 16 32"
+epoch_numbers="2 4 8 16 32"
 ##epoch_num=1
 rounds=200
 wandb_mode="online"
@@ -54,6 +54,9 @@ do
 		--epochs=$epoch_num \
 		--wandb_mode=$wandb_mode \
 		--wandb_username='s173934' \
+		--entity madscba \
+		--api_key a49a6933370e2c529423c7f224c5e773600b033b \
+		--wandb_project 02460_FL \
 		--job_type="client_$strategy" \
 		--config=config.yaml\
 		 --dataset_path=$datapath& 
