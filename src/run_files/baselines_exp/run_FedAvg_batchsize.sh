@@ -10,20 +10,21 @@
 #BSUB -W 24:00 ##20 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
-#BSUB -o O_fl_%J.out 
-#BSUB -e E_fl_%J.err 
+#BSUB -o O_fl_batch_%J.out 
+#BSUB -e E_fl_batch_%J.err 
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 n=1 #spawned_clients
-N=2950 #amount of clients
+N=30000 #amount of clients
 n_wait=9
-epoch_numbers="1 2 4 8 16 32"
-##epoch_num=1
+batch_sizes="2 4 8 16 32 64"
+epoch_num=8
+lr=0.001
 rounds=200
 wandb_mode="online"
-exp_id='FedAvg_epoch'
+exp_id='FedAvg_batch_size'
 strategy='FedAvg'
 ##exp_id=$(date +"FedAvg_%d%b%T")
 
@@ -32,11 +33,11 @@ echo "starting bash script"
 module load python3/3.8.0
 source /zhome/87/9/127623/Desktop/env_fl_380/bin/activate
 
-for epoch_num in $epoch_numbers
+for batch_size in $batch_sizes
 do
 	echo "Starting server $epoch_num"
 	python src/server_main.py --wandb_mode=$wandb_mode \
-	--experiment_id=$exp_id$epoch_num \
+	--experiment_id=$exp_id$batch_size \
 	--wandb_username='s173934' \
 	--run_name=$strategy \
 	--entity madscba \
@@ -47,20 +48,25 @@ do
 	sleep 3 # Sleep for 3s to give the server enough time to start
 
 	while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
-		echo "Starting client: $n , name: $n , epoch: $epoch_num"
+		echo "Starting client: $n, lr: $batch_size"
 	   	timeout 2m python src/client_main.py \
 		--seed=$n \
-		--experiment_id=$exp_id$epoch_num \
+		--experiment_id=$exp_id$batch_size \
 		--epochs=$epoch_num \
 		--wandb_mode=$wandb_mode \
 		--wandb_username='s173934' \
+		--entity madscba \
+		--api_key a49a6933370e2c529423c7f224c5e773600b033b \
+		--wandb_project 02460_FL \
 		--job_type="client_$strategy" \
 		--config=config.yaml\
+		--batch_size=$batch_size \
+		--lr=$lr\
 		 --dataset_path=$datapath& 
 
 		if [ $(expr $n % 10) == 0 ]; then
-			echo "sleeping for" $((30+5*$epoch_num)) 
-			sleep $((30+5*$epoch_num))
+			echo "sleeping for" $((30+64/$batch_size))
+			sleep $((30+64/$batch_size)) ##$((30+5*$epoch_num))
 		fi
 		n=$(($n+1))
 	done
