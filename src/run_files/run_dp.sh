@@ -1,13 +1,13 @@
 #!/bin/bash
 ## 02460 FL, template
 #BSUB -q hpc
-#BSUB -J dp_exp
-#BSUB -n 20 ##Number of cores
+#BSUB -J dp_exp4
+#BSUB -n 10 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 00:40 ##120 minutes (hh:mm)
+#BSUB -W 02:30 ##120 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
 #BSUB -o O_fl_%J.out 
@@ -22,9 +22,9 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 epoch_num=1
-rounds=1
+rounds=200
 wandb_mode="online"
-exp_id='DP_E1'
+exp_id='DP_E4'
 strategy='DP_Fed'
 batch_size=10
 
@@ -43,8 +43,8 @@ python src/server_main.py --wandb_mode=$wandb_mode \
 --api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
 --wandb_project 02460_FL \
 --configs=dp_sgd.yaml \
---noise_multiplier=0.001 \
---max_grad_norm=2.0 \
+--noise_multiplier=0.05 \
+--max_grad_norm=1.0 \
 --batch_size=$batch_size \
 --total_num_clients=$N \
 --rounds=$rounds&pid=$!

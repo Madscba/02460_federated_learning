@@ -4,6 +4,7 @@ import flwr as fl
 from strategies.dp_fedavg import DPFedAvg
 from strategies.fedavg import FedAvg
 from strategies.qfedavg_fixed import QFedAvg
+from strategies.fedx import FedX
 from global_model_eval import global_model_eval
 from strategies.qfedavg_manual_impl import QFedAvg_manual
 import argparse
@@ -105,6 +106,23 @@ if __name__ == "__main__":
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
             total_num_clients=wandb.config.total_num_clients
+            )
+    elif args.strategy == "FedX":
+        print("Strategy: FedX")
+        strategy = FedX(
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_,
+            min_available_clients=MIN_AVAILABLE_CLIENTS_,
+            num_rounds=args.rounds,
+            batch_size=wandb.config.batch_size,
+            noise_multiplier=wandb.config.noise_multiplier,
+            noise_scale=wandb.config.noise_scale,
+            max_grad_norm=wandb.config.max_grad_norm,
+            total_num_clients=wandb.config.total_num_clients,
+            q_param = 0.2,
+            qffl_learning_rate = 0.01
             )
     else:
         print("Strategy: FedAvg")

@@ -39,6 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
+from .fedavg import FedAvg
 from privacy_opt import PrivacyAccount
 from model import Net
 
@@ -79,7 +80,7 @@ than or equal to the values of `min_fit_clients` and `min_eval_clients`.
 """
 
 
-class DPFedAvg(Strategy):
+class FedX(FedAvg):
     """Configurable DP FedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -104,7 +105,9 @@ class DPFedAvg(Strategy):
         max_grad_norm: float = 1.1,
         total_num_clients: int = 1000,
         user_names_test_file=None,
-        model=Net
+        model=Net,
+        q_param: float = 0.2,
+        qffl_learning_rate: float = 0.1,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -133,7 +136,18 @@ class DPFedAvg(Strategy):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-        super().__init__()
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
+            min_available_clients=min_available_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=initial_parameters,
+        )
 
         if (
             min_fit_clients > min_available_clients
@@ -163,11 +177,16 @@ class DPFedAvg(Strategy):
         self.round=1
         self.privacy_account = None
         self.test_file_path=user_names_test_file
-        self.name = "DP_Fedavg"
+        self.name = "FedX"
         self.model=model
+        self.learning_rate = qffl_learning_rate
+        self.L = 1/qffl_learning_rate
+        self.q_param = q_param
+        self.pre_weights: Optional[Weights] = None
+
 
     def __repr__(self) -> str:
-        rep = f"FedAvg(accept_failures={self.accept_failures})"
+        rep = f"FedX(accept_failures={self.accept_failures})"
         return rep
 
     def set_privacy_account(self, results):
@@ -294,10 +313,47 @@ class DPFedAvg(Strategy):
         if not self.accept_failures and failures:
             return None, {}
         # Convert results
-        weights_results = [
-                    (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
-        weights_aggregated = aggregate(weights_results)
+
+        def norm_grad_squared(list_of_grads: List[Weights]) -> float:
+            # input: nested gradients
+            # output: square of the L-2 norm
+            n = 0.0
+            for grad in list_of_grads:
+                n += np.sum(np.square(grad))
+            return n
+
+        if self.pre_weights is None:
+            raise Exception("FedX pre_weights are None in aggregate_fit")
+       
+        weights_prev = self.pre_weights
+        ds = [0.0 for _ in range(len(weights_prev))]
+        hs = 0.0
+        eps = 1e-10
+
+        for _, params in results:
+            loss = params.metrics.get("loss_prior_to_training", None)
+            if loss == None: print("please enable qfed_client = True in client_main")
+
+            weights_new = parameters_to_weights(params.parameters)
+            grads = [
+                    (weights_before - weights_after) * self.L for
+                     weights_before, weights_after in zip(weights_prev, weights_new)
+                     ]
+
+
+            ds = [d + np.float_power(loss + eps, self.q_param) * grad for d, grad in zip(ds, grads)]
+
+            hs += (self.q_param *
+                   np.float_power(loss + eps, self.q_param-1) *
+                   norm_grad_squared(grads) +
+                   self.L *
+                   np.float_power(loss + eps, self.q_param)
+                   )
+
+        weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
+
         self.set_privacy_account(results=results)
+
         if self.noise_scale:
             sigma = self.privacy_account.noise_multiplier
             for w in weights_aggregated:
