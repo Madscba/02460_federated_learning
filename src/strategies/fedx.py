@@ -253,6 +253,8 @@ class FedX(FedAvg):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        weights = parameters_to_weights(parameters)
+        self.pre_weights = weights
         config = {'round':rnd}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided

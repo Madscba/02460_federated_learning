@@ -7,7 +7,7 @@
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 00:30 ##120 minutes (hh:mm)
+#BSUB -W 02:30 ##120 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
 #BSUB -o O_fl_%J.out 
@@ -22,12 +22,12 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 epoch_num=20
-rounds=2
+rounds=200
 num_classes=10
 wandb_mode="online"
-exp_id='X_ex1'
+exp_id='X_ex2'
 strategy='FedX'
-batch_size=10
+batch_size=8
 straggler_pct=0.5
 
 echo "starting bash script"
@@ -51,7 +51,7 @@ python src/server_main.py --wandb_mode=$wandb_mode \
 --total_num_clients=$N \
 --rounds=$rounds&pid=$!
 
-sleep 10  # Sleep for 3s to give the server enough time to start
+sleep 3  # Sleep for 3s to give the server enough time to start
 
 
 while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
@@ -72,6 +72,7 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 		--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
 		--wandb_project 02460_FL \
 		--batch_size=$batch_size \
+		--qfed=True \
 		--dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'&
 	else
 		echo "Starting client: $n , name: $user"
@@ -89,7 +90,9 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 		--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
 		--wandb_project 02460_FL \
 		--batch_size=$batch_size \
+		--qfed=True \
 		--dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'&
+	fi
 	if [ $(expr $n % 10) == 0 ]; then
 		echo "sleeping for 100  sec" ## sec
 		sleep 100
