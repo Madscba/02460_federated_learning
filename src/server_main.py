@@ -38,6 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
+    parser.add_argument("--q_param",type=float,default=0.2)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
@@ -74,7 +75,7 @@ if __name__ == "__main__":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
             q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            qffl_learning_rate = 0.001,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -85,7 +86,7 @@ if __name__ == "__main__":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            qffl_learning_rate = 0.001,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -121,8 +122,8 @@ if __name__ == "__main__":
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
             total_num_clients=wandb.config.total_num_clients,
-            q_param = 0.2,
-            qffl_learning_rate = 0.01
+            q_param = wandb.config.q_param,
+            qffl_learning_rate = wandb.config.lr
             )
     else:
         print("Strategy: FedAvg")
