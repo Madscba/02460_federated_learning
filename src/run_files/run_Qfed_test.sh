@@ -46,6 +46,7 @@ do
 	--run_name=$strategy \
 	--strategy=$strategy \
 	--q_param=$q_param \
+	--config=qfed.yaml\
 	--entity karlulbaek \
 	--api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
 	--wandb_project 02460_FL \
@@ -64,7 +65,10 @@ do
 		--qfed=True \
 		--config=qfed.yaml\
 		--epochs=$epoch_num \
-		--batch_size=$batch_size
+		--batch_size=$batch_size \
+		--entity karlulbaek \
+	  --api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
+	  --wandb_project 02460_FL \
 		 --dataset_path=$datapath&
 
 		if [ $(expr $n % 10) == 0 ]; then
