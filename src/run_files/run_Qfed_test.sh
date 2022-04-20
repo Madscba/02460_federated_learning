@@ -20,11 +20,12 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
-q_params = "0 0.2 0.5 1 2 5"
+q_params="0 0.2 0.5 1 2 5"
 ##epoch_num=1
 rounds=100
 wandb_mode="online"
-exp_id='Qfed_q_param'
+exp_id1='Qfed_q_param_global'
+exp_id2='Qfed_q_param_local'
 strategy='Qfed_manual'
 epoch_num=8
 batch_size=8
@@ -41,15 +42,15 @@ do
 	echo "Starting server with q param $q_param"
 	python src/server_main.py \
 	--wandb_mode=$wandb_mode \
-	--experiment_id=$exp_id$q_param \
+	--experiment_id=$exp_id1$q_param \
 	--wandb_username='karlulbaek' \
 	--run_name=$strategy \
 	--strategy=$strategy \
 	--q_param=$q_param \
 	--config=qfed.yaml\
-	--entity karlulbaek \
-	--api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
-	--wandb_project 02460_FL \
+	--entity=karlulbaek \
+	--api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
+	--wandb_project=02460_FL \
 	--rounds=$rounds&pid=$!
 
 	sleep 3 # Sleep for 3s to give the server enough time to start
@@ -58,7 +59,7 @@ do
 		echo "Starting client: $n , name: $n , q param : $q_param"
 	   	timeout 2m python src/client_main.py \
 		--seed=$n \
-		--experiment_id=$exp_id$q_param \
+		--experiment_id=$exp_id2$q_param \
 		--wandb_mode=$wandb_mode \
 		--wandb_username='karlulbaek' \
 		--job_type="client_$strategy" \
@@ -66,9 +67,9 @@ do
 		--config=qfed.yaml\
 		--epochs=$epoch_num \
 		--batch_size=$batch_size \
-		--entity karlulbaek \
-	  --api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
-	  --wandb_project 02460_FL \
+		--entity=karlulbaek \
+	  --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
+	  --wandb_project=02460_FL \
 		 --dataset_path=$datapath&
 
 		if [ $(expr $n % 10) == 0 ]; then

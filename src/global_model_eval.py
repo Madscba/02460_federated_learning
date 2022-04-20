@@ -25,11 +25,10 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
 
     if get_loss: loss_func = torch.nn.CrossEntropyLoss()
 
-    cwd = os.getcwd()
-    client_names = os.listdir(os.path.join(cwd, data_folder))
-    x_data = sorted([os.path.join(cwd, data_folder, client)
+    client_names = os.listdir(data_folder)
+    x_data = sorted([os.path.join(data_folder, client)
                      for client in client_names if client.endswith("x.pt")])[:num_test_clients]
-    y_data = sorted([os.path.join(cwd, data_folder, client)
+    y_data = sorted([os.path.join(data_folder, client)
                      for client in client_names if client.endswith("y.pt")])[:num_test_clients]
 
     import time
@@ -54,7 +53,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
                 if get_loss:
                     loss.append(loss_func(pred, y_).item())
 
-    print("time:", time.time() - t)
+    #print("time:", time.time() - t)
     return acc, loss, num_obs_per_user
 
 if __name__ == '__main__':
