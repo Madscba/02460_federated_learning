@@ -10,8 +10,8 @@
 #BSUB -W 24:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_fl_%J.out
-#BSUB -e E_fl_%J.err
+#BSUB -o O_fl_qfed%J.out
+#BSUB -e E_fl_qfed%J.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -22,7 +22,7 @@ n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
 q_params="0 0.2 0.5 1 2 5"
 ##epoch_num=1
-rounds=100
+rounds=200
 wandb_mode="online"
 exp_id1='Qfed_q_param_global'
 exp_id2='Qfed_q_param_local'
@@ -73,8 +73,8 @@ do
 		 --dataset_path=$datapath&
 
 		if [ $(expr $n % 10) == 0 ]; then
-			echo "sleeping for" $((30+5*$epoch_num))
-			sleep $((30+5*$epoch_num))
+			echo "sleeping for" $((30+1*$epoch_num))
+			sleep $((30+1*$epoch_num))
 		fi
 		n=$(($n+1))
 	done
