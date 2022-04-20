@@ -41,6 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
     parser.add_argument("--model", default='Net', type=str)
+    parser.add_argument("--job_type",default='server')
     parser.add_argument(
         "--api_key",
         default=None
@@ -61,7 +62,7 @@ if __name__ == "__main__":
        
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key=args.api_key)
-    wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+    wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type=args.job_type)
     wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.config.update(args, allow_val_change=True)
 

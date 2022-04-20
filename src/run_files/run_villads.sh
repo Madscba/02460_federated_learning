@@ -16,16 +16,17 @@
 
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
+s=1
 N=2000 #amount of clients
 epoch_num=20
 rounds=200
 strategy='FedAvg'
 wandb_mode='online'
-straggler_pct=0.5
+n_stragglers=0
 exp_id='FedProx_vs_FedAvg'
 config=config.yaml
 num_classes=10
-model='mlr'
+model='Net'
 
 
 echo "starting bash script"
@@ -37,14 +38,15 @@ echo "Starting server"
 python src/server_main.py --wandb_mode=$wandb_mode \
 --experiment_id=$exp_id \
 --wandb_username='s175548' \
---run_name=$strategy \
+--run_name="($strategy)_($model)_($num_classes)c" \
 --model $model \
+--job_type "server_straggler_($n_stragglers)/10_E($epoch_num)" \
 --entity s175548 \
 --api_key 47304b319fc295d13e84bba0d4d020fc41bd0629 \
 --rounds $rounds&pid=$!
 sleep 10  # Sleep for 3s to give the server enough time to start
 while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
-	if [ $(expr $n % 2) == 0 ]
+	if [ "$s" -le "$n_stragglers" ]
 	then	
 		echo "Starting client: $n , name: $user (straggler)"
 		python src/client_main.py --seed=$n --wandb_username='s175548' \
@@ -75,7 +77,9 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	if [ $(expr $n % 10) == 0 ]; then
 		echo "sleeping for 180  sec" ## sec
 		sleep 100
+		s=0
 	fi
+	s=$(($s+1))
 	n=$(($n+1))
 done < $filename
 
