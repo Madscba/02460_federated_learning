@@ -79,7 +79,6 @@ if __name__ == "__main__":
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
             qffl_learning_rate = wandb.config.lr,
-            eval_fn=global_model_eval,
             test_file_path=test_file_path,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,

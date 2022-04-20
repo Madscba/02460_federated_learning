@@ -35,7 +35,7 @@ batch_size=8
 echo "starting bash script"
 
 module load python3/3.8.0
-source /zhome/87/9/127623/Desktop/env_fl_380/bin/activate
+source /zhome/fb/d/137704/Desktop/fed_lr/v_env/bin//activate
 
 for q_param in $q_params
 do
