@@ -43,6 +43,7 @@ python src/server_main.py --wandb_mode=$wandb_mode \
 --job_type "server_straggler_($n_stragglers)/10_E($epoch_num)" \
 --entity s175548 \
 --api_key 47304b319fc295d13e84bba0d4d020fc41bd0629 \
+--wandb_project 02460_federated_learning \
 --rounds $rounds&pid=$!
 sleep 10  # Sleep for 3s to give the server enough time to start
 while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
@@ -71,6 +72,7 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 		--num_classes $num_classes \
 		--entity s175548 \
 		--api_key 47304b319fc295d13e84bba0d4d020fc41bd0629 \
+		--wandb_project 02460_federated_learning \
 		--model $model \
 		--dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'& 
 	fi

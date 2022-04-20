@@ -37,9 +37,10 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 from privacy_opt import PrivacyAccount
+from model import Net
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -101,7 +102,9 @@ class DPFedAvg(Strategy):
         noise_multiplier: float = None,
         noise_scale: float = None,
         max_grad_norm: float = 1.1,
-        total_num_clients: int = 1000
+        total_num_clients: int = 1000,
+        user_names_test_file=None,
+        model=Net
     ) -> None:
         """Federated Averaging strategy.
 
@@ -157,8 +160,11 @@ class DPFedAvg(Strategy):
         self.max_grad_norm = max_grad_norm
         self.target_delta = None
         self.epsilon = 0
+        self.round=1
         self.privacy_account = None
+        self.test_file_path=user_names_test_file
         self.name = "DP_Fedavg"
+        self.model=model
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -171,8 +177,6 @@ class DPFedAvg(Strategy):
         C = len([fit_res.num_examples for _, fit_res in results]) 
         sensitivity = self.max_grad_norm / C
         self.noise_scale = self.noise_multiplier / sensitivity
-        if not self.noise_multiplier:
-            self.noise_multiplier = self.noise_scale * sensitivity
         sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
         steps = int(num_examples / self.batch_size) 
         self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
@@ -208,18 +212,23 @@ class DPFedAvg(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = parameters_to_weights(parameters)
-        print("fedavg uses aswell")
-        eval_res = self.eval_fn(weights)
-        if eval_res is None:
-            return None
-        loss, other = eval_res
-        if isinstance(other, float):
-            print(DEPRECATION_WARNING)
-            metrics = {"accuracy": other}
-        else:
-            metrics = other
-        return loss, metrics
+        weights=parameters_to_weights(parameters)
+        eval_res = self.eval_fn(state_dict=None,
+                                data_folder=self.test_file_path,
+                                parameters=weights,
+                                num_test_clients=60,
+                                model=self.model,
+                                get_loss=True)
+        acc, loss, num_observations  = eval_res
+        sum_obs=np.sum(np.array(num_observations))
+        test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
+        test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
+        wandb.log({'round':self.round,
+                   'mean_global_test_loss':test_loss,
+                   'mean_global_test_accuracy':test_acc,
+                   'dis_global_test_accuracy':np.array(acc)})
+
+        return None
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -278,6 +287,7 @@ class DPFedAvg(Strategy):
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
+        self.round=rnd
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -297,6 +307,7 @@ class DPFedAvg(Strategy):
             wandb.log({'round': rnd, "sigma": self.privacy_account.noise_multiplier})
             wandb.log({'round': rnd, "z": self.privacy_account.noise_scale})
             wandb.log({'round': rnd, "C": self.privacy_account.sample_size})
+            wandb.log({'round': rnd, "delta": self.privacy_account.target_delta})
 
         loss_aggregated = weighted_loss_avg(
             [
@@ -305,7 +316,7 @@ class DPFedAvg(Strategy):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)  # only does something if its the final iteration: rounds == num_rounds
+        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
@@ -333,6 +344,7 @@ class DPFedAvg(Strategy):
             ]
         )
 
-        wandb.log({'round':rnd,'test_accuracy_aggregated':accuracy_aggregated})
-        wandb.log({'round':rnd,'test_loss_aggregated':loss_aggregated})
+        wandb.log({'round':rnd,
+                   'test_accuracy_aggregated':accuracy_aggregated,
+                   'test_loss_aggregated':loss_aggregated})
         return loss_aggregated, {}

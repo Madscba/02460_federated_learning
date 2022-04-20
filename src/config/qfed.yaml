@@ -1,0 +1,19 @@
+epochs:
+  desc: Number of epochs to train over
+  value: 8
+
+batch_size:
+  desc: Size of each mini-batch
+  value: 8
+
+train_fn:
+  value: train
+
+strategy:
+  value: Qfed_manual
+
+lr:
+  value: 0.001
+
+qfed:
+  value: True

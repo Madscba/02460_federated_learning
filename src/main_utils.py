@@ -81,6 +81,7 @@ def parse_args(parser):
         "--entity",
         default=None
     )
+    parser.add_argument("--wandb_project", default='02460_federated_learning', type=str)
     args = parser.parse_args()
     return args
 

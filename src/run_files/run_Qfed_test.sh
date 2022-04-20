@@ -8,10 +8,10 @@
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
 #BSUB -W 24:00 ##20 minutes (hh:mm)
-###BSUB -B 
-#BSUB -N 
-#BSUB -o O_fl_%J.out 
-#BSUB -e E_fl_%J.err 
+###BSUB -B
+#BSUB -N
+#BSUB -o O_fl_%J.out
+#BSUB -e E_fl_%J.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -19,12 +19,16 @@
 n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
-epoch_numbers="1 2 4 8 16 32"
+##epoch_numbers="1 2 4 8 16 32"
+q_params = "0 0.2 0.5 1 2 5"
 ##epoch_num=1
-rounds=200
+rounds=100
 wandb_mode="online"
-exp_id='FedAvg_epoch'
-strategy='FedAvg'
+exp_id='Qfed_q_param'
+strategy='Qfed_manual'
+epoch_num=8
+batch_size=8
+
 ##exp_id=$(date +"FedAvg_%d%b%T")
 
 echo "starting bash script"
@@ -32,34 +36,43 @@ echo "starting bash script"
 module load python3/3.8.0
 source /zhome/87/9/127623/Desktop/env_fl_380/bin/activate
 
-for epoch_num in $epoch_numbers
+for q_param in $q_params
 do
-	echo "Starting server $epoch_num"
-	python src/server_main.py --wandb_mode=$wandb_mode \
-	--experiment_id=$exp_id$epoch_num \
-	--wandb_username='s173934' \
+	echo "Starting server with q param $q_param"
+	python src/server_main.py \
+	--wandb_mode=$wandb_mode \
+	--experiment_id=$exp_id$q_param \
+	--wandb_username='karlulbaek' \
 	--run_name=$strategy \
-	--entity madscba \
-	--api_key a49a6933370e2c529423c7f224c5e773600b033b \
+	--strategy=$strategy \
+	--q_param=$q_param \
+	--config=qfed.yaml\
+	--entity karlulbaek \
+	--api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
 	--wandb_project 02460_FL \
 	--rounds=$rounds&pid=$!
 
 	sleep 3 # Sleep for 3s to give the server enough time to start
 
 	while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
-		echo "Starting client: $n , name: $n , epoch: $epoch_num"
+		echo "Starting client: $n , name: $n , q param : $q_param"
 	   	timeout 2m python src/client_main.py \
 		--seed=$n \
-		--experiment_id=$exp_id$epoch_num \
-		--epochs=$epoch_num \
+		--experiment_id=$exp_id$q_param \
 		--wandb_mode=$wandb_mode \
-		--wandb_username='s173934' \
+		--wandb_username='karlulbaek' \
 		--job_type="client_$strategy" \
-		--config=config.yaml\
-		 --dataset_path=$datapath& 
+		--qfed=True \
+		--config=qfed.yaml\
+		--epochs=$epoch_num \
+		--batch_size=$batch_size \
+		--entity karlulbaek \
+	  --api_key a8ac716e669cdfe0282fc16264fc7533e33e06cf \
+	  --wandb_project 02460_FL \
+		 --dataset_path=$datapath&
 
 		if [ $(expr $n % 10) == 0 ]; then
-			echo "sleeping for" $((30+5*$epoch_num)) 
+			echo "sleeping for" $((30+5*$epoch_num))
 			sleep $((30+5*$epoch_num))
 		fi
 		n=$(($n+1))

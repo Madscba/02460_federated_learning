@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 def global_model_eval(state_dict="saved_models/Qfed_manual_state_dict.pt",
-                      user_names_test_file="dataset/femnist/data/img_lab_by_user/user_names_train.txt",
+                      user_names_test_file="dataset/femnist/data/img_lab_by_user/usernames_train.txt",
                       num_test_clients=None,  # this is the indexing of the list so None means all
                       get_loss=False):
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     wandb.config.update({'dataset_path': dataset_path})
 
     state_dict = "saved_models/fedavg_state_dict.pt"
-    user_names_test_file = "dataset/femnist/data/img_lab_by_user/user_names_train.txt"
+    user_names_test_file = "dataset/femnist/data/img_lab_by_user/usernames_train.txt"
     num_test_clients = 2  # i.e. the 10 first
     get_loss = True
 

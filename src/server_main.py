@@ -4,6 +4,7 @@ import flwr as fl
 from strategies.dp_fedavg import DPFedAvg
 from strategies.fedavg import FedAvg
 from strategies.qfedavg_fixed import QFedAvg
+from strategies.fedx import FedX
 from global_model_eval import global_model_eval
 from strategies.qfedavg_manual_impl import QFedAvg_manual
 import argparse
@@ -37,11 +38,13 @@ if __name__ == "__main__":
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-5)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
+    parser.add_argument("--q_param",type=float,default=0.2)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
     parser.add_argument("--model", default='Net', type=str)
     parser.add_argument("--job_type",default='server')
+    parser.add_argument("--wandb_project", default='02460_federated_learning', type=str)
     parser.add_argument(
         "--api_key",
         default=None
@@ -62,7 +65,7 @@ if __name__ == "__main__":
        
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key=args.api_key)
-    wandb.init(project="02460_federated_learning", entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type=args.job_type)
+    wandb.init(project=args.wandb_project, entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type=args.job_type)
     wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.config.update(args, allow_val_change=True)
 
@@ -72,8 +75,8 @@ if __name__ == "__main__":
     if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
-            q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            q_param = wandb.config.q_param,
+            qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -84,7 +87,7 @@ if __name__ == "__main__":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            qffl_learning_rate = 0.001,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -105,6 +108,23 @@ if __name__ == "__main__":
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
             total_num_clients=wandb.config.total_num_clients
+            )
+    elif args.strategy == "FedX":
+        print("Strategy: FedX")
+        strategy = FedX(
+            fraction_fit=FRACTION_FIT_,
+            fraction_eval=FRACTION_EVAL_,
+            min_fit_clients=MIN_FIT_CLIENTS_,
+            min_eval_clients=MIN_EVAL_CLIENTS_,
+            min_available_clients=MIN_AVAILABLE_CLIENTS_,
+            num_rounds=args.rounds,
+            batch_size=wandb.config.batch_size,
+            noise_multiplier=wandb.config.noise_multiplier,
+            noise_scale=wandb.config.noise_scale,
+            max_grad_norm=wandb.config.max_grad_norm,
+            total_num_clients=wandb.config.total_num_clients,
+            q_param = wandb.config.q_param,
+            qffl_learning_rate = wandb.config.lr
             )
     else:
         print("Strategy: FedAvg")
