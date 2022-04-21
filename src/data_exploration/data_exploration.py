@@ -4,7 +4,7 @@ import os
 import matplotlib.pylab as plt
 from matplotlib import pyplot
 import pickle
-import seaborn as sns
+#import seaborn as sns
 plt.style.use("seaborn")
 
 
@@ -40,7 +40,7 @@ def format_data_to_users_with_each_category(datasets):
 
 
 def visualize_category_distribution_over_classes(datasets, title='Histogram of X',
-                                                 labels=['All', "Active", "Validation", "Test_local"]):
+                                                 labels=['All', "Active", "Validation", "Test_local"],xlabel="Class percentage",ylabel='Frequency'):
     kwargs = dict(alpha=0.6, bins=60)
     colors = ['black', 'red', 'blue']
     for i in range(np.size(datasets, 0)):
@@ -50,10 +50,11 @@ def visualize_category_distribution_over_classes(datasets, title='Histogram of X
         # plt.hist(datasets[2], **kwargs, color='r', label='Test_global')
         # plt.hist(datasets[3], **kwargs, color='p', label='Test_local')
 
-    plt.gca().set(title=title, ylabel='Frequency',xlabel="Class percentage")
+    plt.gca().set(title=title, ylabel=ylabel,xlabel=xlabel)
     plt.xlim()
     plt.legend()
     plt.show()
+    a = 2
 
 def heatmap(dataset,title="",class_labels=[f"{i}" for i in range(64)]):
     class_labels[62], class_labels[63] = "",""
