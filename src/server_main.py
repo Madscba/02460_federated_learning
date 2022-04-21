@@ -38,7 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--noise_multiplier",type=float,default=0.1)
     parser.add_argument("--noise_scale",type=float,default=None)
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
-    parser.add_argument("--target_delta",type=float,default=1e-5)
+    parser.add_argument("--target_delta",type=float,default=1e-4)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
     parser.add_argument("--q_param",type=float,default=0.2)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
@@ -111,6 +111,7 @@ if __name__ == "__main__":
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
+            target_delta=wandb.config.target_delta,
             total_num_clients=wandb.config.total_num_clients
             )
     elif args.strategy == "FedX":
@@ -126,6 +127,7 @@ if __name__ == "__main__":
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
+            target_delta=wandb.config.target_delta,
             total_num_clients=wandb.config.total_num_clients,
             q_param = wandb.config.q_param,
             qffl_learning_rate = wandb.config.lr
