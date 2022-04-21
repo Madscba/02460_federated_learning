@@ -88,6 +88,7 @@ if __name__ == "__main__":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = wandb.config.q_param,
+            test_file_path=test_file_path,
             eval_fn=global_model_eval,
             qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,

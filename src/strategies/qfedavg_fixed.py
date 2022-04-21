@@ -46,6 +46,7 @@ class QFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        test_file_path=None,
         model_name="Qfed_flwr_fixed",
         num_rounds=200,
         q_param: float = 0.2,
@@ -74,7 +75,8 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
-            model_name=model_name
+            model_name=model_name,
+            test_file_path=test_file_path
         )
         self.num_rounds = num_rounds
         self.rounds = 0
@@ -91,6 +93,7 @@ class QFedAvg(FedAvg):
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
         self.name = model_name
+        self.test_file_path=test_file_path
         
 
     def __repr__(self) -> str:
