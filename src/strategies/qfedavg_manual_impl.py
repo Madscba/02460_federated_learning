@@ -38,6 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate_qffl, weighted_loss_avg, save_final_global_model
 from .fedavg import FedAvg
+import time
 
 
 class QFedAvg_manual(FedAvg):
@@ -92,6 +93,7 @@ class QFedAvg_manual(FedAvg):
         self.L = 1/qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
+        self.time = time.time()
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -219,6 +221,11 @@ class QFedAvg_manual(FedAvg):
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
         # safe the model at the final round and keep track of the number of
+        time_ = time.time()
+        print(time_-self.time)
+        self.time = time_
+
+
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
