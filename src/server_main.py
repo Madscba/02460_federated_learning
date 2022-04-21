@@ -75,8 +75,8 @@ if __name__ == "__main__":
         strategy = QFedAvg_manual(
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
-            qffl_learning_rate = wandb.config.lr,
             test_file_path=test_file_path,
+            qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -87,8 +87,9 @@ if __name__ == "__main__":
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
-            q_param = wandb.config.q_param,
             eval_fn=global_model_eval,
+            q_param = wandb.config.q_param,
+            test_file_path=test_file_path,
             qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,

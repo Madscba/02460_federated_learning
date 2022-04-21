@@ -7,7 +7,7 @@
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 00:05 ##20 minutes (hh:mm)
+#BSUB -W 03:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
 #BSUB -o O_qfed_flwr.out
@@ -24,7 +24,7 @@ q_param=0.1
 ##epoch_num=1
 rounds=200
 wandb_mode="online"
-exp_id1='Qfed_q_param_global'
+##exp_id1='Qfed_q_param_global'
 strategy='Qfed_flwr'
 epoch_num=8
 batch_size=8
@@ -40,7 +40,7 @@ source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 echo "Starting server with q param $q_param"
 python src/server_main.py \
 --wandb_mode=$wandb_mode \
---experiment_id=$exp_id1$q_param \
+--experiment_id=$strategy$q_param \
 --wandb_username='karlulbaek' \
 --run_name=$strategy \
 --strategy=$strategy \
