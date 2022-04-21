@@ -17,7 +17,7 @@
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 n=1 #spawned_clients
-N=2950 #amount of clients
+N=2000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
 q_param=0.1
@@ -56,7 +56,7 @@ sleep 10 # Sleep for 3s to give the server enough time to start
 
 while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   echo "Starting client: $n , name: $n , q param : $q_param"
-    timeout 2m python src/client_main.py \
+  python src/client_main.py \
   --seed=$n \
   --qfed=True \
   --config=qfed.yaml\
@@ -65,8 +65,10 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+1*$epoch_num))
-    sleep $((30+1*$epoch_num))
+    ##echo "sleeping for" $((30+1*$epoch_num))
+    ##sleep $((30+1*$epoch_num))
+    echo "sleeping for 100 sec" 
+    sleep 100
   fi
   n=$(($n+1))
 done
