@@ -189,7 +189,7 @@ class FedAvg(Strategy):
             eval_res = self.eval_fn(state_dict=None,
                                     data_folder=self.test_file_path,
                                     parameters=weights,
-                                    num_test_clients=10,
+                                    num_test_clients=60,
                                     model=self.model,
                                     get_loss=True)
 
@@ -197,10 +197,13 @@ class FedAvg(Strategy):
             sum_obs=np.sum(np.array(num_observations))
             test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
             test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
+            test_acc_var=np.var(np.array(acc))
+            test_loss_var=np.var(np.array(loss))
             wandb.log({'round':self.round,
                        'mean_global_test_loss':test_loss,
                        'mean_global_test_accuracy':test_acc,
-                       'dis_global_test_accuracy':np.array(acc)})
+                       'var_global_test_accuracy':test_acc_var,
+                       'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
 
         return None
 
@@ -299,21 +302,22 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        loss_aggregated = weighted_loss_avg(
-            [
+        dis_loss=[
                 (evaluate_res.num_examples, evaluate_res.loss)
                 for _, evaluate_res in results
             ]
-        )
         dis_accuracy=[
                 (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
                 for _, evaluate_res in results
             ]
-        var=np.var(np.array(dis_accuracy[:,1]))
+        var_acc=np.var(np.array(dis_accuracy)[:,1])
+        var_loss=np.var(np.array(dis_loss)[:,1])
         accuracy_aggregated = weighted_loss_avg(dis_accuracy)
+        loss_aggregated = weighted_loss_avg(dis_loss)
         wandb.log({'round':rnd,
-                   'test_accuracy_client_pool':accuracy_aggregated,
-                   'test_loss_client_pool':loss_aggregated,
-                   'var_test_accuracy_client_pool':var})
-
+                   'test_accuracy_aggregated':accuracy_aggregated,
+                   'test_loss_aggregated':loss_aggregated,
+                   'var_test_accuracy_aggregated':var_acc,
+                   'dist_test_accuracy_aggregated':wandb.Histogram(np.array(dis_loss)[:,1])
+                   })
         return loss_aggregated, {}
