@@ -102,6 +102,7 @@ class DPFedAvg(Strategy):
         noise_multiplier: float = None,
         noise_scale: float = None,
         max_grad_norm: float = 1.1,
+        target_delta: float = None,
         total_num_clients: int = 1000,
         user_names_test_file=None,
         model=Net
@@ -158,7 +159,7 @@ class DPFedAvg(Strategy):
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
-        self.target_delta = None
+        self.target_delta = target_delta
         self.epsilon = 0
         self.round=1
         self.privacy_account = None
