@@ -52,7 +52,7 @@ python src/server_main.py \
 --wandb_project=02460_FL \
 --rounds=$rounds&pid=$!
 
-sleep 3 # Sleep for 3s to give the server enough time to start
+sleep 10 # Sleep for 3s to give the server enough time to start
 
 while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   echo "Starting client: $n , name: $n , q param : $q_param"
