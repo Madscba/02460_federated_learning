@@ -10,8 +10,8 @@
 #BSUB -W 00:05 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_qfed2.out
-#BSUB -e E_qfed2.err
+#BSUB -o O_qfed_flwr.out
+#BSUB -e E_qfed_flwr.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
