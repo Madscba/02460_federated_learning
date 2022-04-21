@@ -10,8 +10,8 @@
 #BSUB -W 24:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_fl_qfed2%J.out
-#BSUB -e E_fl_qfed2%J.err
+#BSUB -o O_fl_qfed.out
+#BSUB -e E_fl_qfed.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -29,13 +29,14 @@ exp_id2='Qfed_q_param_local'
 strategy='Qfed_manual'
 epoch_num=8
 batch_size=8
+dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
 
 echo "starting bash script"
 
 module load python3/3.8.0
-source /zhome/fb/d/137704/Desktop/fed_lr/v_env/bin//activate
+source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 
 echo "Starting server with q param $q_param"
 python src/server_main.py \
@@ -45,7 +46,8 @@ python src/server_main.py \
 --run_name=$strategy \
 --strategy=$strategy \
 --q_param=$q_param \
---config=qfed.yaml\
+--dataset_path=$dataset_path \
+--config=qfed.yaml \
 --entity=karlulbaek \
 --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
 --wandb_project=02460_FL \
@@ -57,18 +59,11 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   echo "Starting client: $n , name: $n , q param : $q_param"
     timeout 2m python src/client_main.py \
   --seed=$n \
-  --experiment_id=$exp_id2$q_param \
-  --wandb_mode=$wandb_mode \
-  --wandb_username='karlulbaek' \
-  --job_type="client_$strategy" \
   --qfed=True \
   --config=qfed.yaml\
   --epochs=$epoch_num \
   --batch_size=$batch_size \
-  --entity=karlulbaek \
-  --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
-  --wandb_project=02460_FL \
-   --dataset_path=$datapath&
+  --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
     echo "sleeping for" $((30+1*$epoch_num))
