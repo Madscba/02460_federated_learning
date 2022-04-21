@@ -80,7 +80,6 @@ class QFedAvg_manual(FedAvg):
         )
         self.num_rounds = num_rounds
         self.rounds = 0
-        self.name = "Qfed_manual"
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.fraction_fit = fraction_fit
