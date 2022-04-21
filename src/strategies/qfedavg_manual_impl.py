@@ -222,25 +222,25 @@ class QFedAvg_manual(FedAvg):
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
-    def aggregate_evaluate(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
-        )
-
+    # def aggregate_evaluate(
+    #     self,
+    #     rnd: int,
+    #     results: List[Tuple[ClientProxy, EvaluateRes]],
+    #     failures: List[BaseException],
+    # ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+    #     """Aggregate evaluation losses using weighted average."""
+    #     if not results:
+    #         return None, {}
+    #     # Do not aggregate if there are failures and failures are not accepted
+    #     if not self.accept_failures and failures:
+    #         return None, {}
+    #     return (
+    #         weighted_loss_avg(
+    #             [
+    #                 (evaluate_res.num_examples, evaluate_res.loss)
+    #                 for _, evaluate_res in results
+    #             ]
+    #         ),
+    #         {},
+    #     )
+    #
