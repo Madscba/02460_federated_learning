@@ -22,6 +22,8 @@ MIN_FIT_CLIENTS_ = 10
 MIN_EVAL_CLIENTS_ = 2
 MIN_AVAILABLE_CLIENTS_ = 10
 test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/test_stored_as_tensors'
+#test_file_path="C:/Users/Karlu/Desktop/advanced/02460_federated_learning/dataset/test_stored_as_tensors"
+
 
 
 if __name__ == "__main__":
@@ -75,8 +77,10 @@ if __name__ == "__main__":
     if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
+            eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
             qffl_learning_rate = wandb.config.lr,
+            test_file_path=test_file_path,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -131,7 +135,7 @@ if __name__ == "__main__":
         strategy = FedAvg(
             model=choose_model(args.model),
             eval_fn=global_model_eval,
-            user_names_test_file=test_file_path,
+            test_file_path=test_file_path,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             num_rounds=args.rounds,
