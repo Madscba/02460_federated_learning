@@ -196,7 +196,8 @@ class QFedAvg(FedAvg):
         weights_before = self.pre_weights
         # if eval_result is not None:
             # loss, _ = eval_result
-
+        import time
+        t = time.time()
         for client_prox, fit_res in results:
             loss = fit_res.metrics.get("loss_prior_to_training", None)
             if loss == None: print("please enable qfed_client = True in client_main")
@@ -221,7 +222,7 @@ class QFedAvg(FedAvg):
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-
+        print("qfed_fixed agg time:", time.time()-t)
         return weights_to_parameters(weights_aggregated), {}
 
     # def aggregate_evaluate(
