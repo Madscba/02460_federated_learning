@@ -222,12 +222,12 @@ class QFedAvg_manual(FedAvg):
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
-        # safe the model at the final round and keep track of the number of
         time_ = time.time()
-        print(time_-self.time)
+        print("round time:", time_-self.time)
         self.time = time_
 
 
+        # safe the model at the final round and keep track of the number of
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
