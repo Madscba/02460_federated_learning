@@ -10,8 +10,8 @@
 #BSUB -W 24:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_fl_qfed2%J.out
-#BSUB -e E_fl_qfed2%J.err
+#BSUB -o O_2fl_qfed2%J.out
+#BSUB -e E_2fl_qfed2%J.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -58,7 +58,7 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     timeout 2m python src/client_main.py \
   --seed=$n \
   --experiment_id=$exp_id2$q_param \
-  --wandb_mode=$wandb_mode \
+##  --wandb_mode=$wandb_mode \
   --wandb_username='karlulbaek' \
   --job_type="client_$strategy" \
   --qfed=True \
