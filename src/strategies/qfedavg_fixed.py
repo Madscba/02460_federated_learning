@@ -73,6 +73,7 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            model_name="Qfed_flwr_fixed"
         )
         self.num_rounds = num_rounds
         self.rounds = 0
@@ -88,7 +89,8 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.name = "Qfed_flwr_fixed"
+        self.name = model_name
+        
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long

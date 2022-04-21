@@ -108,6 +108,7 @@ class FedX(FedAvg):
         model=Net,
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
+        model_name="FedX"
     ) -> None:
         """Federated Averaging strategy.
 
@@ -177,7 +178,7 @@ class FedX(FedAvg):
         self.round=1
         self.privacy_account = None
         self.test_file_path=user_names_test_file
-        self.name = "FedX"
+        self.name = model_name
         self.model=model
         self.learning_rate = qffl_learning_rate
         self.L = 1/qffl_learning_rate

@@ -44,6 +44,7 @@ do
 	--entity madscba \
 	--api_key a49a6933370e2c529423c7f224c5e773600b033b \
 	--wandb_project 02460_FL \
+	--model_name="FedX_class__qval__clip__noise_"
 	--rounds=$rounds&pid=$!
 
 	sleep 3 # Sleep for 3s to give the server enough time to start
