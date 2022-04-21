@@ -67,10 +67,10 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --config=qfed.yaml\
   --epochs=$epoch_num \
   --batch_size=$batch_size \
-  --dataset_path=$dataset_path \
   --entity=karlulbaek \
   --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
-  --wandb_project=02460_FL&
+  --wandb_project=02460_FL \
+  --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
     echo "sleeping for" $((30+1*$epoch_num))
