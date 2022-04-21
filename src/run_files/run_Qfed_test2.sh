@@ -29,6 +29,7 @@ exp_id2='Qfed_q_param_local'
 strategy='Qfed_manual'
 epoch_num=8
 batch_size=8
+dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
 
@@ -45,6 +46,7 @@ python src/server_main.py \
 --run_name=$strategy \
 --strategy=$strategy \
 --q_param=$q_param \
+--dataset_path=$dataset_path
 --config=qfed.yaml\
 --entity=karlulbaek \
 --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
@@ -65,6 +67,7 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --config=qfed.yaml\
   --epochs=$epoch_num \
   --batch_size=$batch_size \
+  --dataset_path=$dataset_path
   --entity=karlulbaek \
   --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
   --wandb_project=02460_FL \
