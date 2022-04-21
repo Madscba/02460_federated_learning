@@ -7,7 +7,7 @@
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 24:00 ##20 minutes (hh:mm)
+#BSUB -W 00:05 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
 #BSUB -o O_fl_qfed.out
