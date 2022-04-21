@@ -60,7 +60,6 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     timeout 2m python src/client_main.py \
   --seed=$n \
   --experiment_id=$exp_id2$q_param \
-##  --wandb_mode=$wandb_mode \
   --wandb_username='karlulbaek' \
   --job_type="client_$strategy" \
   --qfed=True \
