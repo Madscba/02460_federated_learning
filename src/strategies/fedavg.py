@@ -309,11 +309,8 @@ class FedAvg(Strategy):
                 (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
                 for _, evaluate_res in results
             ]
-        
         accuracy_aggregated = weighted_loss_avg(dis_accuracy)
-
         wandb.log({'round':rnd,
                    'test_accuracy_aggregated':accuracy_aggregated,
-                   'test_loss_aggregated':loss_aggregated,
-                   'test_accuracy_dis':np.array(dis_accuracy)[:,1]})
+                   'test_loss_aggregated':loss_aggregated})
         return loss_aggregated, {}
