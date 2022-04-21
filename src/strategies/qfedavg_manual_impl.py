@@ -38,6 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate_qffl, weighted_loss_avg, save_final_global_model
 from .fedavg import FedAvg
+import time
 
 
 class QFedAvg_manual(FedAvg):
@@ -47,6 +48,7 @@ class QFedAvg_manual(FedAvg):
     def __init__(
         self,
         num_rounds=200,
+        model_name="QFedAvg_manual",
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
@@ -78,7 +80,6 @@ class QFedAvg_manual(FedAvg):
         )
         self.num_rounds = num_rounds
         self.rounds = 0
-        self.name = "Qfed_manual"
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.fraction_fit = fraction_fit
@@ -92,6 +93,8 @@ class QFedAvg_manual(FedAvg):
         self.L = 1/qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
+        self.time = time.time()
+        self.name = model_name
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -218,29 +221,34 @@ class QFedAvg_manual(FedAvg):
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
+        time_ = time.time()
+        print("round time:", time_-self.time)
+        self.time = time_
+
+
         # safe the model at the final round and keep track of the number of
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
-    def aggregate_evaluate(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
-        )
-
+    # def aggregate_evaluate(
+    #     self,
+    #     rnd: int,
+    #     results: List[Tuple[ClientProxy, EvaluateRes]],
+    #     failures: List[BaseException],
+    # ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+    #     """Aggregate evaluation losses using weighted average."""
+    #     if not results:
+    #         return None, {}
+    #     # Do not aggregate if there are failures and failures are not accepted
+    #     if not self.accept_failures and failures:
+    #         return None, {}
+    #     return (
+    #         weighted_loss_avg(
+    #             [
+    #                 (evaluate_res.num_examples, evaluate_res.loss)
+    #                 for _, evaluate_res in results
+    #             ]
+    #         ),
+    #         {},
+    #     )
+    #

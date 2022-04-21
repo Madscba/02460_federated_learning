@@ -46,6 +46,7 @@ class QFedAvg(FedAvg):
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        model_name="Qfed_flwr_fixed",
         num_rounds=200,
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
@@ -73,6 +74,7 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            model_name=model_name
         )
         self.num_rounds = num_rounds
         self.rounds = 0
@@ -88,7 +90,8 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.name = "Qfed_flwr_fixed"
+        self.name = model_name
+        
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -218,24 +221,24 @@ class QFedAvg(FedAvg):
 
         return weights_to_parameters(weights_aggregated), {}
 
-    def aggregate_evaluate(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-        return (
-            weighted_loss_avg(
-                [
-                    (evaluate_res.num_examples, evaluate_res.loss)
-                    for _, evaluate_res in results
-                ]
-            ),
-            {},
-        )
+    # def aggregate_evaluate(
+    #     self,
+    #     rnd: int,
+    #     results: List[Tuple[ClientProxy, EvaluateRes]],
+    #     failures: List[BaseException],
+    # ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+    #     """Aggregate evaluation losses using weighted average."""
+    #     if not results:
+    #         return None, {}
+    #     # Do not aggregate if there are failures and failures are not accepted
+    #     if not self.accept_failures and failures:
+    #         return None, {}
+    #     return (
+    #         weighted_loss_avg(
+    #             [
+    #                 (evaluate_res.num_examples, evaluate_res.loss)
+    #                 for _, evaluate_res in results
+    #             ]
+    #         ),
+    #         {},
+    #     )

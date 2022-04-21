@@ -7,11 +7,11 @@
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 24:00 ##20 minutes (hh:mm)
+#BSUB -W 00:05 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_fl_qfed.out
-#BSUB -e E_fl_qfed.err
+#BSUB -o O_qfed_flwr.out
+#BSUB -e E_qfed_flwr.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -20,13 +20,12 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
-q_param=1
+q_param=0.1
 ##epoch_num=1
 rounds=200
 wandb_mode="online"
 exp_id1='Qfed_q_param_global'
-exp_id2='Qfed_q_param_local'
-strategy='Qfed_manual'
+strategy='Qfed_flwr'
 epoch_num=8
 batch_size=8
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
@@ -53,7 +52,7 @@ python src/server_main.py \
 --wandb_project=02460_FL \
 --rounds=$rounds&pid=$!
 
-sleep 3 # Sleep for 3s to give the server enough time to start
+sleep 10 # Sleep for 3s to give the server enough time to start
 
 while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   echo "Starting client: $n , name: $n , q param : $q_param"

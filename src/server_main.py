@@ -47,14 +47,10 @@ if __name__ == "__main__":
     parser.add_argument("--model", default='Net', type=str)
     parser.add_argument("--job_type",default='server')
     parser.add_argument("--wandb_project", default='02460_federated_learning', type=str)
-    parser.add_argument(
-        "--api_key",
-        default=None
-    )
-    parser.add_argument(
-        "--entity",
-        default=None
-    )
+    parser.add_argument("--api_key",default=None)
+    parser.add_argument("--entity",default=None)
+    parser.add_argument("--model_name", default='NO_NAME', type=str)
+
     args = parser.parse_args()
 
     if args.experiment_id:
@@ -86,18 +82,21 @@ if __name__ == "__main__":
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
-            min_available_clients = MIN_AVAILABLE_CLIENTS_)
+            min_available_clients = MIN_AVAILABLE_CLIENTS_,
+            model_name=args.model_name)
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
-            q_param = 0.2,
-            qffl_learning_rate = 0.001,
+            q_param = wandb.config.q_param,
+            eval_fn=global_model_eval,
+            qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
-            min_available_clients = MIN_AVAILABLE_CLIENTS_)
+            min_available_clients = MIN_AVAILABLE_CLIENTS_,
+            model_name=args.model_name)
     elif args.strategy == "DP_Fed":
         print("Strategy: DP_FedAvg")
         strategy = DPFedAvg(
@@ -106,13 +105,15 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
+            eval_fn=global_model_eval,
             num_rounds=args.rounds,
             batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
             noise_scale=wandb.config.noise_scale,
             max_grad_norm=wandb.config.max_grad_norm,
             target_delta=wandb.config.target_delta,
-            total_num_clients=wandb.config.total_num_clients
+            total_num_clients=wandb.config.total_num_clients,
+            model_name=args.model_name
             )
     elif args.strategy == "FedX":
         print("Strategy: FedX")
@@ -122,6 +123,7 @@ if __name__ == "__main__":
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
+            eval_fn=global_model_eval,
             num_rounds=args.rounds,
             batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
@@ -130,7 +132,8 @@ if __name__ == "__main__":
             target_delta=wandb.config.target_delta,
             total_num_clients=wandb.config.total_num_clients,
             q_param = wandb.config.q_param,
-            qffl_learning_rate = wandb.config.lr
+            qffl_learning_rate = wandb.config.lr,
+            model_name=args.model_name
             )
     else:
         print("Strategy: FedAvg")
@@ -143,7 +146,8 @@ if __name__ == "__main__":
             num_rounds=args.rounds,
             min_fit_clients=MIN_FIT_CLIENTS_,
             min_eval_clients=MIN_EVAL_CLIENTS_, 
-            min_available_clients = MIN_AVAILABLE_CLIENTS_)
+            min_available_clients = MIN_AVAILABLE_CLIENTS_,
+            model_name=args.model_name)
 
     server=ServerDisconnect(client_manager=SimpleClientManager(),strategy=strategy)
     # Start server

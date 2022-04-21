@@ -105,7 +105,8 @@ class DPFedAvg(Strategy):
         target_delta: float = None,
         total_num_clients: int = 1000,
         user_names_test_file=None,
-        model=Net
+        model=Net,
+        model_name="DP_FedAvg"
     ) -> None:
         """Federated Averaging strategy.
 
@@ -164,7 +165,7 @@ class DPFedAvg(Strategy):
         self.round=1
         self.privacy_account = None
         self.test_file_path=user_names_test_file
-        self.name = "DP_Fedavg"
+        self.name = model_name
         self.model=model
 
     def __repr__(self) -> str:
