@@ -59,16 +59,10 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   echo "Starting client: $n , name: $n , q param : $q_param"
     timeout 2m python src/client_main.py \
   --seed=$n \
-  --experiment_id=$exp_id2$q_param \
-  --wandb_username='karlulbaek' \
-  --job_type="client_$strategy" \
   --qfed=True \
   --config=qfed.yaml\
   --epochs=$epoch_num \
   --batch_size=$batch_size \
-  --entity=karlulbaek \
-  --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
-  --wandb_project=02460_FL \
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
