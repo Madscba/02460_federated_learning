@@ -47,7 +47,7 @@ python src/server_main.py \
 --strategy=$strategy \
 --q_param=$q_param \
 --dataset_path=$dataset_path \
---config=qfed.yaml\
+--config=qfed.yaml \
 --entity=karlulbaek \
 --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
 --wandb_project=02460_FL \
