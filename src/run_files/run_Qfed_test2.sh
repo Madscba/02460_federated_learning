@@ -36,7 +36,7 @@ dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 echo "starting bash script"
 
 module load python3/3.8.0
-source /zhome/fb/d/137704/Desktop/fed_lr/v_env/bin//activate
+source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 
 echo "Starting server with q param $q_param"
 python src/server_main.py \
