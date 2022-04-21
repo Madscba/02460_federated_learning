@@ -48,6 +48,7 @@ class QFedAvg_manual(FedAvg):
     def __init__(
         self,
         num_rounds=200,
+        model_name="QFedAvg_manual",
         q_param: float = 0.2,
         qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
@@ -94,6 +95,7 @@ class QFedAvg_manual(FedAvg):
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
         self.time = time.time()
+        self.name = model_name
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
