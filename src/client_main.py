@@ -23,6 +23,7 @@ def main(args):
     # Load model
     
     net = choose_model(args.model)()
+    net = net.to(DEVICE)
     
     if args.experiment_id:
         experiment="experiment-"+args.experiment_id

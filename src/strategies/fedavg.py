@@ -97,7 +97,7 @@ class FedAvg(Strategy):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
-        user_names_test_file=None,
+        test_file_path=None,
         model=Net
     ) -> None:
         """Federated Averaging strategy.
@@ -148,7 +148,7 @@ class FedAvg(Strategy):
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
         self.round=1
-        self.test_file_path=user_names_test_file
+        self.test_file_path=test_file_path
         self.name = "Fedavg"
         self.model=model
 
@@ -182,21 +182,24 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        weights=parameters_to_weights(parameters)
-        eval_res = self.eval_fn(state_dict=None,
-                                data_folder=self.test_file_path,
-                                parameters=weights,
-                                num_test_clients=60,
-                                model=self.model,
-                                get_loss=True)
-        acc, loss, num_observations  = eval_res
-        sum_obs=np.sum(np.array(num_observations))
-        test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
-        test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
-        wandb.log({'round':self.round,
-                   'mean_global_test_loss':test_loss,
-                   'mean_global_test_accuracy':test_acc,
-                   'dis_global_test_accuracy':np.array(acc)})
+
+        if self.eval_fn:
+            weights=parameters_to_weights(parameters)
+            eval_res = self.eval_fn(state_dict=None,
+                                    data_folder=self.test_file_path,
+                                    parameters=weights,
+                                    num_test_clients=10,
+                                    model=self.model,
+                                    get_loss=True)
+
+            acc, loss, num_observations  = eval_res
+            sum_obs=np.sum(np.array(num_observations))
+            test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
+            test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
+            wandb.log({'round':self.round,
+                       'mean_global_test_loss':test_loss,
+                       'mean_global_test_accuracy':test_acc,
+                       'dis_global_test_accuracy':np.array(acc)})
 
         return None
 

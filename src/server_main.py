@@ -22,6 +22,8 @@ MIN_FIT_CLIENTS_ = 10
 MIN_EVAL_CLIENTS_ = 2
 MIN_AVAILABLE_CLIENTS_ = 10
 test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/test_stored_as_tensors'
+#test_file_path="C:/Users/Karlu/Desktop/advanced/02460_federated_learning/dataset/test_stored_as_tensors"
+
 
 
 if __name__ == "__main__":
@@ -38,10 +40,12 @@ if __name__ == "__main__":
     parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument("--target_delta",type=float,default=1e-4)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
+    parser.add_argument("--q_param",type=float,default=0.2)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
     parser.add_argument("--model", default='Net', type=str)
+    parser.add_argument("--job_type",default='server')
     parser.add_argument("--wandb_project", default='02460_federated_learning', type=str)
     parser.add_argument(
         "--api_key",
@@ -63,7 +67,7 @@ if __name__ == "__main__":
        
     config=os.path.join(os.getcwd(),'src','config',args.configs)
     wandb.login(key=args.api_key)
-    wandb.init(project=args.wandb_project, entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type='server')
+    wandb.init(project=args.wandb_project, entity=args.entity, group=experiment, config=config, mode=args.wandb_mode,job_type=args.job_type)
     wandb.run.name = args.run_name+'_'+wandb.run.id
     wandb.config.update(args, allow_val_change=True)
 
@@ -73,8 +77,10 @@ if __name__ == "__main__":
     if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
-            q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            eval_fn=global_model_eval,
+            q_param = wandb.config.q_param,
+            qffl_learning_rate = wandb.config.lr,
+            test_file_path=test_file_path,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -85,7 +91,7 @@ if __name__ == "__main__":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
             q_param = 0.2,
-            qffl_learning_rate = 0.01,
+            qffl_learning_rate = 0.001,
             num_rounds=args.rounds,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
@@ -123,15 +129,15 @@ if __name__ == "__main__":
             max_grad_norm=wandb.config.max_grad_norm,
             target_delta=wandb.config.target_delta,
             total_num_clients=wandb.config.total_num_clients,
-            q_param = 0.2,
-            qffl_learning_rate = 0.01
+            q_param = wandb.config.q_param,
+            qffl_learning_rate = wandb.config.lr
             )
     else:
         print("Strategy: FedAvg")
         strategy = FedAvg(
             model=choose_model(args.model),
             eval_fn=global_model_eval,
-            user_names_test_file=test_file_path,
+            test_file_path=test_file_path,
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             num_rounds=args.rounds,

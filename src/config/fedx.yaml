@@ -20,5 +20,7 @@ target_delta:
   value: 1e-4
 strategy:
   value: FedX
+q_param:
+  value: 0.2
 
 

@@ -47,6 +47,7 @@ python src/server_main.py --wandb_mode=$wandb_mode \
 --configs=fedx.yaml \
 --noise_multiplier=0.01 \
 --max_grad_norm=1.0 \
+--q_param=0.2 \
 --batch_size=$batch_size \
 --total_num_clients=$N \
 --rounds=$rounds&pid=$!
