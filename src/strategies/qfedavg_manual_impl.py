@@ -203,23 +203,31 @@ class QFedAvg_manual(FedAvg):
 
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
-            if loss == None: print("please enable qfed_client = True in client_main")
+
+            if loss == None:
+                print("\nplease enable qfed_client = True in client_main\n")
+                raise ValueError
+
 
             weights_new = parameters_to_weights(params.parameters)
-            grads = [
-                    (weights_before - weights_after) * self.L for
-                     weights_before, weights_after in zip(weights_prev, weights_new)
-                     ]
 
+            weight_diff = [
+                           (weight_prev - weight_new) * self.L for
+                            weight_prev,  weight_new in zip(weights_prev, weights_new)
+                          ]
 
-            ds = [d + np.float_power(loss + eps, self.q_param) * grad for d, grad in zip(ds, grads)]
+            q_objective = np.float_power((loss + eps), self.q_param)
+            q_objective_minus1 = np.float_power((loss + eps), (self.q_param-1))
 
-            hs += (self.q_param *
-                   np.float_power(loss + eps, self.q_param-1) *
-                   norm_grad_squared(grads) +
+            ds = [d + q_objective * grad for d, grad in zip(ds, weight_diff)]
+
+            hs += (
+                   self.q_param *
+                   q_objective_minus1 *
+                   norm_grad_squared(weight_diff) +
                    self.L *
-                   np.float_power(loss + eps, self.q_param)
-                   )
+                   q_objective
+                  )
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
