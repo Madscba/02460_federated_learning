@@ -153,7 +153,7 @@ class FedAvg(Strategy):
         self.test_file_path=test_file_path
         self.name = model_name
         self.model=model
-        self.num_test_clients = num_test_clients
+        self.num_test_clients = int(num_test_clients)
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
