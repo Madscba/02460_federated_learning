@@ -99,7 +99,8 @@ class FedAvg(Strategy):
         initial_parameters: Optional[Parameters] = None,
         test_file_path=None,
         model=Net,
-        model_name="Fedavg"
+        model_name="Fedavg",
+        num_test_clients = 20
     ) -> None:
         """Federated Averaging strategy.
 
@@ -152,6 +153,7 @@ class FedAvg(Strategy):
         self.test_file_path=test_file_path
         self.name = model_name
         self.model=model
+        self.num_test_clients = num_test_clients
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -189,7 +191,7 @@ class FedAvg(Strategy):
             eval_res = self.eval_fn(state_dict=None,
                                     data_folder=self.test_file_path,
                                     parameters=weights,
-                                    num_test_clients=60,
+                                    num_test_clients=self.num_test_clients,
                                     model=self.model,
                                     get_loss=True)
 

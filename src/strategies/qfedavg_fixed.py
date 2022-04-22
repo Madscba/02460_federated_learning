@@ -63,6 +63,7 @@ class QFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        num_test_clients = 20
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -76,7 +77,8 @@ class QFedAvg(FedAvg):
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
             model_name=model_name,
-            test_file_path=test_file_path
+            test_file_path=test_file_path,
+            num_test_clients=num_test_clients
         )
         self.num_rounds = num_rounds
         self.rounds = 0
