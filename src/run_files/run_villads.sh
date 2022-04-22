@@ -17,7 +17,7 @@
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
 s=1
-N=10 #amount of clients
+N=2000 #amount of clients
 epoch_num=20
 rounds=200
 strategy='FedAvg'
