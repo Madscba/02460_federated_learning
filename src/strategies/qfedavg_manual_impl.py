@@ -195,7 +195,7 @@ class QFedAvg_manual(FedAvg):
         # if eval_result is not None:
         #     loss, _ = eval_result
 
-        t = time.time()
+        #t = time.time()
 
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
@@ -225,7 +225,7 @@ class QFedAvg_manual(FedAvg):
 
         # safe the model at the final round and keep track of the number of
         self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-        print("qfed_manual agg time:", time.time() - t)
+        #print("qfed_manual agg time:", time.time() - t)
         return weights_to_parameters(weights_aggregated), {}
 
     # def aggregate_evaluate(
