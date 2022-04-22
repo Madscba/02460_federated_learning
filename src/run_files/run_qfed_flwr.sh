@@ -68,8 +68,8 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+1*$num_test_clients*0.35))
-    sleep $((30+1*$num_test_clients*0.35))
+    echo "sleeping for" $((30+$one_third_num_test_clients))
+    sleep $((30+$one_third_num_test_clients))
   fi
   n=$(($n+1))
 done
