@@ -29,7 +29,7 @@ strategy='Qfed_flwr'
 epoch_num=8
 batch_size=8
 num_test_clients=20
-one_third_num_test_clients=7 ## you have to do this manually lol
+one_third_num_test_clients=10 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
