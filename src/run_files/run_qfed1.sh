@@ -29,6 +29,7 @@ strategy='Qfed_manual'
 epoch_num=8
 batch_size=8
 num_test_clients=20
+one_third_num_test_clients=7 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
@@ -67,8 +68,8 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+1*$num_test_clients*0.35))
-    sleep $((30+1*$num_test_clients*0.35))
+    echo "sleeping for" $((30+$one_third_num_test_clients))
+    sleep $((30+$one_third_num_test_clients))
   fi
   n=$(($n+1))
 done
