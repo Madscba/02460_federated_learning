@@ -26,6 +26,7 @@ rounds=200
 wandb_mode="online"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_flwr'
+model_name='Qfed_flwr'
 epoch_num=8
 batch_size=8
 num_test_clients=20
@@ -49,6 +50,7 @@ python src/server_main.py \
 --q_param=$q_param \
 --num_test_clients=$num_test_clients \
 --dataset_path=$dataset_path \
+--model_name=$model_name \
 --config=qfed.yaml \
 --entity=karlulbaek \
 --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
