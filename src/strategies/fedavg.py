@@ -186,6 +186,10 @@ class FedAvg(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
 
+        self.rounds += 1
+        if self.rounds == self.num_rounds:
+            self.save_final_global_model(parameters)
+
         if self.eval_fn:
             weights=parameters_to_weights(parameters)
             eval_res = self.eval_fn(state_dict=None,
@@ -201,7 +205,7 @@ class FedAvg(Strategy):
             test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
             test_acc_var=np.var(np.array(acc))
             test_loss_var=np.var(np.array(loss))
-            wandb.log({'round':self.round,
+            wandb.log({'round':self.rounds,
                        'mean_global_test_loss':test_loss,
                        'mean_global_test_accuracy':test_acc,
                        'var_global_test_accuracy':test_acc_var,
@@ -289,7 +293,7 @@ class FedAvg(Strategy):
 
         # only does something if its the final iteration: rounds == num_rounds.
         # The function counts aswell
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
@@ -323,3 +327,30 @@ class FedAvg(Strategy):
                    'dist_test_accuracy_aggregated':wandb.Histogram(np.array(dis_loss)[:,1])
                    })
         return loss_aggregated, {}
+
+    def save_final_global_model(self, parameters):
+        weights = parameters_to_weights(parameters)
+        import sys
+        import os
+
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.append(BASE_DIR)
+        import torch
+        from collections import OrderedDict
+        from model import Net
+
+        import datetime
+        now = datetime.datetime.now()
+        day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
+
+        # this could maybe be simplified but i wont bother
+        net = Net()
+        params_dict = zip(net.state_dict().keys(), weights)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        # this step might not be necessary
+        # net.load_state_dict(state_dict, strict=True)
+        if "saved_models" not in os.listdir(): os.mkdir("saved_models")
+        #torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        #print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")
+        print("Saving model at " "saved_models/" + self.name + "_state_dict" + ".pt")

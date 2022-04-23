@@ -78,7 +78,9 @@ class QFedAvg_manual(FedAvg):
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
             test_file_path=test_file_path,
-            num_test_clients = num_test_clients
+            num_test_clients = num_test_clients,
+            model_name=model_name+"_"+str(q_param)
+
 
         )
         self.num_rounds = num_rounds
@@ -97,7 +99,7 @@ class QFedAvg_manual(FedAvg):
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
         self.time = time.time()
-        self.name = model_name
+        #self.name = model_name+"_"+str(q_param)
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -235,7 +237,7 @@ class QFedAvg_manual(FedAvg):
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
         # safe the model at the final round and keep track of the number of
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         #print("qfed_manual agg time:", time.time() - t)
         return weights_to_parameters(weights_aggregated), {}
 

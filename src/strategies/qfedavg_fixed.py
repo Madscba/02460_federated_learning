@@ -76,9 +76,9 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
-            model_name=model_name,
+            model_name=model_name + "_" + str(q_param),
             test_file_path=test_file_path,
-            num_test_clients=num_test_clients
+            num_test_clients=num_test_clients,
         )
         self.num_rounds = num_rounds
         self.rounds = 0
@@ -223,7 +223,7 @@ class QFedAvg(FedAvg):
             )
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         #print("qfed_fixed agg time:", time.time()-t)
         return weights_to_parameters(weights_aggregated), {}
 
