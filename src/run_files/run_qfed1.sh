@@ -10,8 +10,8 @@
 #BSUB -W 03:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o o_qfed1.out
-#BSUB -e e_qfed1.err
+#BSUB -o o_qfed3.out
+#BSUB -e e_qfed3.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -26,9 +26,11 @@ rounds=200
 wandb_mode="online"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='Qfed_manual'
+model_name='Qfed_manual_high_lr'
 epoch_num=8
 batch_size=8
+lr=0.001
+##lr=0.0001
 num_test_clients=20
 one_third_num_test_clients=10 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
@@ -67,6 +69,7 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --config=qfed.yaml\
   --epochs=$epoch_num \
   --batch_size=$batch_size \
+  --lr=$lr \
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then

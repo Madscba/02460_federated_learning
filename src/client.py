@@ -31,7 +31,11 @@ class FemnistClient(fl.client.NumPyClient):
         # only return something meaningfull if self.qfed == true
         info = self.loss_prior_to_training()
 
-        train_loss=train(self.net, self.trainloader, round=config['round'], epochs=wandb.config.epochs)
+        train_loss=train(self.net,
+                         self.trainloader,
+                         round=config['round'],
+                         epochs=wandb.config.epochs,
+                         lr=wandb.config.lr)
 
         info['loss']=train_loss
         return self.get_parameters(), self.num_examples["trainset"], info
