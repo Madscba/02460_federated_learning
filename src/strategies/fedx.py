@@ -239,10 +239,8 @@ class FedX(FedAvg):
                 n += np.sum(np.square(grad))
             return n
 
-        if not self.q_param == -1:
-
-            if self.pre_weights is None:
-                raise Exception("FedX pre_weights are None in aggregate_fit")
+        if self.pre_weights is None:
+            raise Exception("FedX pre_weights are None in aggregate_fit")
 
         weights_prev = self.pre_weights
 
@@ -295,6 +293,6 @@ class FedX(FedAvg):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+
         return weights_to_parameters(weights_aggregated), {}
 
