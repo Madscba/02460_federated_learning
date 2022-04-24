@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--target_delta",type=float,default=1e-4)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
     parser.add_argument("--q_param",type=float,default=0.2)
-    parser.add_argument("--num_test_clients",type=float,default=60)
+    parser.add_argument("--num_test_clients",type=float,default=10)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)

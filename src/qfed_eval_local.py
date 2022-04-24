@@ -34,7 +34,7 @@ loss2_name = "/local_loss_q_{}.npy".format(q2)
 
 state_dict1 = "saved_models/Qfed_manual_{}_state_dict.pt".format(q1)
 state_dict2 = "saved_models/Qfed_manual_{}_state_dict.pt".format(q2)
-make_predictions = True
+make_predictions = False
 
 if make_predictions:
     acc1, loss1, num_obs_per_user = global_model_eval_non_tensor(state_dict=state_dict1,
