@@ -193,11 +193,13 @@ class FedAvg(Strategy):
             self.save_final_global_model(parameters)
 
         if self.rounds <= 1:
-            print("duration of 1. training round:", time.time()-self.t)
+            if self.rounds == 1:
+                print("duration of 1. training round:", time.time()-self.t)
+                print("the sleep time before 10 new clients are spawned should be this value plus 5ish")
+
             self.t = time.time()
 
         if self.eval_fn:
-            t2 = time.time()
             weights=parameters_to_weights(parameters)
             eval_res = self.eval_fn(state_dict=None,
                                     data_folder=self.test_file_path,
@@ -217,8 +219,8 @@ class FedAvg(Strategy):
                        'mean_global_test_accuracy':test_acc,
                        'var_global_test_accuracy':test_acc_var,
                        'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
-            if self.rounds == 0:
-                print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - t2)
+            if self.rounds == 1:
+                print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
 
         return None
 

@@ -79,26 +79,16 @@ class QFedAvg_manual(FedAvg):
             initial_parameters=initial_parameters,
             test_file_path=test_file_path,
             num_test_clients = num_test_clients,
-            model_name=model_name+"_"+str(q_param)
+            model_name=model_name+"_"+str(q_param),
+            num_rounds=num_rounds
 
 
         )
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.L = 1/qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.time = time.time()
+        self.eps = 1e-10
         #self.name = model_name+"_"+str(q_param)
 
     def __repr__(self) -> str:
@@ -107,16 +97,16 @@ class QFedAvg_manual(FedAvg):
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+    # def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Return the sample size and the required number of available
+    #     clients."""
+    #     num_clients = int(num_available_clients * self.fraction_fit)
+    #     return max(num_clients, self.min_fit_clients), self.min_available_clients
+    #
+    # def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Use a fraction of available clients for evaluation."""
+    #     num_clients = int(num_available_clients * self.fraction_eval)
+    #     return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -204,7 +194,6 @@ class QFedAvg_manual(FedAvg):
 
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
-        eps = 1e-10
 
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
@@ -221,8 +210,8 @@ class QFedAvg_manual(FedAvg):
                             weight_prev,  weight_new in zip(weights_prev, weights_new)
                           ]
 
-            q_objective = np.float_power((loss + eps), self.q_param)
-            q_objective_minus1 = np.float_power((loss + eps), (self.q_param-1))
+            q_objective = np.float_power((loss + self.eps), self.q_param)
+            q_objective_minus1 = np.float_power((loss + self.eps), (self.q_param-1))
 
             ds = [d + q_objective * grad for d, grad in zip(ds, weight_diff)]
 
