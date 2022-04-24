@@ -194,8 +194,8 @@ class FedAvg(Strategy):
 
         if self.rounds <= 1:
             if self.rounds == 1:
-                print("duration of 1. training round:", time.time()-self.t)
-                print("the sleep time before 10 new clients are spawned should be this value plus 5ish")
+                print("\nDuration of 1. round (including eval):", time.time()-self.t)
+                print("The server sleep time should thus be this value + 5ish\n")
 
             self.t = time.time()
 
