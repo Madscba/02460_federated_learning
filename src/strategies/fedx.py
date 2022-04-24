@@ -179,18 +179,18 @@ class FedX(FedAvg):
         rep = f"FedX(accept_failures={self.accept_failures})"
         return rep
 
-    def set_privacy_account(self, results):
-        num_examples = sum([fit_res.num_examples for _, fit_res in results]) 
+    def set_privacy_account(self, results, rnd):
+        num_examples = sum([fit_res.num_examples for _, fit_res in results])
         if not self.target_delta:
             self.target_delta = 0.1 * (1 / num_examples)
-        C = len([fit_res.num_examples for _, fit_res in results]) 
+        C = len([fit_res.num_examples for _, fit_res in results])
         sensitivity = self.max_grad_norm / C
         self.noise_scale = self.noise_multiplier / sensitivity
         sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
-        steps = int(num_examples / self.batch_size) 
-        self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
+        self.privacy_account = PrivacyAccount(steps=rnd, sample_size=C, sample_rate=sample_rate,
                                               max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
                                               noise_scale=self.noise_scale, target_delta=self.target_delta)
+
 
     # def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
     #     """Return the sample size and the required number of available
@@ -313,15 +313,12 @@ class FedX(FedAvg):
                 n += np.sum(np.square(grad))
             return n
 
-        if self.pre_weights is None:
-            raise Exception("QffedAvg pre_weights are None in aggregate_fit")
+        if not self.q_param == -1:
+
+            if self.pre_weights is None:
+                raise Exception("FedX pre_weights are None in aggregate_fit")
 
         weights_prev = self.pre_weights
-        # eval_result = self.evaluate(weights_to_parameters(weights_prev))
-        # if eval_result is not None:
-        #     loss, _ = eval_result
-
-        #t = time.time()
 
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
@@ -356,7 +353,7 @@ class FedX(FedAvg):
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
-        self.set_privacy_account(results=results)
+        self.set_privacy_account(results=results, rnd=rnd)
 
         if self.noise_scale:
             sigma = self.privacy_account.noise_multiplier
@@ -364,10 +361,6 @@ class FedX(FedAvg):
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
             self.epsilon = self.privacy_account.get_privacy_spent()
             wandb.log({'round': rnd, "epsilon": self.epsilon})
-            wandb.log({'round': rnd, "sigma": self.privacy_account.noise_multiplier})
-            wandb.log({'round': rnd, "z": self.privacy_account.noise_scale})
-            wandb.log({'round': rnd, "C": self.privacy_account.sample_size})
-            wandb.log({'round': rnd, "delta": self.privacy_account.target_delta})
 
         loss_aggregated = weighted_loss_avg(
             [
