@@ -102,6 +102,7 @@ class FedX(FedAvg):
         batch_size: int = 8,
         noise_multiplier: float = None,
         noise_scale: float = None,
+        target_delta: float = None,
         max_grad_norm: float = 1.1,
         total_num_clients: int = 1000,
         test_file_path=None,
@@ -160,6 +161,7 @@ class FedX(FedAvg):
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
+        self.target_delta = target_delta
         self.total_num_clients = total_num_clients
         self.batch_size = batch_size
         self.noise_multiplier = noise_multiplier

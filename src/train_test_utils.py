@@ -20,7 +20,7 @@ def train(net, trainloader, round, epochs, lr):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
-            if wandb.config.strategy in ['FedProx', 'FedX']:
+            if wandb.config.strategy in ['FedProx']:
                 loss = criterion(net(images), labels, net.parameters())
             else:
                 loss = criterion(net(images), labels)
@@ -35,7 +35,7 @@ def train(net, trainloader, round, epochs, lr):
     return avg_train_loss
 
 def configure_criterion(parameters):
-    if wandb.config.strategy in ['FedProx', 'FedX']:
+    if wandb.config.strategy in ['FedProx']:
         criterion= FedOptLoss(parameters, mu=wandb.config.mu)
     else: 
         criterion=torch.nn.CrossEntropyLoss()
