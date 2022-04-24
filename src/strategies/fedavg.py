@@ -76,7 +76,7 @@ Setting `min_available_clients` lower than `min_fit_clients` or
 connected to the server. `min_available_clients` must be set to a value larger
 than or equal to the values of `min_fit_clients` and `min_eval_clients`.
 """
-
+import time
 
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -154,6 +154,7 @@ class FedAvg(Strategy):
         self.name = model_name
         self.model=model
         self.num_test_clients = int(num_test_clients)
+        self.t = time.time()
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -168,7 +169,9 @@ class FedAvg(Strategy):
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        #return max(num_clients, self.min_eval_clients), self.min_available_clients
+        print("num_available_clients", num_available_clients)
+        return min(10, num_available_clients), 10
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -185,12 +188,15 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
+        print("time since last eval/round:", time.time()-self.t)
+        self.t = time.time()
 
         self.rounds += 1
         if self.rounds == self.num_rounds:
             self.save_final_global_model(parameters)
 
         if self.eval_fn:
+            t2 = time.time()
             weights=parameters_to_weights(parameters)
             eval_res = self.eval_fn(state_dict=None,
                                     data_folder=self.test_file_path,
@@ -210,6 +216,7 @@ class FedAvg(Strategy):
                        'mean_global_test_accuracy':test_acc,
                        'var_global_test_accuracy':test_acc_var,
                        'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
+            print("eval time for {} clients:".format(self.num_test_clients), time.time() - t2)
 
         return None
 

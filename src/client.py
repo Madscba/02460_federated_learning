@@ -3,7 +3,8 @@ from collections import OrderedDict
 import flwr as fl
 import torch
 import wandb
-from train_test_utils import test, train  
+from train_test_utils import test, train
+import time
 
 
 class FemnistClient(fl.client.NumPyClient):
@@ -29,6 +30,7 @@ class FemnistClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         # only return something meaningfull if self.qfed == true
+        t = time.time()
         info = self.loss_prior_to_training()
 
         train_loss=train(self.net,
@@ -38,6 +40,7 @@ class FemnistClient(fl.client.NumPyClient):
                          lr=wandb.config.lr)
 
         info['loss']=train_loss
+        print("training time for one client:", time.time()-t)
         return self.get_parameters(), self.num_examples["trainset"], info
 
     def evaluate(self, parameters, config):
