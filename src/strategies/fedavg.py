@@ -76,7 +76,7 @@ Setting `min_available_clients` lower than `min_fit_clients` or
 connected to the server. `min_available_clients` must be set to a value larger
 than or equal to the values of `min_fit_clients` and `min_eval_clients`.
 """
-
+import time
 
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
@@ -99,7 +99,8 @@ class FedAvg(Strategy):
         initial_parameters: Optional[Parameters] = None,
         test_file_path=None,
         model=Net,
-        model_name="Fedavg"
+        model_name="Fedavg",
+        num_test_clients = 20
     ) -> None:
         """Federated Averaging strategy.
 
@@ -139,7 +140,7 @@ class FedAvg(Strategy):
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
         self.num_rounds = num_rounds
-        self.rounds = 0
+        self.rounds = -1 # since it calls eval before training has even started thus the counter goes to 0
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
@@ -152,6 +153,8 @@ class FedAvg(Strategy):
         self.test_file_path=test_file_path
         self.name = model_name
         self.model=model
+        self.num_test_clients = int(num_test_clients)
+        self.t = time.time()
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -166,7 +169,9 @@ class FedAvg(Strategy):
     def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+        #return max(num_clients, self.min_eval_clients), self.min_available_clients
+        #print("num_available_clients", num_available_clients)
+        return min(10, num_available_clients), 10
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -183,13 +188,23 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
+        self.rounds += 1
+        if self.rounds == self.num_rounds:
+            self.save_final_global_model(parameters)
+
+        if self.rounds <= 1:
+            if self.rounds == 1:
+                print("\nDuration of 1. round (including eval):", time.time()-self.t)
+                print("The server sleep time should thus be this value + 5ish\n")
+
+            self.t = time.time()
 
         if self.eval_fn:
             weights=parameters_to_weights(parameters)
             eval_res = self.eval_fn(state_dict=None,
                                     data_folder=self.test_file_path,
                                     parameters=weights,
-                                    num_test_clients=10,
+                                    num_test_clients=self.num_test_clients,
                                     model=self.model,
                                     get_loss=True)
 
@@ -197,10 +212,15 @@ class FedAvg(Strategy):
             sum_obs=np.sum(np.array(num_observations))
             test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
             test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
-            wandb.log({'round':self.round,
+            test_acc_var=np.var(np.array(acc))
+            test_loss_var=np.var(np.array(loss))
+            wandb.log({'round':self.rounds,
                        'mean_global_test_loss':test_loss,
                        'mean_global_test_accuracy':test_acc,
-                       'dis_global_test_accuracy':np.array(acc)})
+                       'var_global_test_accuracy':test_acc_var,
+                       'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
+            if self.rounds == 1:
+                print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
 
         return None
 
@@ -284,7 +304,7 @@ class FedAvg(Strategy):
 
         # only does something if its the final iteration: rounds == num_rounds.
         # The function counts aswell
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}
 
     def aggregate_evaluate(
@@ -299,21 +319,49 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        loss_aggregated = weighted_loss_avg(
-            [
+        dis_loss=[
                 (evaluate_res.num_examples, evaluate_res.loss)
                 for _, evaluate_res in results
             ]
-        )
         dis_accuracy=[
                 (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
                 for _, evaluate_res in results
             ]
-        
+        var_acc=np.var(np.array(dis_accuracy)[:,1])
+        var_loss=np.var(np.array(dis_loss)[:,1])
         accuracy_aggregated = weighted_loss_avg(dis_accuracy)
-
+        loss_aggregated = weighted_loss_avg(dis_loss)
         wandb.log({'round':rnd,
                    'test_accuracy_aggregated':accuracy_aggregated,
                    'test_loss_aggregated':loss_aggregated,
-                   'test_accuracy_dis':np.array(dis_accuracy)[:,1]})
+                   'var_test_accuracy_aggregated':var_acc,
+                   'dist_test_accuracy_aggregated':wandb.Histogram(np.array(dis_loss)[:,1])
+                   })
         return loss_aggregated, {}
+
+    def save_final_global_model(self, parameters):
+        weights = parameters_to_weights(parameters)
+        import sys
+        import os
+
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sys.path.append(BASE_DIR)
+        import torch
+        from collections import OrderedDict
+        from model import Net
+
+        import datetime
+        now = datetime.datetime.now()
+        day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
+
+        # this could maybe be simplified but i wont bother
+        net = Net()
+        params_dict = zip(net.state_dict().keys(), weights)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        # this step might not be necessary
+        # net.load_state_dict(state_dict, strict=True)
+        if "saved_models" not in os.listdir(): os.mkdir("saved_models")
+        #torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        #print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+        torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")
+        print("Saving model at " "saved_models/" + self.name + "_state_dict" + ".pt")

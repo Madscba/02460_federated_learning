@@ -29,31 +29,16 @@ def parse_args(parser):
     #            help='user ex f0000_14', default='f0000_14')
     parser.add_argument('--wandb_mode', 
                 help='use "online" to log and sync with cloud', default='disabled')
-    parser.add_argument('--configs', 
-        default='config.yaml')
-    parser.add_argument('--experiment_id', 
-        default=None)
-    parser.add_argument('--wandb_username', 
-        default=None)
-    parser.add_argument('--job_type', 
-        default='client')
-    parser.add_argument('--dataset_path',
-        default=None)
+    parser.add_argument('--configs', default='config.yaml')
+    parser.add_argument('--experiment_id', default=None)
+    parser.add_argument('--wandb_username', default=None)
+    parser.add_argument('--job_type', default='client')
+    parser.add_argument('--dataset_path',default=None)
     parser.add_argument('--num_classes',default=None,type=int)
-    parser.add_argument('--seed', type=int,
-            help='set integer seed', default=1)
-    parser.add_argument('--batch_size', 
-        type=int,
-        default=8
-    )
-    parser.add_argument('--epochs', 
-        type=int,
-        default=1)
-    parser.add_argument(
-        "--lr",
-        type=float,
-        default=0.001
-    )
+    parser.add_argument('--seed', type=int,help='set integer seed', default=1)
+    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--epochs', type=int, default=8)
+    parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument(
         "--momentum",
         type=float,

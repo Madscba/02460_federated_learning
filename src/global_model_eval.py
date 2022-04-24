@@ -12,7 +12,8 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
                       parameters = None,
                       num_test_clients = None,  # this is the indexing of the list so None means all
                       get_loss = False, 
-                      model=Net):
+                      model=Net,
+                      verbose=False):
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net = model().to(DEVICE)
@@ -35,7 +36,9 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
     t = time.time()
     acc, loss, num_obs_per_user = [], [], []
     with torch.no_grad():
+        k = 0
         for x, y in zip(x_data, y_data):
+            k+=1
             x = torch.load(x).to(DEVICE)
             y = torch.load(y).to(DEVICE)
             num_obs_per_user.append(x.shape[0])
@@ -53,7 +56,7 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
                 if get_loss:
                     loss.append(loss_func(pred, y_).item())
 
-    #print("time:", time.time() - t)
+            if verbose: print("client", k, "time:", str(time.time() - t)[:5])
     return acc, loss, num_obs_per_user
 
 if __name__ == '__main__':
