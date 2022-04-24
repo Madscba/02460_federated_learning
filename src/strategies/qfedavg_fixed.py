@@ -79,18 +79,9 @@ class QFedAvg(FedAvg):
             model_name=model_name + "_" + str(q_param),
             test_file_path=test_file_path,
             num_test_clients=num_test_clients,
+            num_rounds=num_rounds
         )
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
+
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
