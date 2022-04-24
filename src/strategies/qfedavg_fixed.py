@@ -94,8 +94,8 @@ class QFedAvg(FedAvg):
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.name = model_name
-        self.test_file_path=test_file_path
+        #self.name = model_name
+        #self.test_file_path=test_file_path
         
 
     def __repr__(self) -> str:

@@ -140,7 +140,7 @@ class FedAvg(Strategy):
         self.fraction_fit = fraction_fit
         self.fraction_eval = fraction_eval
         self.num_rounds = num_rounds
-        self.rounds = 0
+        self.rounds = -1 # since it calls eval before training has even started thus the counter goes to 0
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
         self.min_available_clients = min_available_clients
@@ -170,7 +170,7 @@ class FedAvg(Strategy):
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_eval)
         #return max(num_clients, self.min_eval_clients), self.min_available_clients
-        print("num_available_clients", num_available_clients)
+        #print("num_available_clients", num_available_clients)
         return min(10, num_available_clients), 10
 
     def initialize_parameters(
@@ -188,12 +188,13 @@ class FedAvg(Strategy):
         self, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-        print("time since last eval/round:", time.time()-self.t)
-        self.t = time.time()
-
         self.rounds += 1
         if self.rounds == self.num_rounds:
             self.save_final_global_model(parameters)
+
+        if self.rounds <= 1:
+            print("duration of 1. training round:", time.time()-self.t)
+            self.t = time.time()
 
         if self.eval_fn:
             t2 = time.time()
@@ -216,7 +217,8 @@ class FedAvg(Strategy):
                        'mean_global_test_accuracy':test_acc,
                        'var_global_test_accuracy':test_acc_var,
                        'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
-            print("eval time for {} clients:".format(self.num_test_clients), time.time() - t2)
+            if self.rounds == 0:
+                print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - t2)
 
         return None
 
