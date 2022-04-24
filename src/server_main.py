@@ -89,8 +89,8 @@ if __name__ == "__main__":
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
-            eval_fn=global_model_eval,
             num_test_clients=wandb.config.num_test_clients,
+            eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
             test_file_path=test_file_path,
             qffl_learning_rate = wandb.config.lr,
@@ -137,7 +137,8 @@ if __name__ == "__main__":
             total_num_clients=wandb.config.total_num_clients,
             q_param = wandb.config.q_param,
             qffl_learning_rate = wandb.config.lr,
-            model_name=args.model_name
+            model_name=args.model_name,
+            num_test_clients = wandb.config.num_test_clients,
             )
     else:
         print("Strategy: FedAvg")

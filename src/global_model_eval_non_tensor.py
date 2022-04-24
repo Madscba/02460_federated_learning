@@ -25,7 +25,7 @@ def global_model_eval_non_tensor(state_dict =None,
     with open(data_folder) as file: user_names_test = [line.strip() for line in file]
     print(len(user_names_test))
 
-    user_names_test = user_names_test[:num_test_clients]
+    user_names_test = user_names_test[:num_test_clients][:-1]
     transform = transforms.Compose([transforms.ToTensor()])
 
     t = time.time()
@@ -33,12 +33,12 @@ def global_model_eval_non_tensor(state_dict =None,
     k = 0
     with torch.no_grad():
         for user in tqdm(user_names_test):
-            k+=1
+            #k+=1
             dataset = FemnistDataset(user, transform, train=False, train_proportion=0.8)
             data_loader = DataLoader(dataset, batch_size=8000)
             for x, y in data_loader:
-                x = torch.load(x).to(DEVICE)
-                y = torch.load(y).to(DEVICE)
+                x = x.to(DEVICE)
+                y = y.to(DEVICE)
                 num_obs_per_user.append(x.shape[0])
                 pred = net(x)
                 acc.append(torch.mean((torch.argmax(pred, axis=1) == y).type(torch.float)).item() * 100)
@@ -46,7 +46,7 @@ def global_model_eval_non_tensor(state_dict =None,
                 if get_loss:
                     loss.append(loss_func(pred, y).item())
 
-            if verbose: print("client", k, "time:", str(time.time() - t)[:5])
+            #if verbose: print("client", k, "time:", str(time.time() - t)[:5])
     return acc, loss, num_obs_per_user
 
 # if __name__ == '__main__':
