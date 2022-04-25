@@ -155,6 +155,7 @@ class FedAvg(Strategy):
         self.model=model
         self.num_test_clients = int(num_test_clients)
         self.t = time.time()
+        self.best_loss = 10000000
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -189,8 +190,6 @@ class FedAvg(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         self.rounds += 1
-        if self.rounds == self.num_rounds:
-            self.save_final_global_model(parameters)
 
         if self.rounds <= 1:
             if self.rounds == 1:
@@ -221,6 +220,10 @@ class FedAvg(Strategy):
                        'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
             if self.rounds == 1:
                 print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
+
+            if test_loss < self.best_loss and self.rounds > 100:
+                self.save_final_global_model(parameters)
+                self.best_loss = test_loss
 
         return None
 

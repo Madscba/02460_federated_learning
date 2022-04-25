@@ -62,6 +62,32 @@ acc2 = np.load(data_folder + predict2_name)
 loss1 = np.load(data_folder + loss1_name)
 loss2 = np.load(data_folder + loss2_name)
 
+from tqdm import tqdm
+
+def bootstrap(val1, val2, fn = np.std, name="loss", quantilies=[0.025, 0.975], n = 10000):
+    stds1 = []
+    stds2 = []
+    stds_diff = []
+    N = val1.shape[0]
+    loss_diff = val2-val1
+    for _ in tqdm(range(n)):
+        indx = np.round((np.random.uniform(size=N)*(N-1))).astype(int)
+        stds1.append(fn(val1[indx]))
+        stds2.append(fn(val2[indx]))
+        stds_diff.append(fn(loss_diff[indx]))
+    
+    print(name, fn(val1), np.quantile(np.array(stds1), quantilies))
+    print(name, fn(val2), np.quantile(np.array(stds2), quantilies))
+    print(name, fn(loss_diff), np.quantile(np.array(stds_diff), quantilies))
+   
+bootstrap(acc1, acc2, np.mean, "acc")
+bootstrap(loss1, loss2, np.mean, "loss")
+
+ 
+
+
+
+
 print("loss q{} mean and std".format(q1), np.mean(loss1), np.std(loss1))
 print("loss q{} mean and std".format(q2), np.mean(loss2), np.std(loss2))
 
