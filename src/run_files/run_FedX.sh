@@ -2,12 +2,12 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J fedx_ex5
-#BSUB -n 10 ##Number of cores
+#BSUB -n 12 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 02:30 ##120 minutes (hh:mm)
+#BSUB -W 01:30 ##120 minutes (hh:mm)
 ###BSUB -B 
 #BSUB -N 
 #BSUB -o O_fl_%J.out 
@@ -22,8 +22,8 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 epoch_num=8
-rounds=200
-#num_classes=None
+rounds=30
+#num_classes=20
 wandb_mode="online"
 exp_id='FedX'
 strategy='FedX'
@@ -51,7 +51,7 @@ python src/server_main.py --wandb_mode=$wandb_mode \
 --configs=fedx.yaml \
 --noise_multiplier=0.001 \
 --max_grad_norm=10.0 \
---q_param=0.2 \
+--q_param=0.001 \
 --batch_size=$batch_size \
 --total_num_clients=$N \
 --rounds=$rounds&pid=$!
