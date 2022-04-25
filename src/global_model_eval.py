@@ -39,8 +39,8 @@ def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
         k = 0
         for x, y in zip(x_data, y_data):
             k+=1
-            x = torch.load(x).to(DEVICE)
-            y = torch.load(y).to(DEVICE)
+            x = torch.load(x, map_location=torch.device('DEVICE') ).to(DEVICE)
+            y = torch.load(y, map_location=torch.device('DEVICE') ).to(DEVICE)
             num_obs_per_user.append(x.shape[0])
 
             # batch_size = 8
