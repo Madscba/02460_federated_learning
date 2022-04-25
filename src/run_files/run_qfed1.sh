@@ -10,8 +10,8 @@
 #BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o long_v2.out
-#BSUB -e long_v2.err
+#BSUB -o mlr2.out
+#BSUB -e mlr2.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -22,8 +22,8 @@ n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
 q_param=0.01
 ##epoch_num=1
-rounds=200
-wandb_mode="online"
+rounds=1
+wandb_mode="disabled"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
 model_name='Qfed_mlr'
@@ -46,6 +46,7 @@ source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 echo "Starting server with q param $q_param"
 python src/server_main.py \
 --wandb_mode=$wandb_mode \
+--model=$model \
 --experiment_id=$model_name$q_param \
 --wandb_username='karlulbaek' \
 --run_name=$strategy \
@@ -68,7 +69,6 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --seed=$n \
   --qfed=True \
   --config=qfed.yaml \
-  --model=$model \
   --num_classes=$num_classes \
   --epochs=$epoch_num \
   --batch_size=$batch_size \

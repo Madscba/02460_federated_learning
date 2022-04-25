@@ -21,7 +21,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 from typing import Callable, Dict, List, Optional, Tuple
 import wandb
 import numpy as np
-
+from model import Net
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -64,7 +64,8 @@ class QFedAvg_manual(FedAvg):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         test_file_path=None,
-        num_test_clients = 20
+        num_test_clients = 20,
+        model = Net
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -80,7 +81,8 @@ class QFedAvg_manual(FedAvg):
             test_file_path=test_file_path,
             num_test_clients = num_test_clients,
             model_name=model_name+"_"+str(q_param),
-            num_rounds=num_rounds
+            num_rounds=num_rounds,
+            model = model
 
 
         )
@@ -89,6 +91,7 @@ class QFedAvg_manual(FedAvg):
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
         self.eps = 1e-10
+        self.model = model
         #self.name = model_name+"_"+str(q_param)
 
     def __repr__(self) -> str:
