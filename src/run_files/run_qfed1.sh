@@ -17,18 +17,20 @@
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 n=1 #spawned_clients
-N=2950 #amount of clients
+N=100000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
 q_param=0.01
 ##epoch_num=1
-rounds=400
+rounds=200
 wandb_mode="online"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='Qfed_manual_long'
+model_name='Qfed_mlr'
 epoch_num=8
 batch_size=8
+model='mlr'
+num_classes=10
 lr=0.001
 num_test_clients=10
 one_third_num_test_clients=0 ## you have to do this manually lol
@@ -43,8 +45,9 @@ source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 
 echo "Starting server with q param $q_param"
 python src/server_main.py \
+--model=$model
 --wandb_mode=$wandb_mode \
---experiment_id=$strategy$q_param \
+--experiment_id=$model_name$q_param \
 --wandb_username='karlulbaek' \
 --run_name=$strategy \
 --num_test_clients=$num_test_clients \
@@ -65,7 +68,8 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     timeout 2m python src/client_main.py \
   --seed=$n \
   --qfed=True \
-  --config=qfed.yaml\
+  --config=qfed.yaml \
+  --num_classes=$num_classes \
   --epochs=$epoch_num \
   --batch_size=$batch_size \
   --lr=$lr \
@@ -78,24 +82,6 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   n=$(($n+1))
 done
 
-n=1
-while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
-  echo "Starting client: $n , name: $n , q param : $q_param"
-    timeout 2m python src/client_main.py \
-  --seed=$n \
-  --qfed=True \
-  --config=qfed.yaml\
-  --epochs=$epoch_num \
-  --batch_size=$batch_size \
-  --lr=$lr \
-  --dataset_path=$dataset_path&
-
-  if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+$one_third_num_test_clients))
-    sleep $((30+$one_third_num_test_clients))
-  fi
-  n=$(($n+1))
-done
 
 
 ## This will allow you to use CTRL+C to stop all background processesb

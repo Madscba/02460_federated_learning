@@ -19,7 +19,7 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 
 
 from typing import Callable, Dict, List, Optional, Tuple
-
+import wandb
 import numpy as np
 
 from flwr.common import (
@@ -195,8 +195,11 @@ class QFedAvg_manual(FedAvg):
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
 
+        train_losses = []
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
+            train_losses.append(params.metrics['loss'])
+
 
             if loss == None:
                 print("\nplease enable qfed_client = True in client_main\n")
@@ -224,6 +227,7 @@ class QFedAvg_manual(FedAvg):
                   )
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
+        wandb.log({'round': self.rounds, 'train_loss_var': np.var(np.array(train_losses))})
 
         # safe the model at the final round and keep track of the number of
         #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)

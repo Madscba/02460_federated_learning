@@ -74,6 +74,7 @@ if __name__ == "__main__":
     if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
+            model=choose_model(args.model),
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
             num_test_clients=wandb.config.num_test_clients,
