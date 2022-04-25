@@ -45,7 +45,6 @@ source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 
 echo "Starting server with q param $q_param"
 python src/server_main.py \
---model=$model
 --wandb_mode=$wandb_mode \
 --experiment_id=$model_name$q_param \
 --wandb_username='karlulbaek' \
@@ -69,6 +68,7 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --seed=$n \
   --qfed=True \
   --config=qfed.yaml \
+  --model=$model \
   --num_classes=$num_classes \
   --epochs=$epoch_num \
   --batch_size=$batch_size \
