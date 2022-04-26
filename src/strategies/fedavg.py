@@ -222,9 +222,9 @@ class FedAvg(Strategy):
             if self.rounds == 1:
                 print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
 
-            if test_loss < self.best_loss and self.rounds > int(self.num_rounds/2):
-                self.save_final_global_model(parameters)
+            if test_loss < self.best_loss and self.rounds >= int(self.num_rounds/2):
                 self.best_loss = test_loss
+                self.save_final_global_model(parameters)
 
         return None
 
@@ -372,13 +372,7 @@ class FedAvg(Strategy):
                 json.dump(self.sampled_users, fp)
 
             print("Saving sampled users into:", "saved_models/" + self.name + "_users" + ".json")
-        #     ...
-        #     json.dump(l, fp)
-        # ...
-        # >> > with open("test", "r") as fp:
-        #     ...
-        #     b = json.load(fp)
-        #torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
-        #print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+
         torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")
+        print("At round:", self.rounds, "with test loss", self.best_loss)
         print("Saving model at " "saved_models/" + self.name + "_state_dict" + ".pt")
