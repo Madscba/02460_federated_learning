@@ -39,7 +39,13 @@ import wandb
 from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 import numpy as np
+
+
+import torch
+from collections import OrderedDict
 from model import Net
+import json
+import os
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -155,6 +161,8 @@ class FedAvg(Strategy):
         self.model=model
         self.num_test_clients = int(num_test_clients)
         self.t = time.time()
+        self.best_loss = 10000000
+        self.sampled_users = []
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -189,8 +197,6 @@ class FedAvg(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
         self.rounds += 1
-        if self.rounds == self.num_rounds:
-            self.save_final_global_model(parameters)
 
         if self.rounds <= 1:
             if self.rounds == 1:
@@ -221,6 +227,10 @@ class FedAvg(Strategy):
                        'dist_global_test_accuracy':wandb.Histogram(np.array(acc))})
             if self.rounds == 1:
                 print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
+
+            if test_loss < self.best_loss and self.rounds >= int(self.num_rounds/2):
+                self.best_loss = test_loss
+                self.save_final_global_model(parameters)
 
         return None
 
@@ -341,18 +351,15 @@ class FedAvg(Strategy):
 
     def save_final_global_model(self, parameters):
         weights = parameters_to_weights(parameters)
-        import sys
-        import os
+        # import sys
+        # import os
+        #
+        # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # sys.path.append(BASE_DIR)
 
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        sys.path.append(BASE_DIR)
-        import torch
-        from collections import OrderedDict
-        from model import Net
-
-        import datetime
-        now = datetime.datetime.now()
-        day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
+        # import datetime
+        # now = datetime.datetime.now()
+        # day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
 
         # this could maybe be simplified but i wont bother
         net = Net()
@@ -361,7 +368,14 @@ class FedAvg(Strategy):
         # this step might not be necessary
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
-        #torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
-        #print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
+
+        print("\nAt round:", self.rounds, "with test loss", self.best_loss)
+
+        if len(self.sampled_users) > 0:
+            with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
+                json.dump(self.sampled_users, fp)
+
+            print("Saving sampled users into:", "saved_models/" + self.name + "_users" + ".json")
+
         torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")
         print("Saving model at " "saved_models/" + self.name + "_state_dict" + ".pt")
