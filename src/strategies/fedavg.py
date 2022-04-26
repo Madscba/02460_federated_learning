@@ -366,6 +366,8 @@ class FedAvg(Strategy):
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
 
+        print("\nAt round:", self.rounds, "with test loss", self.best_loss)
+
         if len(self.sampled_users) > 0:
             import json
             with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
@@ -374,5 +376,4 @@ class FedAvg(Strategy):
             print("Saving sampled users into:", "saved_models/" + self.name + "_users" + ".json")
 
         torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")
-        print("At round:", self.rounds, "with test loss", self.best_loss)
         print("Saving model at " "saved_models/" + self.name + "_state_dict" + ".pt")
