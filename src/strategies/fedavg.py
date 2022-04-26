@@ -39,7 +39,13 @@ import wandb
 from .aggregate import aggregate, weighted_loss_avg, save_final_global_model
 from .strategy import Strategy
 import numpy as np
+
+
+import torch
+from collections import OrderedDict
 from model import Net
+import json
+import os
 
 DEPRECATION_WARNING = """
 DEPRECATION WARNING: deprecated `eval_fn` return format
@@ -345,18 +351,15 @@ class FedAvg(Strategy):
 
     def save_final_global_model(self, parameters):
         weights = parameters_to_weights(parameters)
-        import sys
-        import os
+        # import sys
+        # import os
+        #
+        # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # sys.path.append(BASE_DIR)
 
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        sys.path.append(BASE_DIR)
-        import torch
-        from collections import OrderedDict
-        from model import Net
-
-        import datetime
-        now = datetime.datetime.now()
-        day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
+        # import datetime
+        # now = datetime.datetime.now()
+        # day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
 
         # this could maybe be simplified but i wont bother
         net = Net()
@@ -369,7 +372,6 @@ class FedAvg(Strategy):
         print("\nAt round:", self.rounds, "with test loss", self.best_loss)
 
         if len(self.sampled_users) > 0:
-            import json
             with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
                 json.dump(self.sampled_users, fp)
 
