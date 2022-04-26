@@ -156,6 +156,7 @@ class FedAvg(Strategy):
         self.num_test_clients = int(num_test_clients)
         self.t = time.time()
         self.best_loss = 10000000
+        self.sampled_users = []
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -364,6 +365,18 @@ class FedAvg(Strategy):
         # this step might not be necessary
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
+
+        import json
+        with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
+            json.dump(self.sampled_users, fp)
+
+        print("saved sampled users into:", "saved_models/" + self.name + "_users" + ".json")
+        #     ...
+        #     json.dump(l, fp)
+        # ...
+        # >> > with open("test", "r") as fp:
+        #     ...
+        #     b = json.load(fp)
         #torch.save(state_dict, "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
         #print("Saving model at " "saved_models/" + name + "_state_dict_" + day_hour_min + ".pt")
         torch.save(state_dict, "saved_models/" + self.name + "_state_dict" + ".pt")

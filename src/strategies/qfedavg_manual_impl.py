@@ -92,6 +92,7 @@ class QFedAvg_manual(FedAvg):
         self.pre_weights: Optional[Weights] = None
         self.eps = 1e-10
         self.model = model
+        self.sampled_users = []
         #self.name = model_name+"_"+str(q_param)
 
     def __repr__(self) -> str:
@@ -202,6 +203,7 @@ class QFedAvg_manual(FedAvg):
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
             train_losses.append(params.metrics['loss'])
+            self.sampled_users.append(params.metrics['user'])
 
 
             if loss == None:

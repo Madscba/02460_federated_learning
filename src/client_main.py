@@ -47,7 +47,8 @@ def main(args):
     # Flower client
     qfed_client = args.qfed # default is false
     client=FemnistClient(net, trainloader, testloader, num_examples,
-                         qfed_client=qfed_client)
+                         qfed_client=qfed_client,
+                         user=user)
 
     #client.fit(net.parameters(),config={'round':1})
     # Start client
