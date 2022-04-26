@@ -10,8 +10,8 @@
 #BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o mlr3.out
-#BSUB -e mlr3.err
+#BSUB -o mlrtest.out
+#BSUB -e mlrtest.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -22,11 +22,11 @@ n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
 q_param=0.1
 ##epoch_num=1
-rounds=200
-wandb_mode="online"
+rounds=1
+wandb_mode="disabled"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='Qfed_mlr_1epoch_high_lr_largebatch_all_classes'
+model_name='Qfed_mlr_test'
 epoch_num=1
 batch_size=32
 model='mlr'

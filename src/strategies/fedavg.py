@@ -222,7 +222,7 @@ class FedAvg(Strategy):
             if self.rounds == 1:
                 print("duration of 1. global eval for {} clients:".format(self.num_test_clients), time.time() - self.t)
 
-            if test_loss < self.best_loss and self.rounds > 100:
+            if test_loss < self.best_loss and self.rounds > int(self.num_rounds/2):
                 self.save_final_global_model(parameters)
                 self.best_loss = test_loss
 
@@ -366,11 +366,12 @@ class FedAvg(Strategy):
         # net.load_state_dict(state_dict, strict=True)
         if "saved_models" not in os.listdir(): os.mkdir("saved_models")
 
-        import json
-        with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
-            json.dump(self.sampled_users, fp)
+        if len(self.sampled_users) > 0:
+            import json
+            with open("saved_models/" + self.name + "_users" + ".json", "w") as fp:
+                json.dump(self.sampled_users, fp)
 
-        print("saved sampled users into:", "saved_models/" + self.name + "_users" + ".json")
+            print("Saving sampled users into:", "saved_models/" + self.name + "_users" + ".json")
         #     ...
         #     json.dump(l, fp)
         # ...
