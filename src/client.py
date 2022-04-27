@@ -3,7 +3,7 @@ from collections import OrderedDict
 import flwr as fl
 import torch
 import wandb
-from train_test_utils import test, train  
+from train_test_utils import rank_pred, test, train  
 
 
 class FemnistClient(fl.client.NumPyClient):
@@ -38,8 +38,8 @@ class FemnistClient(fl.client.NumPyClient):
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.testloader,config['round'])
-        return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
+        loss, accuracy,ranked_pred = test(self.net, self.testloader,config['round'])
+        return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy),"ranked_pred":ranked_pred}
 
     # only needed for q fed
     def loss_prior_to_training(self):

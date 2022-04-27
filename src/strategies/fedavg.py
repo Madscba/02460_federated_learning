@@ -302,22 +302,25 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        dis_loss=[
-                (evaluate_res.num_examples, evaluate_res.loss)
+
+        dis_metrics=np.array([
+                (evaluate_res.num_examples, 
+                evaluate_res.metrics['accuracy'],
+                evaluate_res.metrics['ranked_pred'],
+                evaluate_res.loss)
                 for _, evaluate_res in results
-            ]
-        dis_accuracy=[
-                (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
-                for _, evaluate_res in results
-            ]
-        var_acc=np.var(np.array(dis_accuracy)[:,1])
-        var_loss=np.var(np.array(dis_loss)[:,1])
-        accuracy_aggregated = weighted_loss_avg(dis_accuracy)
-        loss_aggregated = weighted_loss_avg(dis_loss)
+            ])
+
+        var_acc=np.var(dis_metrics[:,1])
+        var_loss=np.var(dis_metrics[:,3])
+        accuracy_aggregated = weighted_loss_avg(dis_metrics[:,[0,3]])
+        loss_aggregated = weighted_loss_avg(dis_metrics[:,[0,1]])
+        ranked_pred = weighted_loss_avg(dis_metrics[:,[0,2]])
         wandb.log({'round':rnd,
                    'test_accuracy_aggregated':accuracy_aggregated,
                    'test_loss_aggregated':loss_aggregated,
                    'var_test_accuracy_aggregated':var_acc,
-                   'dist_test_accuracy_aggregated':wandb.Histogram(np.array(dis_loss)[:,1])
+                   'dist_test_accuracy_aggregated':wandb.Histogram(dis_metrics[:,1]),
+                   'ranked_pred_test_accuracy':ranked_pred
                    })
         return loss_aggregated, {}

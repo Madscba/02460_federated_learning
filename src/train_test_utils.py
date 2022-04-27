@@ -19,10 +19,11 @@ def train(net, trainloader,round, epochs):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
+            output = net(images)
             if wandb.config.strategy in ['FedProx', 'FedX']:
-                loss = criterion(net(images), labels, net.parameters())
+                loss = criterion(output, labels, net.parameters())
             else:
-                loss = criterion(net(images), labels)
+                loss = criterion(output, labels)
             loss.backward()
             loss_agg+=loss.item()
             wandb.log({"train_loss": loss.item()})
@@ -48,7 +49,7 @@ def choose_train_fn(train_fn='train'):
 def test(net, testloader,round):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, total, loss, ranked_pred = 0, 0, 0.0, 0.0
     net.eval()
     with torch.no_grad():
         for images, labels in testloader:
@@ -58,8 +59,16 @@ def test(net, testloader,round):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            ranked_pred += rank_pred(labels,outputs)
     loss /= len(testloader.dataset)
+    ranked_pred /=len(testloader.dataset)
     accuracy = correct / total
     wandb.log({"round":round,"test_loss": loss, "test_accuracy": accuracy})
-    return loss, accuracy
+    return loss, accuracy, ranked_pred
+
+def rank_pred(labels,predictions):            
+    sort_pred=torch.argsort(predictions.data,dim=-1,descending=True)
+    _,ranked_pred=torch.where(sort_pred==labels.view(-1,1).detach())
+    mean_ranked_pred=torch.sum(ranked_pred)
+    return mean_ranked_pred.numpy()
 
