@@ -2,32 +2,38 @@
 ## 02460 FL, template
 #BSUB -q hpc
 #BSUB -J intro_FL_exp
-#BSUB -n 12 ##Number of cores
+#BSUB -n 24 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
 #BSUB -R "span[hosts=1]"
 #BSUB -M 4GB
-#BSUB -W 03:00 ##20 minutes (hh:mm)
+#BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_qfed1.out
-#BSUB -e E_qfed1.err
+#BSUB -o mlrtest.out
+#BSUB -e mlrtest.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 n=1 #spawned_clients
-N=2950 #amount of clients
+N=100000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
-q_param=0.0
+q_param=0.1
 ##epoch_num=1
-rounds=200
-wandb_mode="online"
+rounds=1
+wandb_mode="disabled"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-epoch_num=8
-batch_size=8
+model_name='Qfed_mlr_test'
+epoch_num=1
+batch_size=32
+model='mlr'
+num_classes=10
+lr=0.05
+num_test_clients=20
+one_third_num_test_clients=0 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
@@ -40,11 +46,14 @@ source /zhome/fb/d/137704/Desktop/fed_lr/v_env2/bin//activate
 echo "Starting server with q param $q_param"
 python src/server_main.py \
 --wandb_mode=$wandb_mode \
---experiment_id=$strategy$q_param \
+--model=$model \
+--experiment_id=$model_name$q_param \
 --wandb_username='karlulbaek' \
 --run_name=$strategy \
+--num_test_clients=$num_test_clients \
 --strategy=$strategy \
 --q_param=$q_param \
+--model_name=$model_name \
 --dataset_path=$dataset_path \
 --config=qfed.yaml \
 --entity=karlulbaek \
@@ -59,17 +68,21 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     timeout 2m python src/client_main.py \
   --seed=$n \
   --qfed=True \
-  --config=qfed.yaml\
+  --model=$model \
+  --config=qfed.yaml \
+  --num_classes=$num_classes \
   --epochs=$epoch_num \
   --batch_size=$batch_size \
+  --lr=$lr \
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+1*$epoch_num))
-    sleep $((30+1*$epoch_num))
+    echo "sleeping for" $((5+$one_third_num_test_clients))
+    sleep $((5+$one_third_num_test_clients))
   fi
   n=$(($n+1))
 done
+
 
 
 ## This will allow you to use CTRL+C to stop all background processesb

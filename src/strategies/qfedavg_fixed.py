@@ -63,6 +63,7 @@ class QFedAvg(FedAvg):
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
+        num_test_clients = 20
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -75,25 +76,17 @@ class QFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
-            model_name=model_name,
-            test_file_path=test_file_path
+            model_name=model_name + "_" + str(q_param),
+            test_file_path=test_file_path,
+            num_test_clients=num_test_clients,
+            num_rounds=num_rounds
         )
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
+
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.name = model_name
-        self.test_file_path=test_file_path
+        #self.name = model_name
+        #self.test_file_path=test_file_path
         
 
     def __repr__(self) -> str:
@@ -102,16 +95,16 @@ class QFedAvg(FedAvg):
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+    # def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Return the sample size and the required number of available
+    #     clients."""
+    #     num_clients = int(num_available_clients * self.fraction_fit)
+    #     return max(num_clients, self.min_fit_clients), self.min_available_clients
+    #
+    # def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Use a fraction of available clients for evaluation."""
+    #     num_clients = int(num_available_clients * self.fraction_eval)
+    #     return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -196,8 +189,8 @@ class QFedAvg(FedAvg):
         weights_before = self.pre_weights
         # if eval_result is not None:
             # loss, _ = eval_result
-        import time
-        t = time.time()
+        #import time
+        #t = time.time()
         for client_prox, fit_res in results:
             loss = fit_res.metrics.get("loss_prior_to_training", None)
             if loss == None: print("please enable qfed_client = True in client_main")
@@ -221,8 +214,8 @@ class QFedAvg(FedAvg):
             )
 
         weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-        print("qfed_fixed agg time:", time.time()-t)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #print("qfed_fixed agg time:", time.time()-t)
         return weights_to_parameters(weights_aggregated), {}
 
     # def aggregate_evaluate(

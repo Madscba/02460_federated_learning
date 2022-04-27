@@ -8,10 +8,11 @@ from FedOptLoss import FedOptLoss
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def train(net, trainloader,round, epochs):
+def train(net, trainloader, round, epochs, lr):
     """Train the network on the training set."""
     criterion = configure_criterion(net.parameters())
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9)
+    #print("lr:", lr)
     net.train()
     loss_agg=0
     theta0 = deepcopy(net.state_dict())
@@ -20,7 +21,7 @@ def train(net, trainloader,round, epochs):
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
             output = net(images)
-            if wandb.config.strategy in ['FedProx', 'FedX']:
+            if wandb.config.strategy in ['FedProx']:
                 loss = criterion(output, labels, net.parameters())
             else:
                 loss = criterion(output, labels)
@@ -35,7 +36,7 @@ def train(net, trainloader,round, epochs):
     return avg_train_loss
 
 def configure_criterion(parameters):
-    if wandb.config.strategy in ['FedProx', 'FedX']:
+    if wandb.config.strategy in ['FedProx']:
         criterion= FedOptLoss(parameters, mu=wandb.config.mu)
     else: 
         criterion=torch.nn.CrossEntropyLoss()

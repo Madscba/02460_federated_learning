@@ -18,9 +18,9 @@ from main_utils import choose_model
 
 FRACTION_FIT_ = 1.
 FRACTION_EVAL_ = 1.
-MIN_FIT_CLIENTS_ = 2
-MIN_EVAL_CLIENTS_ = 2
-MIN_AVAILABLE_CLIENTS_ = 2
+MIN_FIT_CLIENTS_ = 10
+MIN_EVAL_CLIENTS_ = 10
+MIN_AVAILABLE_CLIENTS_ = 10
 test_file_path='/work3/s173934/AdvML/02460_federated_learning/dataset/test_stored_as_tensors'
 #test_file_path="C:/Users/Karlu/Desktop/advanced/02460_federated_learning/dataset/test_stored_as_tensors"
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--target_delta",type=float,default=1e-4)
     parser.add_argument("--sample_rate",type=float,default=0.0025)
     parser.add_argument("--q_param",type=float,default=0.2)
+    parser.add_argument("--num_test_clients",type=float,default=10)
     parser.add_argument("--dataset_path",default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--total_num_clients", type=int, default=1000)
@@ -73,8 +74,10 @@ if __name__ == "__main__":
     if args.strategy == "Qfed_manual":
         print("Strategy: Qfed_manual")
         strategy = QFedAvg_manual(
+            model=choose_model(args.model),
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
+            num_test_clients=wandb.config.num_test_clients,
             test_file_path=test_file_path,
             qffl_learning_rate = wandb.config.lr,
             num_rounds=args.rounds,
@@ -87,6 +90,7 @@ if __name__ == "__main__":
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
+            num_test_clients=wandb.config.num_test_clients,
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
             test_file_path=test_file_path,
@@ -107,6 +111,7 @@ if __name__ == "__main__":
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
             eval_fn=global_model_eval,
+            test_file_path=test_file_path,
             num_rounds=args.rounds,
             batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
@@ -125,6 +130,7 @@ if __name__ == "__main__":
             min_eval_clients=MIN_EVAL_CLIENTS_,
             min_available_clients=MIN_AVAILABLE_CLIENTS_,
             eval_fn=global_model_eval,
+            test_file_path=test_file_path,
             num_rounds=args.rounds,
             batch_size=wandb.config.batch_size,
             noise_multiplier=wandb.config.noise_multiplier,
@@ -134,7 +140,8 @@ if __name__ == "__main__":
             total_num_clients=wandb.config.total_num_clients,
             q_param = wandb.config.q_param,
             qffl_learning_rate = wandb.config.lr,
-            model_name=args.model_name
+            model_name=args.model_name,
+            num_test_clients = wandb.config.num_test_clients,
             )
     else:
         print("Strategy: FedAvg")

@@ -19,9 +19,9 @@ Paper: https://openreview.net/pdf?id=ByexElSYDr
 
 
 from typing import Callable, Dict, List, Optional, Tuple
-
+import wandb
 import numpy as np
-
+from model import Net
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -64,6 +64,8 @@ class QFedAvg_manual(FedAvg):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         test_file_path=None,
+        num_test_clients = 20,
+        model = Net
     ) -> None:
         super().__init__(
             fraction_fit=fraction_fit,
@@ -76,25 +78,22 @@ class QFedAvg_manual(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
-            test_file_path=test_file_path
+            test_file_path=test_file_path,
+            num_test_clients = num_test_clients,
+            model_name=model_name+"_"+str(q_param),
+            num_rounds=num_rounds,
+            model = model
+
+
         )
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_available_clients = min_available_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.L = 1/qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[Weights] = None
-        self.time = time.time()
-        self.name = model_name
+        self.eps = 1e-10
+        self.model = model
+        self.sampled_users = []
+        #self.name = model_name+"_"+str(q_param)
 
     def __repr__(self) -> str:
         # pylint: disable=line-too-long
@@ -102,16 +101,16 @@ class QFedAvg_manual(FedAvg):
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
+    # def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Return the sample size and the required number of available
+    #     clients."""
+    #     num_clients = int(num_available_clients * self.fraction_fit)
+    #     return max(num_clients, self.min_fit_clients), self.min_available_clients
+    #
+    # def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
+    #     """Use a fraction of available clients for evaluation."""
+    #     num_clients = int(num_available_clients * self.fraction_eval)
+    #     return max(num_clients, self.min_eval_clients), self.min_available_clients
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -195,37 +194,49 @@ class QFedAvg_manual(FedAvg):
         # if eval_result is not None:
         #     loss, _ = eval_result
 
-        t = time.time()
+        #t = time.time()
 
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
-        eps = 1e-10
 
+        train_losses = []
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
-            if loss == None: print("please enable qfed_client = True in client_main")
+            train_losses.append(params.metrics['loss'])
+            self.sampled_users.append(params.metrics['user'])
+
+
+            if loss == None:
+                print("\nplease enable qfed_client = True in client_main\n")
+                raise ValueError
+
 
             weights_new = parameters_to_weights(params.parameters)
-            grads = [
-                    (weights_before - weights_after) * self.L for
-                     weights_before, weights_after in zip(weights_prev, weights_new)
-                     ]
 
+            weight_diff = [
+                           (weight_prev - weight_new) * self.L for
+                            weight_prev,  weight_new in zip(weights_prev, weights_new)
+                          ]
 
-            ds = [d + np.float_power(loss + eps, self.q_param) * grad for d, grad in zip(ds, grads)]
+            q_objective = np.float_power((loss + self.eps), self.q_param)
+            q_objective_minus1 = np.float_power((loss + self.eps), (self.q_param-1))
 
-            hs += (self.q_param *
-                   np.float_power(loss + eps, self.q_param-1) *
-                   norm_grad_squared(grads) +
+            ds = [d + q_objective * grad for d, grad in zip(ds, weight_diff)]
+
+            hs += (
+                   self.q_param *
+                   q_objective_minus1 *
+                   norm_grad_squared(weight_diff) +
                    self.L *
-                   np.float_power(loss + eps, self.q_param)
-                   )
+                   q_objective
+                  )
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
+        wandb.log({'round': self.rounds, 'train_loss_var': np.var(np.array(train_losses))})
 
         # safe the model at the final round and keep track of the number of
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
-        print("qfed_manual agg time:", time.time() - t)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #print("qfed_manual agg time:", time.time() - t)
         return weights_to_parameters(weights_aggregated), {}
 
     # def aggregate_evaluate(

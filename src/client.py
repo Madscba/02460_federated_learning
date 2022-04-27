@@ -7,7 +7,7 @@ from train_test_utils import rank_pred, test, train
 
 
 class FemnistClient(fl.client.NumPyClient):
-    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=False) -> None:
+    def __init__(self, net, trainloader, testloader, num_examples, qfed_client=False, user = None) -> None:
         self.net=net
         self.num_examples=num_examples
         self.trainloader=trainloader
@@ -15,6 +15,7 @@ class FemnistClient(fl.client.NumPyClient):
         self.qfed_client = qfed_client
         self.loss_func = torch.nn.CrossEntropyLoss()
         self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.user = user
         super().__init__()
 
     def get_parameters(self):
@@ -31,9 +32,14 @@ class FemnistClient(fl.client.NumPyClient):
         # only return something meaningfull if self.qfed == true
         info = self.loss_prior_to_training()
 
-        train_loss=train(self.net, self.trainloader, round=config['round'], epochs=wandb.config.epochs)
+        train_loss=train(self.net,
+                         self.trainloader,
+                         round=config['round'],
+                         epochs=wandb.config.epochs,
+                         lr=wandb.config.lr)
 
         info['loss']=train_loss
+        info['user'] = self.user
         return self.get_parameters(), self.num_examples["trainset"], info
 
     def evaluate(self, parameters, config):

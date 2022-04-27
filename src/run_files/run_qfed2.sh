@@ -10,8 +10,8 @@
 #BSUB -W 03:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o O_qfed2.out
-#BSUB -e E_qfed2.err
+#BSUB -o o_qfed2.out
+#BSUB -e e_qfed2.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -20,7 +20,7 @@ n=1 #spawned_clients
 N=2950 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
-q_param=0.1
+q_param=0.0
 ##epoch_num=1
 rounds=200
 wandb_mode="online"
@@ -28,6 +28,8 @@ wandb_mode="online"
 strategy='Qfed_manual'
 epoch_num=8
 batch_size=8
+num_test_clients=20
+one_third_num_test_clients=10 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
@@ -43,6 +45,7 @@ python src/server_main.py \
 --experiment_id=$strategy$q_param \
 --wandb_username='karlulbaek' \
 --run_name=$strategy \
+--num_test_clients=$num_test_clients \
 --strategy=$strategy \
 --q_param=$q_param \
 --dataset_path=$dataset_path \
@@ -65,8 +68,8 @@ while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
   --dataset_path=$dataset_path&
 
   if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((30+1*$epoch_num))
-    sleep $((30+1*$epoch_num))
+    echo "sleeping for" $((30+$one_third_num_test_clients))
+    sleep $((30+$one_third_num_test_clients))
   fi
   n=$(($n+1))
 done

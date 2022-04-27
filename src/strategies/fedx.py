@@ -102,12 +102,13 @@ class FedX(FedAvg):
         batch_size: int = 8,
         noise_multiplier: float = None,
         noise_scale: float = None,
+        target_delta: float = None,
         max_grad_norm: float = 1.1,
         total_num_clients: int = 1000,
-        user_names_test_file=None,
-        model=Net,
-        q_param: float = 0.2,
-        qffl_learning_rate: float = 0.1,
+        test_file_path=None,
+        num_test_clients=20,
+        q_param: float = 0.001,
+        qffl_learning_rate: float = 0.001,
         model_name="FedX"
     ) -> None:
         """Federated Averaging strategy.
@@ -148,6 +149,10 @@ class FedX(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
+            test_file_path=test_file_path,
+            num_test_clients = num_test_clients,
+            model_name=model_name+"_"+str(q_param),
+            num_rounds=num_rounds
         )
 
         if (
@@ -156,33 +161,19 @@ class FedX(FedAvg):
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.min_available_clients = min_available_clients
+        self.target_delta = target_delta
         self.total_num_clients = total_num_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
-        self.initial_parameters = initial_parameters
         self.batch_size = batch_size
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = None
         self.epsilon = 0
-        self.round=1
         self.privacy_account = None
-        self.test_file_path=user_names_test_file
-        self.name = model_name
-        self.model=model
-        self.learning_rate = qffl_learning_rate
+
         self.L = 1/qffl_learning_rate
         self.q_param = q_param
+        self.eps = 1e-10
         self.pre_weights: Optional[Weights] = None
 
 
@@ -190,65 +181,18 @@ class FedX(FedAvg):
         rep = f"FedX(accept_failures={self.accept_failures})"
         return rep
 
-    def set_privacy_account(self, results):
-        num_examples = sum([fit_res.num_examples for _, fit_res in results]) 
+    def set_privacy_account(self, results, rnd):
+        num_examples = sum([fit_res.num_examples for _, fit_res in results])
         if not self.target_delta:
             self.target_delta = 0.1 * (1 / num_examples)
-        C = len([fit_res.num_examples for _, fit_res in results]) 
+        C = len([fit_res.num_examples for _, fit_res in results])
         sensitivity = self.max_grad_norm / C
         self.noise_scale = self.noise_multiplier / sensitivity
         sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
-        steps = int(num_examples / self.batch_size) 
-        self.privacy_account = PrivacyAccount(steps=steps, sample_size=C, sample_rate=sample_rate,
+        self.privacy_account = PrivacyAccount(steps=rnd, sample_size=C, sample_rate=sample_rate,
                                               max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
                                               noise_scale=self.noise_scale, target_delta=self.target_delta)
 
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_eval)
-        return max(num_clients, self.min_eval_clients), self.min_available_clients
-
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        if isinstance(initial_parameters, list):
-            log(WARNING, DEPRECATION_WARNING_INITIAL_PARAMETERS)
-            initial_parameters = weights_to_parameters(weights=initial_parameters)
-        return initial_parameters
-
-    def evaluate(
-        self, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function."""
-        if self.eval_fn is None:
-            # No evaluation function provided
-            return None
-        weights=parameters_to_weights(parameters)
-        eval_res = self.eval_fn(state_dict=None,
-                                data_folder=self.test_file_path,
-                                parameters=weights,
-                                num_test_clients=60,
-                                model=self.model,
-                                get_loss=True)
-        acc, loss, num_observations  = eval_res
-        sum_obs=np.sum(np.array(num_observations))
-        test_acc=np.sum(np.array(acc)*np.array(num_observations))/sum_obs
-        test_loss=np.sum(np.array(loss)*np.array(num_observations))/sum_obs
-        wandb.log({'round':self.round,
-                   'mean_global_test_loss':test_loss,
-                   'mean_global_test_accuracy':test_acc,
-                   'dis_global_test_accuracy':np.array(acc)})
-
-        return None
 
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
@@ -273,35 +217,6 @@ class FedX(FedAvg):
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
-    def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction eval is 0.
-        if self.fraction_eval == 0.0:
-            return []
-
-        # Parameters and config
-        config = {'round':rnd}
-        if self.on_evaluate_config_fn is not None:
-            # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(rnd)
-        evaluate_ins = EvaluateIns(parameters, config)
-
-        # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
-
-        # Return client/config pairs
-        return [(client, evaluate_ins) for client in clients]
-
     def aggregate_fit(
         self,
         rnd: int,
@@ -309,7 +224,6 @@ class FedX(FedAvg):
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        self.round=rnd
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -327,35 +241,43 @@ class FedX(FedAvg):
 
         if self.pre_weights is None:
             raise Exception("FedX pre_weights are None in aggregate_fit")
-       
+
         weights_prev = self.pre_weights
+
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
-        eps = 1e-10
 
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
-            if loss == None: print("please enable qfed_client = True in client_main")
+
+            if loss == None:
+                print("\nplease enable qfed_client = True in client_main\n")
+                raise ValueError
+
 
             weights_new = parameters_to_weights(params.parameters)
-            grads = [
-                    (weights_before - weights_after) * self.L for
-                     weights_before, weights_after in zip(weights_prev, weights_new)
-                     ]
 
+            weight_diff = [
+                           (weight_prev - weight_new) * self.L for
+                            weight_prev,  weight_new in zip(weights_prev, weights_new)
+                          ]
 
-            ds = [d + np.float_power(loss + eps, self.q_param) * grad for d, grad in zip(ds, grads)]
+            q_objective = np.float_power((loss + self.eps), self.q_param)
+            q_objective_minus1 = np.float_power((loss + self.eps), (self.q_param-1))
 
-            hs += (self.q_param *
-                   np.float_power(loss + eps, self.q_param-1) *
-                   norm_grad_squared(grads) +
+            ds = [d + q_objective * grad for d, grad in zip(ds, weight_diff)]
+
+            hs += (
+                   self.q_param *
+                   q_objective_minus1 *
+                   norm_grad_squared(weight_diff) +
                    self.L *
-                   np.float_power(loss + eps, self.q_param)
-                   )
+                   q_objective
+                  )
 
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
 
-        self.set_privacy_account(results=results)
+        self.set_privacy_account(results=results, rnd=rnd)
 
         if self.noise_scale:
             sigma = self.privacy_account.noise_multiplier
@@ -363,10 +285,6 @@ class FedX(FedAvg):
                 w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
             self.epsilon = self.privacy_account.get_privacy_spent()
             wandb.log({'round': rnd, "epsilon": self.epsilon})
-            wandb.log({'round': rnd, "sigma": self.privacy_account.noise_multiplier})
-            wandb.log({'round': rnd, "z": self.privacy_account.noise_scale})
-            wandb.log({'round': rnd, "C": self.privacy_account.sample_size})
-            wandb.log({'round': rnd, "delta": self.privacy_account.target_delta})
 
         loss_aggregated = weighted_loss_avg(
             [
@@ -375,35 +293,6 @@ class FedX(FedAvg):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+
         return weights_to_parameters(weights_aggregated), {}
 
-    def aggregate_evaluate(
-        self,
-        rnd: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-        loss_aggregated = weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss)
-                for _, evaluate_res in results
-            ]
-        )
-        accuracy_aggregated = weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.metrics['accuracy'])
-                for _, evaluate_res in results
-            ]
-        )
-
-        wandb.log({'round':rnd,
-                   'test_accuracy_aggregated':accuracy_aggregated,
-                   'test_loss_aggregated':loss_aggregated})
-        return loss_aggregated, {}
