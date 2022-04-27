@@ -154,7 +154,6 @@ class FedX(FedAvg):
             num_test_clients = num_test_clients,
             model_name=model_name+"_"+str(q_param),
             num_rounds=num_rounds,
-            model = model
         )
 
         if (
