@@ -109,7 +109,8 @@ class FedX(FedAvg):
         num_test_clients=20,
         q_param: float = 0.001,
         qffl_learning_rate: float = 0.001,
-        model_name="FedX"
+        model_name="FedX",
+        model=Net
     ) -> None:
         """Federated Averaging strategy.
 
@@ -139,6 +140,7 @@ class FedX(FedAvg):
             Initial global model parameters.
         """
         super().__init__(
+            model=model,
             fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
             min_fit_clients=min_fit_clients,
@@ -170,6 +172,7 @@ class FedX(FedAvg):
         self.target_delta = None
         self.epsilon = 0
         self.privacy_account = None
+        self.model = model
 
         self.L = 1/qffl_learning_rate
         self.q_param = q_param

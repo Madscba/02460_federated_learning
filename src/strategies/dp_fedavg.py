@@ -137,7 +137,9 @@ class DPFedAvg(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-        super().__init__(fraction_fit=fraction_fit,
+        super().__init__(
+            model=model,
+            fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
             min_fit_clients=min_fit_clients,
             min_eval_clients=min_eval_clients,

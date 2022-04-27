@@ -105,6 +105,7 @@ if __name__ == "__main__":
     elif args.strategy == "DP_Fed":
         print("Strategy: DP_FedAvg")
         strategy = DPFedAvg(
+            model=choose_model(args.model),
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -124,6 +125,7 @@ if __name__ == "__main__":
     elif args.strategy == "FedX":
         print("Strategy: FedX")
         strategy = FedX(
+            model=choose_model(args.model),
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
