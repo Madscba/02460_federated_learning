@@ -362,7 +362,7 @@ class FedAvg(Strategy):
         # day_hour_min = '{:02d}_{:02d}_{:02d}'.format(now.day, now.hour, now.minute)
 
         # this could maybe be simplified but i wont bother
-        net = Net()
+        net = self.model()
         params_dict = zip(net.state_dict().keys(), weights)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         # this step might not be necessary

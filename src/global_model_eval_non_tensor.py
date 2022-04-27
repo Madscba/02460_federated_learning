@@ -2,12 +2,13 @@ from torch.utils.data import DataLoader
 from client_dataset import FemnistDataset
 import torchvision.transforms as transforms
 import torch
-from model import Net
+from model import Net, mlr
 from collections import OrderedDict
 import os
 from tqdm import tqdm
 from main_utils import set_seed
 import time
+import json
 
 
 def global_model_eval_non_tensor(state_dict =None,
@@ -15,27 +16,40 @@ def global_model_eval_non_tensor(state_dict =None,
                                  num_test_clients = None,  # this is the indexing of the list so None means all
                                  get_loss = False,
                                  model=Net,
-                                 verbose=False):
+                                 users_used_for_training = None
+                                 ):
 
     loss_func = torch.nn.CrossEntropyLoss()
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net = model().to(DEVICE)
-    net.load_state_dict(torch.load(state_dict))
+    #fc1.weight, fc1.bias
+    try:
+        net.load_state_dict(torch.load(state_dict))
+        print("loaded NN\n")
 
-    with open(data_folder) as file: user_names_test = [line.strip() for line in file]
-    print(len(user_names_test))
+    except Exception:
+        state_dict = torch.load(state_dict)
+        state_dict["fc1.weight"] = state_dict["conv1.weight"]
+        state_dict["fc1.bias"] = state_dict["conv1.bias"]
+        state_dict.pop("conv1.weight")
+        state_dict.pop("conv1.bias")
+        print("loaded mlr\n")
 
-    user_names_test = user_names_test[:num_test_clients][:-1]
+    if users_used_for_training == None:
+        with open(data_folder) as file: user_names_test = [line.strip() for line in file][:-1]
+    else:
+        with open(users_used_for_training) as file:
+            user_names_test = json.load(file)
+
+    user_names_test = user_names_test[len(user_names_test)-num_test_clients:]
+
     transform = transforms.Compose([transforms.ToTensor()])
-
-    t = time.time()
     acc, loss, num_obs_per_user = [], [], []
-    k = 0
     with torch.no_grad():
         for user in tqdm(user_names_test):
             #k+=1
             dataset = FemnistDataset(user, transform, train=False, train_proportion=0.8)
-            data_loader = DataLoader(dataset, batch_size=8000)
+            data_loader = DataLoader(dataset, batch_size=80000)
             for x, y in data_loader:
                 x = x.to(DEVICE)
                 y = y.to(DEVICE)
