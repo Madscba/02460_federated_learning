@@ -192,7 +192,7 @@ class DPFedAvg(FedAvg):
         C = len([fit_res.num_examples for _, fit_res in results]) 
         sensitivity = self.max_grad_norm / C
         self.noise_scale = self.noise_multiplier / sensitivity
-        sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
+        sample_rate = C / self.total_num_clients
         #steps = int(num_examples / self.batch_size) 
         self.privacy_account = PrivacyAccount(steps=rnd, sample_size=C, sample_rate=sample_rate,
                                               max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,

@@ -1,7 +1,7 @@
 #!/bin/bash
 ## 02460 FL, template
 #BSUB -q hpc
-#BSUB -J dp_01exp
+#BSUB -J dp_001exp
 #BSUB -n 12 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
@@ -19,14 +19,14 @@
 
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
-N=29500 #amount of clients
+N=3000 #amount of clients
 n_wait=9
 epoch_num=4
 lr=0.0001
 rounds=200
 model='mlr'
 wandb_mode="online"
-exp_id='mlr_DP'
+exp_id='mlr1_DP'
 strategy='DP_Fed'
 batch_size=8
 
@@ -38,8 +38,8 @@ source /zhome/dd/4/128822/fl_380/bin/activate
 echo "Starting server"
 
 sigmas="0.0001 0.001 0.01"
-sigma=0.01
-norms="0.01 0.1 1.0"
+sigma=0.001
+norms="0.001"
 for max_grad in $norms
 do
 	echo "Starting server"
@@ -85,7 +85,7 @@ do
 		fi
 		n=$(($n+1))
 	done
-	n=1
+	n=$((1))
 done
 
 

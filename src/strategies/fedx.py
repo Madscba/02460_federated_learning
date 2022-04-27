@@ -140,7 +140,6 @@ class FedX(FedAvg):
             Initial global model parameters.
         """
         super().__init__(
-            model=model,
             fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
             min_fit_clients=min_fit_clients,
@@ -170,7 +169,6 @@ class FedX(FedAvg):
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
-        self.target_delta = None
         self.epsilon = 0
         self.privacy_account = None
         self.model = model
@@ -179,7 +177,6 @@ class FedX(FedAvg):
         self.q_param = q_param
         self.eps = 1e-10
         self.pre_weights: Optional[Weights] = None
-        self.model = model
         self.sampled_users = []
 
 
@@ -194,7 +191,7 @@ class FedX(FedAvg):
         C = len([fit_res.num_examples for _, fit_res in results])
         sensitivity = self.max_grad_norm / C
         self.noise_scale = self.noise_multiplier / sensitivity
-        sample_rate = (self.fraction_fit * self.total_num_clients) / self.total_num_clients
+        sample_rate = C / self.total_num_clients
         self.privacy_account = PrivacyAccount(steps=rnd, sample_size=C, sample_rate=sample_rate,
                                               max_grad_norm=self.max_grad_norm, noise_multiplier=self.noise_multiplier,
                                               noise_scale=self.noise_scale, target_delta=self.target_delta)
