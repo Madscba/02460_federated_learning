@@ -23,17 +23,17 @@ def global_model_eval_non_tensor(state_dict =None,
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net = model().to(DEVICE)
     #fc1.weight, fc1.bias
-    try:
-        net.load_state_dict(torch.load(state_dict))
-        print("loaded NN\n")
-
-    except Exception:
-        state_dict = torch.load(state_dict)
-        state_dict["fc1.weight"] = state_dict["conv1.weight"]
-        state_dict["fc1.bias"] = state_dict["conv1.bias"]
-        state_dict.pop("conv1.weight")
-        state_dict.pop("conv1.bias")
-        print("loaded mlr\n")
+    # try:
+    net.load_state_dict(torch.load(state_dict))
+    #     print("loaded NN\n")
+    #
+    # except Exception:
+    #     state_dict = torch.load(state_dict)
+    #     state_dict["fc1.weight"] = state_dict["conv1.weight"]
+    #     state_dict["fc1.bias"] = state_dict["conv1.bias"]
+    #     state_dict.pop("conv1.weight")
+    #     state_dict.pop("conv1.bias")
+    #     print("loaded mlr\n")
 
     if users_used_for_training == None:
         with open(data_folder) as file: user_names_test = [line.strip() for line in file][:-1]
@@ -41,7 +41,10 @@ def global_model_eval_non_tensor(state_dict =None,
         with open(users_used_for_training) as file:
             user_names_test = json.load(file)
 
-    user_names_test = user_names_test[len(user_names_test)-num_test_clients:]
+    print(len(user_names_test))
+    user_names_test = user_names_test[-num_test_clients:]
+    print(len(user_names_test))
+    #print(user_names_test[-5:])
 
     transform = transforms.Compose([transforms.ToTensor()])
     acc, loss, num_obs_per_user = [], [], []

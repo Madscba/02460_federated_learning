@@ -154,7 +154,8 @@ class FedX(FedAvg):
             test_file_path=test_file_path,
             num_test_clients = num_test_clients,
             model_name=model_name+"_"+str(q_param),
-            num_rounds=num_rounds
+            num_rounds=num_rounds,
+            model = model
         )
 
         if (
@@ -178,6 +179,8 @@ class FedX(FedAvg):
         self.q_param = q_param
         self.eps = 1e-10
         self.pre_weights: Optional[Weights] = None
+        self.model = model
+        self.sampled_users = []
 
 
     def __repr__(self) -> str:
@@ -250,13 +253,16 @@ class FedX(FedAvg):
         ds = [0.0 for _ in range(len(weights_prev))]
         hs = 0.0
 
+        train_losses = []
         for _, params in results:
             loss = params.metrics.get("loss_prior_to_training", None)
+            train_losses.append(params.metrics['loss'])
+            self.sampled_users.append(params.metrics['user'])
+
 
             if loss == None:
                 print("\nplease enable qfed_client = True in client_main\n")
                 raise ValueError
-
 
             weights_new = parameters_to_weights(params.parameters)
 
@@ -295,7 +301,8 @@ class FedX(FedAvg):
                 for _, fit_res in results
             ]
         )
-        wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
+        wandb.log({'round': self.rounds, 'train_loss_aggregated': loss_aggregated})
+        wandb.log({'round': self.rounds, 'train_loss_var': np.var(np.array(train_losses))})
 
         return weights_to_parameters(weights_aggregated), {}
 
