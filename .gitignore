@@ -10,3 +10,5 @@ src/debug.py
 *.err
 *.out
 *.pt
+src/debug_client.py
+src/run_files/run_debug.sh

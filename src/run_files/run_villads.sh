@@ -17,17 +17,17 @@
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
 s=1
-N=2000 #amount of clients
+N=3000 #amount of clients
 epoch_num=20
-rounds=200
-strategy='FedAvg'
+rounds=300
+strategy='FedProx'
 wandb_mode='online'
 n_stragglers=5
 exp_id='FedProx_vs_FedAvg'
-config=config.yaml
+config=fedprox.yaml
 num_classes=10
-model='Net'
-drop_stragglers="true"
+model='mlr'
+drop_stragglers="false"
 #job_type="server_straggler_($n_stragglers)/10_E($epoch_num)" 
 job_type="server"
 
