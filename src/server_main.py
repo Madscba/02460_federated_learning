@@ -90,6 +90,7 @@ if __name__ == "__main__":
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
+            model=choose_model(args.model),
             num_test_clients=wandb.config.num_test_clients,
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
