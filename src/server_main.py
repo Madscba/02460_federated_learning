@@ -90,6 +90,7 @@ if __name__ == "__main__":
     elif args.strategy == "Qfed_flwr":
         print("Strategy: Qfed_flwr_fixed")
         strategy = QFedAvg(
+            model=choose_model(args.model),
             num_test_clients=wandb.config.num_test_clients,
             eval_fn=global_model_eval,
             q_param = wandb.config.q_param,
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     elif args.strategy == "DP_Fed":
         print("Strategy: DP_FedAvg")
         strategy = DPFedAvg(
+            model=choose_model(args.model),
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,
@@ -124,6 +126,7 @@ if __name__ == "__main__":
     elif args.strategy == "FedX":
         print("Strategy: FedX")
         strategy = FedX(
+            model=choose_model(args.model),
             fraction_fit=FRACTION_FIT_,
             fraction_eval=FRACTION_EVAL_,
             min_fit_clients=MIN_FIT_CLIENTS_,

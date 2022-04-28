@@ -21,12 +21,29 @@ txt_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\
 wandb.init()
 wandb.config.update({"dataset_path":r'C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist'}, allow_val_change=True)
 
-num_test_clients = 100
+num_test_clients = 20000
+name1="mlr_10_0.1"
+state_dict_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\{}_state_dict.pt".format(name1)
+users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\{}_users.json".format(name1)
+
+acc1, loss1, _ = global_model_eval_non_tensor(state_dict=state_dict_path,
+                                            data_folder=txt_folder,
+                                            num_test_clients=num_test_clients,
+                                            get_loss=True,
+                                            model=mlr,
+                                            users_used_for_training=users_used_for_training)
+
+print("qfed")
+print("local acc mean:", np.mean(np.array(acc1)))
+print("local acc std:", np.std(np.array(acc1)))
+
+print("local loss mean:", np.mean(np.array(loss1)))
+print("local loss std:", np.std(np.array(loss1)))
 
 
-
-state_dict_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\mlr_0.1_state_dict.pt"
-users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\mlr_0.1_users.json"
+name2="mlr_10_0.0"
+state_dict_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\{}_state_dict.pt".format(name2)
+users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\{}_users.json".format(name2)
 
 
 acc2, loss2, _ = global_model_eval_non_tensor(state_dict=state_dict_path,
@@ -36,6 +53,7 @@ acc2, loss2, _ = global_model_eval_non_tensor(state_dict=state_dict_path,
                                             model=mlr,
                                             users_used_for_training=users_used_for_training)
 
+print("fedavg")
 print("local acc mean:", np.mean(np.array(acc2)))
 print("local acc std:", np.std(np.array(acc2)))
 
@@ -43,32 +61,17 @@ print("local loss mean:", np.mean(np.array(loss2)))
 print("local loss std:", np.std(np.array(loss2)))
 
 
-state_dict_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\mlr_0.0_state_dict.pt"
-users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived\mlr_0.0_users.json"
 
 
-acc1, loss1, _ = global_model_eval_non_tensor(state_dict=state_dict_path,
-                                            data_folder=txt_folder,
-                                            num_test_clients=num_test_clients,
-                                            get_loss=True,
-                                            model=mlr,
-                                            users_used_for_training=users_used_for_training)
 
-print("local acc mean:", np.mean(np.array(acc1)))
-print("local acc std:", np.std(np.array(acc1)))
-
-print("local loss mean:", np.mean(np.array(loss1)))
-print("local loss std:", np.std(np.array(loss1)))
-
-
-plt.hist(acc1, bins=20, alpha=0.3, label="qfed q=0.1")
-plt.hist(acc2, bins=20, alpha=0.3, label="fed avg")
+plt.hist(acc1, bins=50, alpha=0.3, label=name1)
+plt.hist(acc2, bins=50, alpha=0.3, label=name2)
 plt.title("test acc for mlr all classes on last {} clients".format(num_test_clients))
 plt.legend()
 plt.show()
 
-plt.hist(loss1, bins=20, alpha=0.3, label="qfed q=0.1")
-plt.hist(loss2, bins=20, alpha=0.3, label="fed avg")
+plt.hist(loss1, bins=50, alpha=0.3, label=name1)
+plt.hist(loss2, bins=50, alpha=0.3, label=name2)
 plt.title("test loss for mlr all classes on last {} clients".format(num_test_clients))
 plt.legend()
 plt.show()

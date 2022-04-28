@@ -1,7 +1,7 @@
 #!/bin/bash
 ## 02460 FL, template
 #BSUB -q hpc
-#BSUB -J fedx_ex1
+#BSUB -J fedx_ex
 #BSUB -n 12 ##Number of cores
 #BSUB -R "rusage[mem=2048MB]"
 ##BSUB -R "select[model=XeonGold6126]"
@@ -19,16 +19,21 @@
 
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
-N=29500 #amount of clients
+s=1
+N=3000 #amount of clients
 n_wait=9
-epoch_num=8
-rounds=300
-#num_classes=20
+epoch_num=4
+rounds=200
+num_classes=10
+n_stragglers=5
+drop_stragglers="false"
 wandb_mode="online"
-exp_id='FedX1-'
+exp_id='Fed_X'
 strategy='FedX'
 batch_size=8
 straggler_pct=0.5
+lr=0.0001
+model='mlr'
 
 echo "starting bash script"
 
@@ -36,32 +41,35 @@ module load python3/3.8.0
 source /zhome/dd/4/128822/fl_380/bin/activate
 
 echo "Starting server"
-qs="0.001 0.002 0.004 0.008"
-sigma=0.001
+qs="0.01 0.05 0.1"
 norms="0.1 1.0 10.0"
-max_grad=1.0
-for q_val in $qs
-do
-	python src/server_main.py --wandb_mode=$wandb_mode \
-	--strategy=$strategy \
-	--experiment_id=$exp_id$q_val \
-	--wandb_username='johannes_boe' \
-	--run_name=$strategy \
-	--entity johannes_boe \
-	--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
-	--wandb_project 02460_FL \
-	--configs=fedx.yaml \
-	--noise_multiplier=$sigma \
-	--max_grad_norm=$max_grad \
-	--q_param=$q_val \
-	--batch_size=$batch_size \
-	--total_num_clients=$N \
-	--rounds=$rounds&pid=$!
+q_val=0.1
+sigma=0.001
+max_grad=0.001
 
-	sleep 10  # Sleep for 3s to give the server enough time to start
+python src/server_main.py --wandb_mode=$wandb_mode \
+--strategy=$strategy \
+--experiment_id=$exp_id$q_val \
+--wandb_username='johannes_boe' \
+--run_name="($strategy)_($sigma)_($q_val)_($num_classes)_$drop_stragglers" \
+--model $model \
+--entity johannes_boe \
+--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
+--wandb_project 02460_FL \
+--configs=fedx.yaml \
+--noise_multiplier=$sigma \
+--max_grad_norm=$max_grad \
+--q_param=$q_val \
+--batch_size=$batch_size \
+--total_num_clients=$N \
+--rounds=$rounds&pid=$!
+
+sleep 15  # Sleep for 3s to give the server enough time to start
 
 
-	while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
+while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
+	if [ "$s" -le "$n_stragglers" ]
+	then
 		echo "Starting client: $n , name: $user (straggler)"
 		python src/client_main.py \
 		--seed=$n \
@@ -70,21 +78,45 @@ do
 		--wandb_mode="disabled" \
 		--wandb_username='johannes_boe' \
 		--job_type="client_$strategy" \
+		--epochs=1 \
+		--num_classes=$num_classes \
 		--config=fedx.yaml \
 		--epochs=$epoch_num \
 		--entity johannes_boe \
 		--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
 		--wandb_project 02460_FL \
 		--batch_size=$batch_size \
+		--lr=$lr \
 		--qfed=True \
 		--dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'&
-		if [ $(expr $n % 10) == 0 ]; then
-			echo "sleeping for" $((30+5*$epoch_num)) 
-			sleep $((30+5*$epoch_num))
-		fi
-		n=$(($n+1))
-	done
-	n=1
+	else
+		echo "Starting client: $n , name: $user"
+		python src/client_main.py \
+		--seed=$n \
+		--experiment_id=$exp_id$q_val \
+		--epochs=$epoch_num \
+		--wandb_mode="disabled" \
+		--wandb_username='johannes_boe' \
+		--job_type="client_$strategy" \
+		--config=fedx.yaml \
+		--epochs=$epoch_num  \
+		--num_classes $num_classes \
+		--epochs=$epoch_num \
+		--entity johannes_boe \
+		--api_key d9a0e4bbe478bc7e59b80f931b0281cb3501e8dd \
+		--wandb_project 02460_FL \
+		--batch_size=$batch_size \
+		--lr=$lr \
+		--qfed=True \
+		--dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'&
+	fi
+	if [ $(expr $n % 10) == 0 ]; then
+		echo "sleeping for" $((100)) 
+		sleep 100
+		s=0
+	fi
+	n=$(($n+1))
+	s=$(($s+1))
 done
 
 

@@ -1,6 +1,7 @@
 from cmath import sqrt
 import torch
 import math
+import wandb
 
 def clip_gradients(net, max_grad_norm, theta0, device):
     for layer, params in net.state_dict().items():
@@ -17,7 +18,7 @@ def per_layer_clip(layer, layer_gradient, max_grad_norm,device):
     #    clipping_value = max_grad_norm-0.4
     #else:
     #    clipping_value = 0.2
-    clipping_value = max_grad_norm/math.sqrt(5)
+    clipping_value = max_grad_norm
     total_norm = torch.norm(layer_gradient.data.detach(), p=1).to(device)
     clipped_gradient = layer_gradient * min(1, clipping_value / total_norm)
     return clipped_gradient
