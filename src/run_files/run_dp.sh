@@ -21,9 +21,9 @@ filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img
 n=1 #spawned_clients
 N=3000 #amount of clients
 n_wait=9
-epoch_num=4
+epoch_num=16
 lr=0.0001
-rounds=200
+rounds=1
 model='mlr'
 wandb_mode="online"
 exp_id='mlr1_DP'
@@ -43,11 +43,11 @@ norms="0.001"
 for max_grad in $norms
 do
 	echo "Starting server"
-	python src/server_main.py --wandb_mode=$wandb_mode \
+	python src/server_main.py \
 	--strategy=$strategy \
 	--model=$model \
 	--experiment_id=$exp_id$sigma$max_grad \
-	--wandb_mode=$wandb_mode \
+	--wandb_mode="disabled" \
 	--wandb_username='johannes_boe' \
 	--run_name=$strategy \
 	--entity johannes_boe \

@@ -33,7 +33,7 @@ def parse_args(parser):
     parser.add_argument('--experiment_id', default=None)
     parser.add_argument('--wandb_username', default=None)
     parser.add_argument('--job_type', default='client')
-    parser.add_argument('--dataset_path',default=None)
+    parser.add_argument('--dataset_path',default='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist')
     parser.add_argument('--num_classes',default=None,type=int)
     parser.add_argument('--seed', type=int,help='set integer seed', default=1)
     parser.add_argument('--batch_size', type=int, default=8)

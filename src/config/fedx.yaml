@@ -11,7 +11,7 @@ noise_multiplier:
 max_grad_norm:
   value: 1.1
 lr:
-  value: 0.001
+  value: 0.0001
 momentum:
   value: 0.90
 target_delta:
@@ -20,5 +20,5 @@ strategy:
   value: FedX
 q_param:
   value: 0.2
-
-
+mu: 
+  value: 1
