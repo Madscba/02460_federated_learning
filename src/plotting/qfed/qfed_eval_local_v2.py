@@ -1,11 +1,12 @@
+from global_model_eval_non_tensor import global_model_eval_non_tensor
 from global_model_eval import global_model_eval
-
 import torch
 from model import Net
 from collections import OrderedDict
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import wandb
 
 # def global_model_eval(state_dict ="saved_models/Qfed_manual_state_dict.pt",
 #                       data_folder = "dataset/test_stored_as_tensor",
@@ -14,17 +15,42 @@ import numpy as np
 #                       get_loss = False,
 #                       model=Net):
 
-os.chdir("..")
+os.chdir("../../..")
 data_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\test_stored_as_tensors"
+txt_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist\data\img_lab_by_user\usernames_train.txt"
+wandb.init()
+wandb.config.update({"dataset_path":r'C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist'}, allow_val_change=True)
+
 num_test_clients = None
 
 state_dict_dir = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\archived"
 state_dicts = sorted(os.listdir(state_dict_dir))
+
+#local
+state_dict_paths = [os.path.join(state_dict_dir, state_dict) for state_dict in state_dicts if state_dict.endswith(".pt")]
+acc_paths = [os.path.join(state_dict_dir, "acc_local", state_dict[:-3]) for state_dict in state_dicts]
+loss_paths = [os.path.join(state_dict_dir, "loss_local", state_dict[:-3]) for state_dict in state_dicts]
+
+make_predictions = True
+
+if make_predictions:
+    for state_dict_path, acc_path, loss_path in zip(state_dict_paths, acc_paths, loss_paths):
+        acc, loss, _ = global_model_eval_non_tensor(state_dict=state_dict_path,
+                                                    data_folder=txt_folder,
+                                                    num_test_clients=num_test_clients,
+                                                    get_loss=True,
+                                                    verbose=False)
+        np.save(acc_path, np.array(acc))
+        np.save(loss_path, np.array(loss))
+        print(state_dict_path)
+        print("local mean:", np.mean(np.array(acc)))
+        print("local std:", np.std(np.array(acc)))
+
+## global
 state_dict_paths = [os.path.join(state_dict_dir, state_dict) for state_dict in state_dicts if state_dict.endswith(".pt")]
 acc_paths = [os.path.join(state_dict_dir, "acc_global", state_dict[:-3]) for state_dict in state_dicts]
 loss_paths = [os.path.join(state_dict_dir, "loss_global", state_dict[:-3]) for state_dict in state_dicts]
 
-make_predictions = True
 
 if make_predictions:
     for state_dict_path, acc_path, loss_path in zip(state_dict_paths, acc_paths, loss_paths):
@@ -38,12 +64,11 @@ if make_predictions:
         np.save(acc_path, np.array(acc))
         np.save(loss_path, np.array(loss))
         print(state_dict_path)
-        print("mean:", np.mean(np.array(acc)))
-        print("std:", np.std(np.array(acc)))
+        print("global mean:", np.mean(np.array(acc)))
+        print("global std:", np.std(np.array(acc)))
         print("\n")
 
-
-
+#
 # # acc1 = np.load('data.npy')
 # # acc2 = np.load('data.npy')
 #
