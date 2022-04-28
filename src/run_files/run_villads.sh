@@ -17,19 +17,20 @@
 filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 n=1 #spawned_clients
 s=1
-N=3000 #amount of clients
+N=2000 #amount of clients
 epoch_num=20
-rounds=300
+rounds=200
 strategy='FedProx'
 wandb_mode='online'
 n_stragglers=5
-exp_id='FedProx_vs_FedAvg'
+exp_id='FedProx_hyperparamters'
 config=fedprox.yaml
 num_classes=10
 model='mlr'
+mu=0.1
 drop_stragglers="false"
-#job_type="server_straggler_($n_stragglers)/10_E($epoch_num)" 
-job_type="server"
+job_type="straggler_($n_stragglers)/10_E($epoch_num)" 
+#job_type="server"
 
 echo "starting bash script"
 
@@ -40,7 +41,7 @@ echo "Starting server"
 python src/server_main.py --wandb_mode=$wandb_mode \
 --experiment_id=$exp_id \
 --wandb_username='s175548' \
---run_name="($strategy)_($model)_($num_classes)c_drop_$drop_stragglers" \
+--run_name="($strategy)_($model)_($num_classes)c_mu$mu" \
 --model $model \
 --job_type $job_type \
 --entity s175548 \
@@ -60,6 +61,7 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 			--experiment_id=$exp_id \
 			--configs=$config \
 			--epochs=1 \
+			--mu $mu \
 			--num_classes $num_classes \
 			--entity s175548 \
 			--api_key 47304b319fc295d13e84bba0d4d020fc41bd0629 \
@@ -76,6 +78,7 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 		--epochs=$epoch_num \
 		--num_classes $num_classes \
 		--entity s175548 \
+		--mu $mu \
 		--api_key 47304b319fc295d13e84bba0d4d020fc41bd0629 \
 		--wandb_project 02460_federated_learning \
 		--model $model \
@@ -83,7 +86,7 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	fi
 	if [ $(expr $n % 10) == 0 ]; then
 		echo "sleeping for 100  sec" ## sec
-		sleep 100
+		sleep 20
 		s=0
 	fi
 	s=$(($s+1))

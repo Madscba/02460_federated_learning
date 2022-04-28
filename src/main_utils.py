@@ -44,6 +44,7 @@ def parse_args(parser):
         type=float,
         default=0.90
     )
+    parser.add_argument("--mu", type=float, default=1)
     parser.add_argument(
         "--qfed",
         type=bool,
