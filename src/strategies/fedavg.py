@@ -340,9 +340,9 @@ class FedAvg(Strategy):
 
         var_acc=np.var(dis_metrics[:,1])
         var_loss=np.var(dis_metrics[:,3])
-        accuracy_aggregated = weighted_loss_avg(dis_metrics[:,[0,3]])
-        loss_aggregated = weighted_loss_avg(dis_metrics[:,[0,1]])
+        accuracy_aggregated = weighted_loss_avg(dis_metrics[:,[0,1]])
         ranked_pred = weighted_loss_avg(dis_metrics[:,[0,2]])
+        loss_aggregated = weighted_loss_avg(dis_metrics[:,[0,3]])
         wandb.log({'round':rnd,
                    'test_accuracy_aggregated':accuracy_aggregated,
                    'test_loss_aggregated':loss_aggregated,
