@@ -14,7 +14,7 @@ import numpy as np
 #                       get_loss = False,
 #                       model=Net):
 
-os.chdir("..")
+os.chdir("../../..")
 print(os.getcwd())
 data_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\test_stored_as_tensors"
 num_test_clients = None

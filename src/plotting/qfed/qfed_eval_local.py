@@ -15,7 +15,7 @@ import wandb
 #                       get_loss = False,
 #                       model=Net):
 
-os.chdir("..")
+os.chdir("../../..")
 print(os.getcwd())
 data_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\test_stored_as_tensors"
 txt_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist\data\img_lab_by_user\usernames_train.txt"
