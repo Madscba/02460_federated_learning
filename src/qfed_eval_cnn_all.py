@@ -24,17 +24,16 @@ wandb_init = False
 
 num_test_clients = 2000
 redo_predictions = False
-model = mlr
+model = Net
 alpha = 1
 bins = 50
 
-name1 = "mlr_10_0.0"
-name2 = "mlr_flwr_10_0.1"
-name3 = "mlr_10_0.1"
-labels = [ "Fed-Avg", "Qfed-Flwr", "Qfed-Ours"]
+name1 = "Qfed_net_all_0.0"
+name3 = "Qfed_net_all_0.002"
+labels = [ "Fed-Avg", "Qfed-Ours"]
 
-names = [name1, name2, name3]
-colors = ["indianred", "darkseagreen", "cornflowerblue"]
+names = [name1, name3]
+colors = ["indianred", "cornflowerblue"]
 
 fig, ax = plt.subplots(1,2, figsize=(16,8))
 ax1, ax2 = ax
@@ -99,7 +98,6 @@ ax2.set_ylabel("")
 ax1.set_xlabel("Accuracy")
 ax2.set_xlabel("Loss")
 
-
 # from matplotlib.lines import Line2D
 # custom_line = Line2D([0], [0], color="gray", lw=4, linestyle="dashed", alpha=alpha)
 #
@@ -110,19 +108,14 @@ ax2.set_xlabel("Loss")
 #
 # handles1.append(custom_line)
 # handles2.append(custom_line)
-#
-# ax1.legend(handles1, labels1)
-# ax2.legend(handles2, labels2)
 
-ax1.legend(loc="upper right")
-ax2.legend(loc="upper left")
-
-#ax2.legend()
+ax1.legend(loc="upper left")
+ax2.legend(loc="upper right")
 
 #ax2.legend()
 plt.tight_layout()
 plt.subplots_adjust(top=0.87)
-fig.suptitle("MLR client test performance distribution - limited to 10 classes per client", fontsize=20)
+fig.suptitle("CNN client test performance distribution - unrestricted client classes", fontsize=20)
 plt.savefig(os.path.basename(__file__)[:-3]+'.png', dpi=200)
 plt.show()
 
