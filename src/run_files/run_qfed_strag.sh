@@ -10,13 +10,13 @@
 #BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o test.out
-#BSUB -e test.err
+#BSUB -o strag.out
+#BSUB -e strag.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
-n=5 #spawned_clients
+n=1 #spawned_clients
 N=100000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
@@ -26,7 +26,7 @@ rounds=1
 wandb_mode="disabled"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='qfed_strag'
+model_name='strag'
 epoch_num=16
 batch_size=16
 model='mlr'
@@ -60,26 +60,27 @@ python src/server_main.py \
 --api_key=a8ac716e669cdfe0282fc16264fc7533e33e06cf \
 --wandb_project=02460_FL \
 --rounds=$rounds&pid=$!
-
-sleep 10 # Sleep for 3s to give the server enough time to start
-
-while read user && (($n<=$N)); do
-
-	if [ $(expr $n % 10) == 0 ] && [ $n<=10 ]
-		echo "Starting client: $(n) , name: $user (straggler)"
-      timeout 2m python src/client_main.py \
-    --seed=$n \
-    --qfed=True \
-    --model=$model \
-    --config=qfed.yaml \
-    --num_classes=$num_classes \
-    --epochs=1 \
-    --batch_size=$batch_size \
-    --lr=$lr \
-    --dataset_path=$dataset_path&
-  else
+sleep 15 # Sleep for 3s to give the server enough time to start
+while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
+	if [ "$s" -le "$n_stragglers" ]
+	then
+		if [ $drop_stragglers == "false" ]; then :;
+		else
+			echo "Starting client: $n , name: $user (straggler)"
+      python src/client_main.py \
+      --seed=$n \
+      --qfed=True \
+      --model=$model \
+      --config=qfed.yaml \
+      --num_classes=$num_classes \
+      --epochs=1 \
+      --batch_size=$batch_size \
+      --lr=$lr \
+      --dataset_path=$dataset_path&
+		fi
+	else
 		echo "Starting client: $n , name: $user"
-      timeout 2m python src/client_main.py \
+    python src/client_main.py \
     --seed=$n \
     --qfed=True \
     --model=$model \
@@ -89,21 +90,21 @@ while read user && (($n<=$N)); do
     --batch_size=$batch_size \
     --lr=$lr \
     --dataset_path=$dataset_path&
-  fi
-	if [ $(expr $n % 10) == 0 ] && [ $n>$n_wait ]; then
-		echo "sleeping for 15 sec" ##120 sec
-		sleep 15
 	fi
-	n=$((n+1))
+	if [ $(expr $n % 10) == 0 ]; then
+		echo "sleeping for 20  sec" ## sec
+		sleep 20
+		s=0
+	fi
+	s=$(($s+1))
+	n=$(($n+1))
 done < $filename
-
 
 
 ## This will allow you to use CTRL+C to stop all background processesb
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 ## Wait for all background processes to complete
 wait
-
 
 #for i in `seq 0 9`; do
 #   echo "Starting client $i"
