@@ -35,6 +35,7 @@ lr=0.0001
 num_test_clients=20
 one_third_num_test_clients=0 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
+filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
 ##exp_id=$(date +"FedAvg_%d%b%T")
 
