@@ -10,13 +10,13 @@
 #BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o mlrtest.out
-#BSUB -e mlrtest.err
+#BSUB -o test.out
+#BSUB -e test.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
 
-n=1 #spawned_clients
+n=5 #spawned_clients
 N=100000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
@@ -26,12 +26,12 @@ rounds=1
 wandb_mode="disabled"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='Qfed_mlr_test'
-epoch_num=1
-batch_size=32
+model_name='qfed_strag'
+epoch_num=16
+batch_size=16
 model='mlr'
 num_classes=10
-lr=0.05
+lr=0.0001
 num_test_clients=20
 one_third_num_test_clients=0 ## you have to do this manually lol
 dataset_path='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist'
@@ -67,7 +67,6 @@ while read user && (($n<=$N)); do
 
 	if [ $(expr $n % 10) == 0 ] && [ $n<=10 ]
 		echo "Starting client: $(n) , name: $user (straggler)"
-  	echo "Starting client: $n , name: $n , q param : $q_param"
       timeout 2m python src/client_main.py \
     --seed=$n \
     --qfed=True \
@@ -80,7 +79,6 @@ while read user && (($n<=$N)); do
     --dataset_path=$dataset_path&
   else
 		echo "Starting client: $n , name: $user"
-   	echo "Starting client: $n , name: $n , q param : $q_param"
       timeout 2m python src/client_main.py \
     --seed=$n \
     --qfed=True \
