@@ -63,25 +63,41 @@ python src/server_main.py \
 
 sleep 10 # Sleep for 3s to give the server enough time to start
 
-while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
-  echo "Starting client: $n , name: $n , q param : $q_param"
-    timeout 2m python src/client_main.py \
-  --seed=$n \
-  --qfed=True \
-  --model=$model \
-  --config=qfed.yaml \
-  --num_classes=$num_classes \
-  --epochs=$epoch_num \
-  --batch_size=$batch_size \
-  --lr=$lr \
-  --dataset_path=$dataset_path&
+while read user && (($n<=$N)); do
 
-  if [ $(expr $n % 10) == 0 ]; then
-    echo "sleeping for" $((5+$one_third_num_test_clients))
-    sleep $((5+$one_third_num_test_clients))
+	if [ $(expr $n % 10) == 0 ] && [ $n<=10 ]
+		echo "Starting client: $(n) , name: $user (straggler)"
+  	echo "Starting client: $n , name: $n , q param : $q_param"
+      timeout 2m python src/client_main.py \
+    --seed=$n \
+    --qfed=True \
+    --model=$model \
+    --config=qfed.yaml \
+    --num_classes=$num_classes \
+    --epochs=1 \
+    --batch_size=$batch_size \
+    --lr=$lr \
+    --dataset_path=$dataset_path&
+  else
+		echo "Starting client: $n , name: $user"
+   	echo "Starting client: $n , name: $n , q param : $q_param"
+      timeout 2m python src/client_main.py \
+    --seed=$n \
+    --qfed=True \
+    --model=$model \
+    --config=qfed.yaml \
+    --num_classes=$num_classes \
+    --epochs=$epoch_num \
+    --batch_size=$batch_size \
+    --lr=$lr \
+    --dataset_path=$dataset_path&
   fi
-  n=$(($n+1))
-done
+	if [ $(expr $n % 10) == 0 ] && [ $n>$n_wait ]; then
+		echo "sleeping for 15 sec" ##120 sec
+		sleep 15
+	fi
+	n=$((n+1))
+done < $filename
 
 
 
