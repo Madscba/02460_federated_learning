@@ -10,8 +10,8 @@
 #BSUB -W 05:00 ##20 minutes (hh:mm)
 ###BSUB -B
 #BSUB -N
-#BSUB -o strag.out
-#BSUB -e strag.err
+#BSUB -o strag1.out
+#BSUB -e strag1.err
 
 
 ##filename='/work3/s173934/AdvML/02460_federated_learning/dataset/femnist/data/img_lab_by_user/usernames_train.txt'
@@ -20,13 +20,15 @@ n=1 #spawned_clients
 N=100000 #amount of clients
 n_wait=9
 ##epoch_numbers="1 2 4 8 16 32"
-q_param=0.1
+q_param=0.0
+drop_stragglers="false"
+n_stragglers=5
 ##epoch_num=1
-rounds=1
-wandb_mode="disabled"
+rounds=1000
+wandb_mode="online"
 ##exp_id1='Qfed_q_param_global'
 strategy='Qfed_manual'
-model_name='strag'
+model_name='qfed_strag_1000rounds'
 epoch_num=16
 batch_size=16
 model='mlr'
@@ -65,7 +67,7 @@ sleep 15 # Sleep for 3s to give the server enough time to start
 while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	if [ "$s" -le "$n_stragglers" ]
 	then
-		if [ $drop_stragglers == "false" ]; then :;
+		if [ $drop_stragglers == "true" ]; then :;
 		else
 			echo "Starting client: $n , name: $user (straggler)"
       python src/client_main.py \
@@ -93,8 +95,8 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     --dataset_path=$dataset_path&
 	fi
 	if [ $(expr $n % 10) == 0 ]; then
-		echo "sleeping for 20  sec" ## sec
-		sleep 20
+		echo "sleeping for 4  sec" ## sec
+		sleep 4
 		s=0
 	fi
 	s=$(($s+1))
