@@ -64,7 +64,7 @@ python src/server_main.py \
 --wandb_project=02460_FL \
 --rounds=$rounds&pid=$!
 sleep 15 # Sleep for 3s to give the server enough time to start
-while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
+while (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
 	if [ "$s" -le "$n_stragglers" ]
 	then
 		if [ $drop_stragglers == "true" ]; then :;
@@ -95,13 +95,13 @@ while read user && (($n<=$N)) && ps -p $pid > /dev/null 2>&1; do
     --dataset_path=$dataset_path&
 	fi
 	if [ $(expr $n % 10) == 0 ]; then
-		echo "sleeping for 4  sec" ## sec
-		sleep 4
+		echo "sleeping for 3  sec" ## sec
+		sleep 3
 		s=0
 	fi
 	s=$(($s+1))
 	n=$(($n+1))
-done < $filename
+done
 
 
 ## This will allow you to use CTRL+C to stop all background processesb
