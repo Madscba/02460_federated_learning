@@ -234,6 +234,14 @@ class QFedAvg_manual(FedAvg):
         weights_aggregated = [weight_prev - d/hs for weight_prev, d in zip(weights_prev, ds)]
         wandb.log({'round': self.rounds, 'train_loss_var': np.var(np.array(train_losses))})
 
+        loss_aggregated = weighted_loss_avg(
+            [
+                (fit_res.num_examples, fit_res.metrics['loss'])
+                for _, fit_res in results
+            ]
+        )
+        wandb.log({'round': self.rounds, 'train_loss_aggregated': loss_aggregated})
+
         # safe the model at the final round and keep track of the number of
         #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         #print("qfed_manual agg time:", time.time() - t)
