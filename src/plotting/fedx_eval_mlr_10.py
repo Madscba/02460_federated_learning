@@ -1,5 +1,5 @@
 import os
-os.chdir("..")
+os.chdir("../..")
 from global_model_eval_non_tensor import global_model_eval_non_tensor
 from model import Net, mlr
 import matplotlib.pyplot as plt
@@ -22,19 +22,23 @@ data_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset
 txt_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist\data\img_lab_by_user\usernames_train.txt"
 wandb_init = False
 
-num_test_clients = 2000
+num_test_clients = 10000
 redo_predictions = False
 model = mlr
-alpha = 1
+alpha = 0.35
+hist = True
 bins = 50
 
-name1 = "mlr_10_0.0"
-name2 = "mlr_flwr_10_0.1"
-name3 = "mlr_10_0.1"
-labels = [ "Fed-Avg", "Qfed-Flwr", "Qfed-Ours"]
+name1 = "NO_NAME"
+name2 = "FedX_true_S1.0_q0.01"
+#name3 = "qfed_strag_1000_rounds_0.1"
+labels = [ "Fed-Avg", "FedX"]
+#labels = [ "Fed-Avg", "FedX", "Qfed"]
 
-names = [name1, name2, name3]
-colors = ["indianred", "darkseagreen", "cornflowerblue"]
+names = [name1, name2]
+#names = [name1, name2, name3]
+colors = ["indianred", "cornflowerblue"]
+#colors = ["indianred", "cornflowerblue", "darkseagreen"]
 
 fig, ax = plt.subplots(1,2, figsize=(16,8))
 ax1, ax2 = ax
@@ -80,17 +84,19 @@ for color, name, label in zip(colors, names, labels):
     print("local loss mean:", np.mean(np.array(loss)))
     print("local loss std:", np.std(np.array(loss)), "\n")
 
-    sns.distplot(acc, hist=False, kde=True, bins=bins, color=color,
-                 kde_kws={"alpha": alpha, 'linewidth': 4, 'clip': (0.0, 100)},
+    sns.distplot(acc, hist=hist, kde=True, bins=bins, color=color,
+                 kde_kws={"alpha": 1, 'linewidth': 4, 'clip': (0.0, 100)},
+                 hist_kws={"alpha": alpha, "rwidth":0.9},
                  ax=ax1, label=label+" - std: " + str(np.std(np.array(acc)))[:4])
 
-    sns.distplot(loss, hist=False, kde=True, bins=bins, color=color,
-                 kde_kws={"alpha": alpha, 'linewidth': 4},
+    sns.distplot(loss, hist=hist, kde=True, bins=bins, color=color,
+                 kde_kws={"alpha": 1, 'linewidth': 4},
+                 hist_kws={"alpha": alpha, "rwidth":0.9},
                  ax=ax2, label=label+" - std: " + str(np.std(np.array(loss)))[:4])
 
-    ax1.axvline(x=np.mean(np.array(acc)), color=color, linewidth=4, linestyle="dashed", alpha=alpha,
+    ax1.axvline(x=np.mean(np.array(acc)), color=color, linewidth=4, linestyle="dashed", alpha=1,
                 label=label+" - mean: " + str(np.mean(np.array(acc)))[:4])
-    ax2.axvline(x=np.mean(np.array(loss)), color=color, linewidth=4, linestyle="dashed", alpha=alpha,
+    ax2.axvline(x=np.mean(np.array(loss)), color=color, linewidth=4, linestyle="dashed", alpha=1,
                 label=label+" - mean: " + str(np.mean(np.array(loss)))[:4])
 
 ax1.set_title("Accuracy distribution")
@@ -100,20 +106,6 @@ ax1.set_xlabel("Accuracy")
 ax2.set_xlabel("Loss")
 
 
-# from matplotlib.lines import Line2D
-# custom_line = Line2D([0], [0], color="gray", lw=4, linestyle="dashed", alpha=alpha)
-#
-# handles1, labels1 = ax1.get_legend_handles_labels()
-# handles2, labels2 = ax2.get_legend_handles_labels()
-# labels1.append("Mean")
-# labels2.append("Mean")
-#
-# handles1.append(custom_line)
-# handles2.append(custom_line)
-#
-# ax1.legend(handles1, labels1)
-# ax2.legend(handles2, labels2)
-
 ax1.legend(loc="upper right")
 ax2.legend(loc="upper left")
 
@@ -121,8 +113,8 @@ ax2.legend(loc="upper left")
 
 #ax2.legend()
 plt.tight_layout()
-plt.subplots_adjust(top=0.87)
-fig.suptitle("MLR client test performance distribution - limited to 10 classes per client", fontsize=20)
+#plt.subplots_adjust(top=0.87)
+#fig.suptitle("", fontsize=18)
 plt.savefig(os.path.basename(__file__)[:-3]+'.png', dpi=200)
 plt.show()
 

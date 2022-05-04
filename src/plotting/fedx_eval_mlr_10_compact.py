@@ -1,5 +1,5 @@
 import os
-os.chdir("..")
+os.chdir("../..")
 from global_model_eval_non_tensor import global_model_eval_non_tensor
 from model import Net, mlr
 import matplotlib.pyplot as plt
@@ -22,25 +22,30 @@ data_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset
 txt_folder = r"C:\Users\Karlu\Desktop\advanced\02460_federated_learning\dataset\femnist\data\img_lab_by_user\usernames_train.txt"
 wandb_init = False
 
-num_test_clients = 2000
+num_test_clients = 10000
 redo_predictions = False
 model = mlr
-alpha = 1
+alpha = 0.35
+hist = True
 bins = 50
 
-name1 = "Qfed_mlr_all_0.0"
-name3 = "Qfed_mlr_all_0.1"
-labels = [ "Fed-Avg", "Qfed-Ours"]
+name1 = "NO_NAME"
+name2 = "FedX_true_S1.0_q0.01"
+#name3 = "qfed_strag_1000_rounds_0.01"
+labels = [ "Fed-Avg", "FedX"]
+#labels = [ "Fed-Avg", "FedX", "Qfed-Ours"]
 
-names = [name1, name3]
+#names = [name1, name2, name3]
+names = [name1, name2]
+#colors = ["indianred", "darkseagreen", "cornflowerblue"]
 colors = ["indianred", "cornflowerblue"]
 
-fig, ax = plt.subplots(1,2, figsize=(16,8))
-ax1, ax2 = ax
+fig, ax1 = plt.subplots(1,1, figsize=(7,4))
+#ax1, ax2 = ax
 for color, name, label in zip(colors, names, labels):
     state_dict_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\{}_state_dict.pt".format(name)
     acc_and_loss_path = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\{}_list.json".format(name)
-    users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\{}_users.json".format(name)
+    #users_used_for_training = r"\\wsl$\Ubuntu-22.04\home\karl\desktop\saved_models\qfed_strag_1000_rounds_0.0_users.json"
 
     try:
         if redo_predictions:
@@ -66,7 +71,7 @@ for color, name, label in zip(colors, names, labels):
                                                     num_test_clients=num_test_clients,
                                                     get_loss=True,
                                                     model=model,
-                                                    users_used_for_training=users_used_for_training)
+                                                    users_used_for_training=None)
 
         acc_and_loss = [acc, loss]
         with open(acc_and_loss_path, "w") as file:
@@ -79,50 +84,42 @@ for color, name, label in zip(colors, names, labels):
     print("local loss mean:", np.mean(np.array(loss)))
     print("local loss std:", np.std(np.array(loss)), "\n")
 
-    sns.distplot(acc, hist=False, kde=True, bins=bins, color=color,
-                 kde_kws={"alpha": alpha, 'linewidth': 4, 'clip': (0.0, 100)},
+    sns.distplot(acc, hist=hist, kde=True, bins=bins, color=color,
+                 kde_kws={"alpha": 1, 'linewidth': 4, 'clip': (0.0, 100)},
+                 hist_kws={"alpha": alpha, "rwidth":0.9},
                  ax=ax1, label=label+" - std: " + str(np.std(np.array(acc)))[:4])
 
-    sns.distplot(loss, hist=False, kde=True, bins=bins, color=color,
-                 kde_kws={"alpha": alpha, 'linewidth': 4},
-                 ax=ax2, label=label+" - std: " + str(np.std(np.array(loss)))[:4])
+    # sns.distplot(loss, hist=hist, kde=True, bins=bins, color=color,
+    #              kde_kws={"alpha": 1, 'linewidth': 4},
+    #              hist_kws={"alpha": alpha, "rwidth":0.9},
+    #              ax=ax2, label=label+" - std: " + str(np.std(np.array(loss)))[:4])
 
-    ax1.axvline(x=np.mean(np.array(acc)), color=color, linewidth=4, linestyle="dashed", alpha=alpha,
+    ax1.axvline(x=np.mean(np.array(acc)), color=color, linewidth=4, linestyle="dashed", alpha=1,
                 label=label+" - mean: " + str(np.mean(np.array(acc)))[:4])
-    ax2.axvline(x=np.mean(np.array(loss)), color=color, linewidth=4, linestyle="dashed", alpha=alpha,
-                label=label+" - mean: " + str(np.mean(np.array(loss)))[:4])
+    # ax2.axvline(x=np.mean(np.array(loss)), color=color, linewidth=4, linestyle="dashed", alpha=1,
+    #             label=label+" - mean: " + str(np.mean(np.array(loss)))[:4])
 
-ax1.set_title("Accuracy distribution")
-ax2.set_title("Loss distribution")
-ax2.set_ylabel("")
-ax1.set_xlabel("Accuracy")
-ax2.set_xlabel("Loss")
+#ax1.set_title("Accuracy distribution")
+#ax2.set_title("Loss distribution")
+#ax2.set_ylabel("")
+ax1.set_ylabel("")
+ax1.set_xlabel("Accuracy distribution")
+ax1.xaxis.set_label_position('top')
+##ax2.xaxis.set_label_position('top')
+#ax2.set_xlabel("Loss distribution")
+#ax2.set_xlim(-0.5, 6.2)
 
-
-# from matplotlib.lines import Line2D
-# custom_line = Line2D([0], [0], color="gray", lw=4, linestyle="dashed", alpha=alpha)
-#
-# handles1, labels1 = ax1.get_legend_handles_labels()
-# handles2, labels2 = ax2.get_legend_handles_labels()
-# labels1.append("Mean")
-# labels2.append("Mean")
-#
-# handles1.append(custom_line)
-# handles2.append(custom_line)
-#
-# ax1.legend(handles1, labels1)
-# ax2.legend(handles2, labels2)
 
 ax1.legend(loc="upper right")
-ax2.legend(loc="upper left")
+#ax2.legend(loc="upper right")
 
 #ax2.legend()
 
 #ax2.legend()
 plt.tight_layout()
-plt.subplots_adjust(top=0.87)
-fig.suptitle("MLR client test performance distribution - no class restriction", fontsize=20)
-plt.savefig(os.path.basename(__file__)[:-3]+'.png', dpi=200)
+#plt.subplots_adjust(top=0.87)
+#fig.suptitle("", fontsize=18)
+plt.savefig(os.path.basename(__file__)[:-3]+'true_single.png', dpi=200)
 plt.show()
 
 
