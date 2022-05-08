@@ -16,11 +16,13 @@ def global_model_eval_non_tensor(state_dict =None,
                                  num_test_clients = None,  # this is the indexing of the list so None means all
                                  get_loss = False,
                                  model=Net,
-                                 users_used_for_training = None
-                                 ):
+                                 users_used_for_training = None,
+                                 DEVICE = None):
 
     loss_func = torch.nn.CrossEntropyLoss()
-    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if not DEVICE:
+        DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     net = model().to(DEVICE)
     #fc1.weight, fc1.bias
     # try:
@@ -42,7 +44,7 @@ def global_model_eval_non_tensor(state_dict =None,
             user_names_test = json.load(file)
 
     print(len(user_names_test))
-    user_names_test = user_names_test[-num_test_clients:]
+    user_names_test = set(user_names_test[-num_test_clients:])
     print(len(user_names_test))
     #print(user_names_test[-5:])
 
