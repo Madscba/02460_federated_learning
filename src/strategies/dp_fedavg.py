@@ -100,6 +100,7 @@ class DPFedAvg(FedAvg):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
         num_rounds: int = 0,
+        num_test_clients: int = 20,
         batch_size: int = 8,
         noise_multiplier: float = None,
         noise_scale: float = None,
@@ -138,7 +139,6 @@ class DPFedAvg(FedAvg):
             Initial global model parameters.
         """
         super().__init__(
-            model=model,
             fraction_fit=fraction_fit,
             fraction_eval=fraction_eval,
             min_fit_clients=min_fit_clients,
@@ -149,7 +149,12 @@ class DPFedAvg(FedAvg):
             on_evaluate_config_fn=on_evaluate_config_fn,
             accept_failures=accept_failures,
             initial_parameters=initial_parameters,
-            test_file_path=test_file_path)
+            test_file_path=test_file_path,
+            num_test_clients = num_test_clients,
+            model_name=model_name,
+            num_rounds=num_rounds,
+            model = model
+        )
 
         if (
             min_fit_clients > min_available_clients
@@ -157,29 +162,14 @@ class DPFedAvg(FedAvg):
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
-        self.num_rounds = num_rounds
-        self.rounds = 0
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
-        self.min_fit_clients = min_fit_clients
-        self.min_eval_clients = min_eval_clients
-        self.min_available_clients = min_available_clients
         self.total_num_clients = total_num_clients
-        self.eval_fn = eval_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
-        self.initial_parameters = initial_parameters
-        self.batch_size = batch_size
         self.noise_multiplier = noise_multiplier
         self.noise_scale = noise_scale
         self.max_grad_norm = max_grad_norm
         self.target_delta = target_delta
         self.epsilon = 0
-        self.round=1
         self.privacy_account = None
-        self.name = model_name
-        self.model=model
+        self.model = model
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -205,7 +195,7 @@ class DPFedAvg(FedAvg):
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        self.round=rnd
+        #self.round=rnd
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -216,12 +206,11 @@ class DPFedAvg(FedAvg):
                     (parameters_to_weights(fit_res.parameters), fit_res.num_examples) for client, fit_res in results]
         weights_aggregated = aggregate(weights_results)
         self.set_privacy_account(results=results,rnd=rnd)
-        if self.noise_scale:
-            sigma = self.privacy_account.noise_multiplier
-            for w in weights_aggregated:
-                w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
-            self.epsilon = self.privacy_account.get_privacy_spent()
-            wandb.log({'round': rnd, "epsilon": self.epsilon})
+        sigma = self.privacy_account.noise_multiplier
+        for w in weights_aggregated:
+            w += np.random.normal(loc=0, scale=sigma, size=np.shape(w))
+        self.epsilon = self.privacy_account.get_privacy_spent()
+        wandb.log({'round': rnd, "epsilon": self.epsilon})
 
         loss_aggregated = weighted_loss_avg(
             [
@@ -230,5 +219,5 @@ class DPFedAvg(FedAvg):
             ]
         )
         wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
-        self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
+        #self.rounds = save_final_global_model(weights_aggregated, self.name, self.rounds, self.num_rounds)
         return weights_to_parameters(weights_aggregated), {}

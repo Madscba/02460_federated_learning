@@ -39,6 +39,7 @@ def parse_args(parser):
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--epochs', type=int, default=8)
     parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--max_grad_norm",type=float,default=1.1)
     parser.add_argument(
         "--momentum",
         type=float,
@@ -78,7 +79,7 @@ def sample_client(data_pool="Active"):
     """
 
     if data_pool == "Active":
-        usernames = open('src/data/usernames_test.txt').read().splitlines()
+        usernames = open('src/data/usernames_train.txt').read().splitlines()
     else:
         usernames = open('src/data/usernames_test.txt').read().splitlines()
 

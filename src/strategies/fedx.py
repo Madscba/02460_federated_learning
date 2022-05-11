@@ -152,7 +152,7 @@ class FedX(FedAvg):
             initial_parameters=initial_parameters,
             test_file_path=test_file_path,
             num_test_clients = num_test_clients,
-            model_name=model_name+"_"+str(q_param),
+            model_name=model_name,
             num_rounds=num_rounds,
             model=model
         )
@@ -298,8 +298,8 @@ class FedX(FedAvg):
                 for _, fit_res in results
             ]
         )
-        wandb.log({'round': self.rounds, 'train_loss_aggregated': loss_aggregated})
-        wandb.log({'round': self.rounds, 'train_loss_var': np.var(np.array(train_losses))})
+        wandb.log({'round': rnd, 'train_loss_aggregated': loss_aggregated})
+        wandb.log({'round': rnd, 'train_loss_var': np.var(np.array(train_losses))})
 
         return weights_to_parameters(weights_aggregated), {}
 
