@@ -9,6 +9,7 @@ from tqdm import tqdm
 from main_utils import set_seed
 import time
 import json
+import numpy as np
 
 
 def global_model_eval_non_tensor(state_dict =None,
@@ -17,8 +18,13 @@ def global_model_eval_non_tensor(state_dict =None,
                                  get_loss = False,
                                  model=Net,
                                  users_used_for_training = None,
+                                 train_data=False,
+                                 train_proportion=0.8,
+                                 num_classes=None,
                                  DEVICE = None):
 
+    sorted_dist = np.zeros(62)
+    confuss = np.zeros((62,62))
     loss_func = torch.nn.CrossEntropyLoss()
     if not DEVICE:
         DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,20 +59,29 @@ def global_model_eval_non_tensor(state_dict =None,
     with torch.no_grad():
         for user in tqdm(user_names_test):
             #k+=1
-            dataset = FemnistDataset(user, transform, train=False, train_proportion=0.8)
+            dataset = FemnistDataset(user, transform,
+                                     train=train_data, train_proportion=train_proportion, num_classes=num_classes)
             data_loader = DataLoader(dataset, batch_size=80000)
             for x, y in data_loader:
                 x = x.to(DEVICE)
                 y = y.to(DEVICE)
+                #softmax = torch.nn.Softmax(dim=1)
                 num_obs_per_user.append(x.shape[0])
                 pred = net(x)
-                acc.append(torch.mean((torch.argmax(pred, axis=1) == y).type(torch.float)).item() * 100)
+                pred_arg_max = torch.argmax(pred, axis=1)
+                pred_numpy = pred.cpu().numpy()
+                pred_numpy.sort(axis=1) # this one is inplace
+                sorted_dist += pred_numpy.sum(axis=0)
+
+                for pred_, y_ in zip(pred_arg_max.cpu().numpy(), y.cpu().numpy()): confuss[pred_, y_] += 1
+
+                acc.append((torch.mean((pred_arg_max == y).type(torch.float))).item() * 100)
 
                 if get_loss:
-                    loss.append(loss_func(pred, y).item())
+                    loss.append(loss_func( pred, y).item())
 
             #if verbose: print("client", k, "time:", str(time.time() - t)[:5])
-    return acc, loss, num_obs_per_user
+    return acc, loss, num_obs_per_user, confuss, sorted_dist
 
 # if __name__ == '__main__':
     # import os
